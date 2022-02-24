@@ -1,6 +1,11 @@
 <p align="center">
   <a href="https://fingerprintjs.com">
-    <img src="res/logo.svg" alt="FingerprintJS" width="312px" />
+    <img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/res/logo.svg?raw=true" alt="FingerprintJS" width="312px" />
+  </a>
+</p>
+<p align="center">
+  <a href="https://pub.dev/packages/fpjs_pro_plugin">
+    <img src="https://img.shields.io/pub/v/fpjs_pro_plugin.svg"/>
   </a>
 </p>
 
