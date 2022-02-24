@@ -1,0 +1,29 @@
+PODS:
+  - FingerprintJSPro (1.1.0)
+  - Flutter (1.0.0)
+  - fpjs_pro_plugin (0.0.1):
+    - FingerprintJSPro (~> 1.1.0)
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - fpjs_pro_plugin (from `.symlinks/plugins/fpjs_pro_plugin/ios`)
+
+SPEC REPOS:
+  trunk:
+    - FingerprintJSPro
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  fpjs_pro_plugin:
+    :path: ".symlinks/plugins/fpjs_pro_plugin/ios"
+
+SPEC CHECKSUMS:
+  FingerprintJSPro: dbca8dd6123271518f61bbc19a19723d88df79c6
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  fpjs_pro_plugin: c56e9030ddfbe56a14f763f7f42b44a72694dccf
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.11.2
