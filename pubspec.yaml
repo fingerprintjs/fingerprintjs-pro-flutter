@@ -1,7 +1,8 @@
 name: fpjs_pro_plugin
 description: Flutter plugin for FingerprintJS Pro.
 version: 0.1.0
-homepage:
+homepage: https://fingerprintjs.com
+repository: https://github.com/fingerprintjs/fingerprintjs-pro-flutter
 
 environment:
   sdk: ">=2.16.1 <3.0.0"
