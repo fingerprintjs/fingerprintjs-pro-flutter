@@ -1,15 +1,63 @@
-# fpjs_pro_plugin
+<p align="center">
+  <a href="https://fingerprintjs.com">
+    <img src="res/logo.svg" alt="FingerprintJS" width="312px" />
+  </a>
+</p>
 
-Flutter plugin for FingerprintJS Pro.
+# FingerprintJS Pro Flutter
+### Official Flutter plugin for 100% accurate device identification, created for the FingerprintJS Pro Server API.
 
-## Getting Started
+This plugin can be used in a Flutter application to call the native FingerprintJS Pro libraries and identify devices.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+FingerprintJS Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Retrieve an accurate, sticky an stable [FingerprintJS Pro](https://fingerprintjs.com/) visitor identifier in an Android or an iOS app. It is the same for all applications, and only factory reset changes it. This library communicates with the FingerprintJS Pro API and requires an [api key](https://dev.fingerprintjs.com/docs). 
 
+Native libraries used under the hood:
+- [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
+- [FingerprintJS Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
+
+
+## Quick start
+
+#### 1. Add `fpjs_pro_plugin` to the pubspec.yaml in your Flutter app.
+
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  ...
+  fpjs_pro_plugin: ^0.1.0
+```
+
+Run `pub get` to download and install the package.
+
+#### 2. Use the plugin in your application code to get the visitor identifier
+
+```dart
+import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+...
+
+// Initialization
+class _MyAppState extends State<MyApp> {
+  ...
+  @override
+  void initState() async {
+    super.initState();
+    await FpjsProPlugin.initFpjs('<apiKey>'); // insert your actual API key here
+  }
+}
+
+// Usage
+FpjsProPlugin.getVisitorId().then((visitorId) {
+  // use the visitor id
+})
+```
+
+## Additional Resources
+- [Server-to-Server API](https://dev.fingerprintjs.com/docs/server-api)
+- [FingerprintJS Pro documentation](https://dev.fingerprintjs.com/docs)
+
+## License
+This library is MIT licensed.
