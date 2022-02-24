@@ -24,17 +24,17 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initFpjs(_apiKey);
+    _initFpjs(_apiKey);
   }
 
-  Future<void> initFpjs(String apiToken) async {
+  Future<void> _initFpjs(String apiToken) async {
     await FpjsProPlugin.initFpjs(apiToken);
   }
 
   /// The native FingerprintJS libraries expose a methid called `getVisitorId`
   /// to stay consistent with the original Javascript library used for browser identification.
   /// However in the mobile application context a more accurate name would be something like `getDeviceId`.
-  Future<void> getDeviceId() async {
+  Future<void> _getDeviceId() async {
     String deviceId;
     try {
       deviceId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-                onPressed: getDeviceId, child: const Text('Identify!')),
+                onPressed: _getDeviceId, child: const Text('Identify!')),
             Text('The device id is: $_deviceId\n'),
           ],
         )),
