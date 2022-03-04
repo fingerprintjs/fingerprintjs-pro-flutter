@@ -42,6 +42,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
           val region = regionString?.let { parseRegion(it) }
 
           initFpjs(token, region, endpoint)
+          result.success("Successfully initialized FingerprintJS Pro Client")
         }
       GET_VISITOR_ID -> {
           val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()

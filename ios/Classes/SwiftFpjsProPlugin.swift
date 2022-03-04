@@ -21,8 +21,9 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 if let endpointString = args["endpoint"] as? String {
                     endpoint = URL(string: endpointString)
                 }
-                
+
                 initFpjs(token: token, endpoint: endpoint, region: region)
+                result("Successfully initialized FingerprintJS Pro Client")
             } else {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
             }
