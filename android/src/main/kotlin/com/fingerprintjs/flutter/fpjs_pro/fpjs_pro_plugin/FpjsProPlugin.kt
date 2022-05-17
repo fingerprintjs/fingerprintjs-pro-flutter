@@ -2,9 +2,10 @@ package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
 import androidx.annotation.NonNull
+import android.util.Log
 import com.fingerprintjs.android.fpjs_pro.Configuration
-import com.fingerprintjs.android.fpjs_pro.FPJSProClient
-import com.fingerprintjs.android.fpjs_pro.FPJSProFactory
+import com.fingerprintjs.android.fpjs_pro.FingerprintJS
+import com.fingerprintjs.android.fpjs_pro.FingerprintJSFactory
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -20,7 +21,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
   private lateinit var applicationContext : Context
-  private lateinit var fpjsClient : FPJSProClient
+  private lateinit var fpjsClient : FingerprintJS
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "fpjs_pro_plugin")
@@ -63,7 +64,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun initFpjs(apiToken: String, region: Configuration.Region?, endpoint: String?) {
-    val factory = FPJSProFactory(applicationContext)
+    val factory = FingerprintJSFactory(applicationContext)
     val configuration = Configuration(apiToken, region ?: Configuration.Region.US, endpoint ?: Configuration.Region.US.endpointUrl)
 
     fpjsClient = factory.createInstance(configuration)
@@ -74,7 +75,11 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
     listener: (String) -> Unit,
     errorListener: (String) -> (Unit)
   ) {
-    fpjsClient.getVisitorId(tags, listener, errorListener)
+    fpjsClient.getVisitorId(
+      tags,
+      listener = {result -> listener(result.visitorId)},
+      errorListener = {error -> errorListener(error.description.toString())}
+    )
   }
 }
 
