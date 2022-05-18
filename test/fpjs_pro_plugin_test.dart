@@ -32,7 +32,7 @@ void main() {
       expect(result, testVisitorId);
     });
 
-    test('should return visitor id when called without tags', () async {
+    test('should return visitor id when called with tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorId(
           tags: {'sessionId': DateTime.now().millisecondsSinceEpoch});
