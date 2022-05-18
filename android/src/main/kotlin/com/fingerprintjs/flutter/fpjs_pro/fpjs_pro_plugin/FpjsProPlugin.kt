@@ -2,7 +2,6 @@ package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
 import androidx.annotation.NonNull
-import android.util.Log
 import com.fingerprintjs.android.fpjs_pro.Configuration
 import com.fingerprintjs.android.fpjs_pro.FingerprintJS
 import com.fingerprintjs.android.fpjs_pro.FingerprintJSFactory
@@ -65,7 +64,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun initFpjs(apiToken: String, region: Configuration.Region?, endpoint: String?) {
     val factory = FingerprintJSFactory(applicationContext)
-    val configuration = Configuration(apiToken, region ?: Configuration.Region.US, endpoint ?: Configuration.Region.US.endpointUrl)
+    val configuration = Configuration(apiToken, region ?: Configuration.Region.US, endpoint ?: region?.endpointUrl ?: Configuration.Region.US.endpointUrl)
 
     fpjsClient = factory.createInstance(configuration)
   }
@@ -87,6 +86,7 @@ fun parseRegion(region: String): Configuration.Region {
   return when (region.lowercase()) {
     "eu" -> Configuration.Region.EU
     "us" -> Configuration.Region.US
+    "ap" -> Configuration.Region.AP
     else -> throw IllegalArgumentException("Invalid region: $region")
   }
 }
