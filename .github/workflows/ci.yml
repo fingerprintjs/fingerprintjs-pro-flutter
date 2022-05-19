@@ -1,0 +1,27 @@
+name: ci
+on:
+  push:
+    branches-ignore:
+      - main
+    paths-ignore:
+      - '**.md'
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          flutter-version: '2.10.0'
+      - name: Restore packages
+        run: flutter pub get
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+      - name: Analyze
+        run: flutter analyze
+      - name: Run tests
+        run: flutter test
