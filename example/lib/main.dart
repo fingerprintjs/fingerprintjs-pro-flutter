@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
     await FpjsProPlugin.initFpjs(apiToken);
   }
 
-  /// The native FingerprintJS libraries expose a methid called `getVisitorId`
+  /// The native FingerprintJS libraries expose a method called `getVisitorId`
   /// to stay consistent with the original Javascript library used for browser identification.
   /// However in the mobile application context a more accurate name would be something like `getDeviceId`.
   Future<void> _getDeviceId() async {
