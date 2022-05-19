@@ -1,0 +1,15 @@
+# Contributing to FingerprintJS Pro Flutter integration
+
+## Development Environment
+
+Before starting work on the repository please configure the environment and emulators.
+1. Install Flutter using [instruction for your OS](https://docs.flutter.dev/get-started/install).
+2. Follow official recommendations [about setting up IDE](https://docs.flutter.dev/get-started/editor?tab=androidstudio).
+
+## Development playground
+
+In the `example` folder you can find the demo application. Read the [instruction](https://docs.flutter.dev/get-started/test-drive?tab=androidstudio) on how to start the example app.
+
+## Testing
+
+For running tests just call `flutter test`.
