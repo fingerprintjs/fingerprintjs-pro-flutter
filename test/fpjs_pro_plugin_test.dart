@@ -29,7 +29,7 @@ void main() {
     test('should return visitor id when called without tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorId();
-      expect(result, testVisitorId);
+      expect(result, testVisitorId + 'salt');
     });
 
     test('should return visitor id when called with tags', () async {
