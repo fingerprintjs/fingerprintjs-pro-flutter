@@ -1,6 +1,20 @@
+## 1.0.0
+
+### New Features
+* Supported Asian region (`ap`)
+
+### Chores
+* Updated fingerprintjs-pro-android to version 2.0
+* Added ci test run
+* Added codeowners
+
+### Documentation Changes
+* Added contributing instructions
+* Added badges
+
 ## 0.1.3
 
-###Bug Fixes
+### Bug Fixes
 * Fixed init method getting stuck in the native code
 
 ## 0.1.2
