@@ -13,3 +13,7 @@ In the `example` folder you can find the demo application. Read the [instruction
 ## Testing
 
 For running tests just call `flutter test`.
+
+## Developing process
+
+The `main` branch is locked for the push action. For proposing changes, use the standard [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) approach. It's recommended to discus fixes or new functionality in the [Issues](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues), first.
