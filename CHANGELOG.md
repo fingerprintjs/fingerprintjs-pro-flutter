@@ -1,3 +1,9 @@
+## 1.0.1
+
+### Documentation Changes
+* Added contributing instructions
+* Added badges
+
 ## 1.0.0
 
 ### New Features
@@ -7,10 +13,6 @@
 * Updated fingerprintjs-pro-android to version 2.0
 * Added ci test run
 * Added codeowners
-
-### Documentation Changes
-* Added contributing instructions
-* Added badges
 
 ## 0.1.3
 
