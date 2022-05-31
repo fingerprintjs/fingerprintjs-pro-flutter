@@ -1,3 +1,8 @@
+## 1.0.2
+
+### Documentation Changes
+* Fix sample usage
+
 ## 1.0.1
 
 ### Documentation Changes
