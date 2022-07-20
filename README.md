@@ -25,7 +25,7 @@ This plugin can be used in a Flutter application to call the native FingerprintJ
 
 FingerprintJS Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
 
-Retrieve an accurate, sticky an stable [FingerprintJS Pro](https://fingerprintjs.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [api key](https://dev.fingerprintjs.com/docs). 
+Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprintjs.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [api key](https://dev.fingerprintjs.com/docs). 
 
 Native libraries used under the hood:
 - [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
@@ -67,6 +67,13 @@ class _MyAppState extends State<MyApp> {
 FpjsProPlugin.getVisitorId().then((visitorId) {
   // use the visitor id
 })
+```
+
+You can also configure `region` and `endpoint` in `initFpjs` method, like below:
+```dart
+await FpjsProPlugin.initFpjs('<apiKey>');
+await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
+await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
 ```
 
 ## Additional Resources
