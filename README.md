@@ -74,7 +74,6 @@ You can also configure `region` and `endpoint` in `initFpjs` method, like below:
 await FpjsProPlugin.initFpjs('<apiKey>');
 await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
 await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
-await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com', region: 'eu');
 ```
 
 ## Additional Resources
