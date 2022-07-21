@@ -19,7 +19,7 @@
 </p>
 
 # FingerprintJS Pro Flutter
-### Official Flutter plugin for 100% accurate device identification, created for the FingerprintJS Pro.
+### Official Flutter plugin for 100% accurate device identification, created for FingerprintJS Pro.
 
 This plugin can be used in a Flutter application to call the native FingerprintJS Pro libraries and identify devices.
 
