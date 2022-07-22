@@ -11,7 +11,7 @@ Flutter plugin for FingerprintJS Pro.
                        DESC
   s.homepage         = 'https://github.com/fingerprintjs/fingerprintjs-pro-flutter'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'FingerprintJS, Inc (https://fingerprintjs.com)' => 'boris.lobanov@fingerprintjs.com' }
+  s.author           = { 'FingerprintJS, Inc (https://fingerprint.com)' => 'boris.lobanov@fingerprintjs.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
