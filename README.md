@@ -1,6 +1,10 @@
 <p align="center">
-  <a href="https://fingerprintjs.com">
-    <img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/res/logo.svg?raw=true" alt="FingerprintJS" width="312px" />
+  <a href="https://fingerprint.com">
+    <picture>
+     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/logo_light.svg" />
+     <source media="(prefers-color-scheme: light)" srcset="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/logo_dark.svg" />
+     <img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/logo_dark.svg" alt="Fingerprint logo" width="312px" />
+   </picture>
   </a>
 </p>
 <p align="center">
