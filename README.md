@@ -1,6 +1,10 @@
 <p align="center">
-  <a href="https://fingerprintjs.com">
-    <img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/res/logo.svg?raw=true" alt="FingerprintJS" width="312px" />
+  <a href="https://fingerprint.com">
+    <picture>
+     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/logo_light.svg" />
+     <source media="(prefers-color-scheme: light)" srcset="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/logo_dark.svg" />
+     <img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/logo_dark.svg" alt="Fingerprint logo" width="312px" />
+   </picture>
   </a>
 </p>
 <p align="center">
@@ -25,7 +29,7 @@ This plugin can be used in a Flutter application to call the native FingerprintJ
 
 FingerprintJS Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
 
-Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprintjs.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [api key](https://dev.fingerprintjs.com/docs). 
+Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [api key](https://dev.fingerprint.com/docs). 
 
 Native libraries used under the hood:
 - [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
@@ -77,8 +81,8 @@ await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
 ```
 
 ## Additional Resources
-- [Server-to-Server API](https://dev.fingerprintjs.com/docs/server-api)
-- [FingerprintJS Pro documentation](https://dev.fingerprintjs.com/docs)
+- [Server-to-Server API](https://dev.fingerprint.com/docs/server-api)
+- [FingerprintJS Pro documentation](https://dev.fingerprint.com/docs)
 
 ## License
 This library is MIT licensed.
