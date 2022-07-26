@@ -1,3 +1,15 @@
+## 1.0.4
+
+### Documentation Changes
+* Fix logo url
+
+## 1.0.3
+
+### Documentation Changes
+* Update urls domain from fingerprintjs.com to fingerprint.com
+* Update logo
+* Add more code examples
+
 ## 1.0.2
 
 ### Documentation Changes
