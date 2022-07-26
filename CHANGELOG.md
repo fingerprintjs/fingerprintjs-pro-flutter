@@ -1,3 +1,8 @@
+## 1.0.4
+
+### Documentation Changes
+* Fix logo url
+
 ## 1.0.3
 
 ### Documentation Changes
