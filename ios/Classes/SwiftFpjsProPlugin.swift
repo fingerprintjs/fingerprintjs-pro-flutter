@@ -24,15 +24,20 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             }
         } else if (call.method == "getVisitorId") {
             let args = call.arguments as? Dictionary<String, Any>
-            let tags = args?["tags"] as? [String: JSONTypeConvertible]
-            var metadata = Metadata()
-            
-            tags?.forEach({ (tagName: String, tagValue: JSONTypeConvertible) in
-                metadata.setTag(tagValue, forKey: tagName)
-            })
-
+            let metadata = prepareMetadata(args?["tags"] as? [String: Any])
             getVisitorId(metadata, result)
         }
+    }
+
+    private func prepareMetadata(_ tags: [String: Any]?) -> Metadata {
+        NSLog("prepareMetadata")
+        var metadata = Metadata()
+        tags?.forEach() { key, json in
+          if let jsonType = json as? JSONTypeConvertible {
+            metadata.setTag(jsonType, forKey: key)
+          }
+        }
+        return metadata
     }
 
     private func parseRegion(passedRegion: String?, endpoint: String?) -> Region {

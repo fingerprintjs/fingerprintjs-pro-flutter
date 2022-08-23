@@ -37,7 +37,19 @@ class _MyAppState extends State<MyApp> {
   Future<void> _getDeviceId() async {
     String deviceId;
     try {
-      deviceId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
+      const tags = {
+        'a': 'a',
+        'b': 0,
+        'c': {
+          'foo': true,
+          'bar': [1, 2, 3]
+        },
+        'd': false
+      };
+      // const tags = {
+      //   'a': 'a'
+      // };
+      deviceId = await FpjsProPlugin.getVisitorId(tags: tags) ?? 'Unknown';
     } on PlatformException {
       deviceId = 'Failed to get device id.';
     }
