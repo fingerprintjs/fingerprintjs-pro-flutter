@@ -12,9 +12,13 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any] else {
+            result(FlutterError(code: "missingArguments", message: "Missing or invalid arguments", details: nil))
+            return
+        }
+        
         if (call.method == "init") {
-            if let args = call.arguments as? Dictionary<String, Any>,
-                let token = args["apiToken"] as? String {
+            if let token = args["apiToken"] as? String {
                 let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String)
 
                 initFpjs(token: token, region: region)
@@ -23,19 +27,26 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
             }
         } else if (call.method == "getVisitorId") {
-            let args = call.arguments as? Dictionary<String, Any>
-            let metadata = prepareMetadata(args?["tags"] as? [String: Any])
+            let metadata = prepareMetadata(args["tags"])
             getVisitorId(metadata, result)
         }
     }
-
-    private func prepareMetadata(_ tags: [String: Any]?) -> Metadata {
-        NSLog("prepareMetadata")
+    
+    private func prepareMetadata(_ tags: Any?) -> Metadata? {
+        guard
+            let tags = tags,
+            let jsonTags = JSONTypeConvertor.convertObjectToJSONTypeConvertible(tags)
+        else {
+            return nil
+        }
+        
         var metadata = Metadata()
-        tags?.forEach() { key, json in
-          if let jsonType = json as? JSONTypeConvertible {
-            metadata.setTag(jsonType, forKey: key)
-          }
+        if let dict = jsonTags as? [String: JSONTypeConvertible] {
+            dict.forEach { key, jsonType in
+                metadata.setTag(jsonType, forKey: key)
+            }
+        } else {
+            metadata.setTag(jsonTags, forKey: "tag")
         }
         return metadata
     }
