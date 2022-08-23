@@ -15,22 +15,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         if (call.method == "init") {
             if let args = call.arguments as? Dictionary<String, Any>,
                 let token = args["apiToken"] as? String {
-                let passedRegion = args["region"] as? String
-                var region: Region
-                
-                switch passedRegion {
-                case "eu":
-                    region = .eu
-                case "ap":
-                    region = .ap
-                default:
-                    region = .global
-                }
-
-                var endpoint: URL?
-                if let endpointString = args["endpoint"] as? String {
-                    region = .custom(domain: endpointString)
-                }
+                let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String)
 
                 initFpjs(token: token, region: region)
                 result("Successfully initialized FingerprintJS Pro Client")
@@ -39,16 +24,33 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             }
         } else if (call.method == "getVisitorId") {
             let args = call.arguments as? Dictionary<String, Any>
-            let tags = args?["tags"] as? [String: JSONType]
-//            var metadata = Metadata()
+            let tags = args?["tags"] as? [String: JSONTypeConvertible]
+            var metadata = Metadata()
             
-//            tags?.forEach({ (tagName: String, tagValue: JSONType) in
-//                metadata.setTag(tagValue, forKey: tagName)
-//            })
+            tags?.forEach({ (tagName: String, tagValue: JSONTypeConvertible) in
+                metadata.setTag(tagValue, forKey: tagName)
+            })
 
-//            getVisitorId(metadata, { (visitorId: String) -> Void in result(visitorId) })
-            getVisitorId(nil, { (visitorId: String) -> Void in result(visitorId) })
+            getVisitorId(metadata, result)
         }
+    }
+
+    private func parseRegion(passedRegion: String?, endpoint: String?) -> Region {
+        var region: Region
+        switch passedRegion {
+        case "eu":
+            region = .eu
+        case "ap":
+            region = .ap
+        default:
+            region = .global
+        }
+
+        if let endpointString = endpoint {
+            region = .custom(domain: endpointString)
+        }
+
+        return region
     }
 
     private func initFpjs(token: String, region: Region) {
@@ -56,22 +58,13 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         fpjsClient = FingerprintProFactory.getInstance(configuration)
     }
 
-    private func getVisitorId(_ metadata: Metadata?, _ handler: @escaping (String) -> Void) {
-        NSLog("getVisitorId")
-//        fpjsClient?.getVisitorId { result in
-//            switch result {
-//            case let .failure(error):
-//                handler(error.localizedDescription)
-//            case let .success(visitorId):
-//                handler(visitorId)
-//            }
-//        }
+    private func getVisitorId(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
         Task {
             do {
                 let visitorId = try await fpjsClient?.getVisitorId(metadata)
-                handler(visitorId ?? "")
+                result(visitorId)
             } catch FPJSError.apiError(let apiError) {
-                handler(apiError.error?.message ?? "")
+                result(FlutterError.init(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
             }
         }
     }

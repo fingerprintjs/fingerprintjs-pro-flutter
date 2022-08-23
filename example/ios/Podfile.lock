@@ -2,7 +2,7 @@ PODS:
   - FingerprintPro (2.0.1)
   - Flutter (1.0.0)
   - fpjs_pro_plugin (1.0.4):
-    - FingerprintPro (~> 2.0)
+    - FingerprintPro (~> 2.0.1)
     - Flutter
 
 DEPENDENCIES:
@@ -22,7 +22,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   FingerprintPro: d9d570a49335e312a89af48909904e4dad1c6615
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  fpjs_pro_plugin: 18ce6c4f38bc848d95dc273573db1f7210e30081
+  fpjs_pro_plugin: 1c0e5064457609716ae865a4cc0388f4d7c9de75
 
 PODFILE CHECKSUM: cc1f88378b4bfcf93a6ce00d2c587857c6008d3b
 
