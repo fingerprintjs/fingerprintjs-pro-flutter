@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
     try {
       visitorId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
       // use the visitor id
-    } on PlatformException {
+    } on PlatformException catch(e) {
       // process an error somehow
     }
   }
