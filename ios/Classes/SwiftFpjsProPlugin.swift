@@ -59,9 +59,13 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
     }
 
     private func getVisitorId(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
+        guard let client = fpjsClient else {
+            result(FlutterError.init(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
+            return
+        }
         Task {
             do {
-                let visitorId = try await fpjsClient?.getVisitorId(metadata)
+                let visitorId = try await client.getVisitorId(metadata)
                 result(visitorId)
             } catch FPJSError.apiError(let apiError) {
                 result(FlutterError.init(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
