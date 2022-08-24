@@ -5,6 +5,7 @@ import androidx.annotation.NonNull
 import com.fingerprintjs.android.fpjs_pro.Configuration
 import com.fingerprintjs.android.fpjs_pro.FingerprintJS
 import com.fingerprintjs.android.fpjs_pro.FingerprintJSFactory
+import com.fingerprintjs.android.fpjs_pro.FingerprintJSProResponse
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -53,9 +54,18 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
                 errorMessage -> result.error("fpjs_error", errorMessage, null)
             })
           }
-        else -> {
-          result.notImplemented()
-        }
+      GET_VISITOR_DATA -> {
+        val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
+        val linkedId = call.argument<String>("linkedId") ?: ""
+        getVisitorData(linkedId, tags, {
+            getVisitorData -> result.success(getVisitorData)
+        }, {
+            errorMessage -> result.error("fpjs_error", errorMessage, null)
+        })
+      }
+      else -> {
+        result.notImplemented()
+      }
     }
   }
 
@@ -83,6 +93,20 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
       errorListener = {error -> errorListener(error.description.toString())}
     )
   }
+
+  private fun getVisitorData(
+    linkedId: String,
+    tags: Map<String, Any>,
+    listener: (FingerprintJSProResponse) -> Unit,
+    errorListener: (String) -> (Unit)
+  ) {
+    fpjsClient.getVisitorId(
+      tags,
+      linkedId,
+      listener = {result -> listener(result)},
+      errorListener = {error -> errorListener(error.description.toString())}
+    )
+  }
 }
 
 fun parseRegion(region: String): Configuration.Region {
@@ -96,3 +120,4 @@ fun parseRegion(region: String): Configuration.Region {
 
 const val INIT = "init"
 const val GET_VISITOR_ID = "getVisitorId"
+const val GET_VISITOR_DATA = "getVisitorData"

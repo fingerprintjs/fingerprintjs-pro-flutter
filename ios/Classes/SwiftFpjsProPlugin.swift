@@ -29,6 +29,9 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         } else if (call.method == "getVisitorId") {
             let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
             getVisitorId(metadata, result)
+        } else if (call.method == "getVisitorData") {
+            let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
+            getVisitorData(metadata, result)
         }
     }
     
@@ -85,6 +88,23 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 result(visitorId)
             } catch FPJSError.apiError(let apiError) {
                 result(FlutterError.init(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
+            } catch {
+                result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
+            }
+        }
+    }
+    
+    private func getVisitorData(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
+        guard let client = fpjsClient else {
+            result(FlutterError(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
+            return
+        }
+        Task {
+            do {
+                let visitorDataResponse = try await client.getVisitorIdResponse(metadata)
+                result(visitorDataResponse)
+            } catch FPJSError.apiError(let apiError) {
+                result(FlutterError(code: "errorGetVisitorData", message: apiError.error?.message, details: nil))
             } catch {
                 result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
             }

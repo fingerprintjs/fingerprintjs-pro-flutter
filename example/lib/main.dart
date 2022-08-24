@@ -61,6 +61,24 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _getDeviceData() async {
+    Object deviceData;
+    try {
+      const tags = {
+        'a': 'a',
+        'b': 0,
+        'c': {
+          'foo': true,
+          'bar': [1, 2, 3]
+        },
+        'd': false
+      };
+      deviceData = await FpjsProPlugin.getVisitorData(tags: tags, linkedId: 'some linkedId') ?? 'Unknown';
+    } on PlatformException {
+      deviceData = 'Failed to get device id.';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -74,6 +92,8 @@ class _MyAppState extends State<MyApp> {
           children: [
             ElevatedButton(
                 onPressed: _getDeviceId, child: const Text('Identify!')),
+            ElevatedButton(
+                onPressed: _getDeviceData, child: const Text('Identify with extended result!')),
             Text('The device id is: $_deviceId\n'),
           ],
         )),

@@ -39,4 +39,18 @@ class FpjsProPlugin {
     });
     return visitorId;
   }
+
+  static Future<Object?> getVisitorData({Map<String, dynamic>? tags, String? linkedId}) async {
+    if (!_isInitialized) {
+      throw Exception(
+          'You need to initialize the FPJS Client first by calling the "initFpjs" method');
+    }
+
+    final Object? getVisitorData = await _channel.invokeMethod('getVisitorData', {
+      'linkedId': linkedId,
+      'tags': tags
+    });
+    print(getVisitorData);
+    return getVisitorData;
+  }
 }
