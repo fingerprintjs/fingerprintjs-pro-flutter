@@ -33,7 +33,9 @@ class FpjsProPlugin {
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
-    final String? visitorId = await _channel.invokeMethod('getVisitorId');
+    final String? visitorId = await _channel.invokeMethod('getVisitorId', {
+      'tags': tags
+    });
     return visitorId;
   }
 }

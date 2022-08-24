@@ -55,11 +55,11 @@ Run `pub get` to download and install the package.
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-...
+// ...
 
 // Initialization
 class _MyAppState extends State<MyApp> {
-  ...
+  // ...
   @override
   void initState() async {
     super.initState();
@@ -67,10 +67,15 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-// Usage
-FpjsProPlugin.getVisitorId().then((visitorId) {
-  // use the visitor id
-})
+  // Usage
+  void identify() async {
+    try {
+      visitorId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
+      // use the visitor id
+    } on PlatformException catch(e) {
+      // process an error somehow
+    }
+  }
 ```
 
 You can also configure `region` and `endpoint` in `initFpjs` method, like below:

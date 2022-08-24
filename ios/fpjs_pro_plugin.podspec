@@ -15,9 +15,9 @@ Flutter plugin for FingerprintJS Pro.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'FingerprintJSPro', '~> 1.1.0'
+  s.dependency 'FingerprintPro', '~> 2.0.1'
 
-  s.platform = :ios, '9.0'
+  s.platform = :ios, '13.0'
 
   s.xcconfig = {
     "LIBRARY_SEARCH_PATHS" => '"${PROJECT_DIR}/.."/*',
