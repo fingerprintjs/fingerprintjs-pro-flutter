@@ -46,9 +46,6 @@ class _MyAppState extends State<MyApp> {
         },
         'd': false
       };
-      // const tags = {
-      //   'a': 'a'
-      // };
       deviceId = await FpjsProPlugin.getVisitorId(tags: tags) ?? 'Unknown';
     } on PlatformException {
       deviceId = 'Failed to get device id.';
