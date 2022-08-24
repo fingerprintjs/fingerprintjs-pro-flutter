@@ -85,6 +85,8 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 result(visitorId)
             } catch FPJSError.apiError(let apiError) {
                 result(FlutterError.init(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
+            } catch {
+                result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
             }
         }
     }
