@@ -27,12 +27,12 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
             }
         } else if (call.method == "getVisitorId") {
-            let metadata = prepareMetadata(args["tags"])
+            let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
             getVisitorId(metadata, result)
         }
     }
     
-    private func prepareMetadata(_ tags: Any?) -> Metadata? {
+    private func prepareMetadata(_ linkedId: String?, tags: Any?) -> Metadata? {
         guard
             let tags = tags,
             let jsonTags = JSONTypeConvertor.convertObjectToJSONTypeConvertible(tags)
@@ -40,7 +40,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             return nil
         }
         
-        var metadata = Metadata()
+        var metadata = Metadata(linkedId: linkedId)
         if let dict = jsonTags as? [String: JSONTypeConvertible] {
             dict.forEach { key, jsonType in
                 metadata.setTag(jsonType, forKey: key)

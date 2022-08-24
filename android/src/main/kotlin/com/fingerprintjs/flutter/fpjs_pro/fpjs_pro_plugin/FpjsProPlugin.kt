@@ -46,7 +46,8 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
         }
       GET_VISITOR_ID -> {
           val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
-          getVisitorId(tags, {
+          val linkedId = call.argument<String>("linkedId") ?: ""
+          getVisitorId(linkedId, tags, {
                 visitorId -> result.success(visitorId)
             }, {
                 errorMessage -> result.error("fpjs_error", errorMessage, null)
@@ -70,12 +71,14 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun getVisitorId(
+    linkedId: String,
     tags: Map<String, Any>,
     listener: (String) -> Unit,
     errorListener: (String) -> (Unit)
   ) {
     fpjsClient.getVisitorId(
       tags,
+      linkedId,
       listener = {result -> listener(result.visitorId)},
       errorListener = {error -> errorListener(error.description.toString())}
     )
