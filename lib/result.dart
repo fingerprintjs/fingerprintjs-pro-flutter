@@ -61,8 +61,8 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
       "osName": osName,
       "osVersion": osVersion,
       "device": device,
-      "firstSeenAt": firstSeenAt,
-      "lastSeenAt": lastSeenAt,
+      "firstSeenAt": firstSeenAt.toJson(),
+      "lastSeenAt": lastSeenAt.toJson(),
     });
 
     return fromObject;
