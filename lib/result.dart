@@ -36,6 +36,8 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   final String osName;
   final String osVersion;
   final String device;
+  final StSeenAt firstSeenAt;
+  final StSeenAt lastSeenAt;
 
   FingerprintJSProExtendedResponse.fromJson(
       Map<String, dynamic> json, String requestId, num confidence)
@@ -45,6 +47,8 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
         osName = json['os'],
         osVersion = json['osVersion'],
         device = json['device'],
+        firstSeenAt = StSeenAt.fromJson(json['firstSeenAt']),
+        lastSeenAt = StSeenAt.fromJson(json['lastSeenAt']),
         super.fromJson(json, requestId, confidence);
 
   @override
@@ -57,6 +61,8 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
       "osName": osName,
       "osVersion": osVersion,
       "device": device,
+      "firstSeenAt": firstSeenAt,
+      "lastSeenAt": lastSeenAt,
     });
 
     return fromObject;
@@ -180,6 +186,24 @@ class Subdivision {
     Map fromObject = {
       "isoCode": isoCode,
       "name": name,
+    };
+
+    return fromObject;
+  }
+}
+
+class StSeenAt {
+  final String? global;
+  final String? subscription;
+
+  StSeenAt.fromJson(Map<String, dynamic> json)
+      : global = json['global'],
+        subscription = json['subscription'];
+
+  Map toJson() {
+    Map fromObject = {
+      "global": global,
+      "subscription": subscription,
     };
 
     return fromObject;
