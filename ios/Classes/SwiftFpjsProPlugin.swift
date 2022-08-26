@@ -103,7 +103,11 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         Task {
             do {
                 let visitorDataResponse = try await client.getVisitorIdResponse(metadata)
-                result(visitorDataResponse)
+                result([
+                    visitorDataResponse.requestId,
+                    visitorDataResponse.confidence,
+                    visitorDataResponse.asJSON()
+                ])
             } catch FPJSError.apiError(let apiError) {
                 result(FlutterError(code: "errorGetVisitorData", message: apiError.error?.message, details: nil))
             } catch {

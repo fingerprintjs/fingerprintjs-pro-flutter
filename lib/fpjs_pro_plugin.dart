@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/region.dart';
+import 'package:fpjs_pro_plugin/result.dart';
 
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
@@ -11,6 +13,7 @@ class FpjsProPlugin {
   static const MethodChannel _channel = MethodChannel(channelName);
 
   static var _isInitialized = false;
+  static var _isExtendedResult = false;
 
   /// Initializes the native FingerprintJS Pro client
   /// Throws a [PlatformException] if [apiKey] is missing
@@ -22,6 +25,7 @@ class FpjsProPlugin {
       'region': region?.stringValue,
       'extendedResponseFormat': extendedResponseFormat,
     });
+    _isExtendedResult = extendedResponseFormat;
     _isInitialized = true;
   }
 
@@ -41,17 +45,26 @@ class FpjsProPlugin {
     return visitorId;
   }
 
-  static Future<Object?> getVisitorData({Map<String, dynamic>? tags, String? linkedId}) async {
+  static Future<T> getVisitorData<T extends FingerprintJSProResponse>({Map<String, dynamic>? tags, String? linkedId}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
-    final Object? getVisitorData = await _channel.invokeMethod('getVisitorData', {
+    final visitorDataTuple = await _channel.invokeMethod('getVisitorData', {
       'linkedId': linkedId,
       'tags': tags
     });
-    print(getVisitorData);
-    return getVisitorData;
+
+    final String requestId = visitorDataTuple[0];
+    final num confidence = visitorDataTuple[1];
+    final String visitorDataJsonString = visitorDataTuple[2];
+    final visitorDataJson = jsonDecode(visitorDataJsonString);
+
+    final visitorData = _isExtendedResult
+        ? FingerprintJSProExtendedResponse.fromJson(visitorDataJson, requestId, confidence)
+        : FingerprintJSProResponse.fromJson(visitorDataJson, requestId, confidence);
+
+    return visitorData as T;
   }
 }

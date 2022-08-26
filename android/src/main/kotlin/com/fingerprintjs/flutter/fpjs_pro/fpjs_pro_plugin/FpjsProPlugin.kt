@@ -98,13 +98,13 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
   private fun getVisitorData(
     linkedId: String,
     tags: Map<String, Any>,
-    listener: (FingerprintJSProResponse) -> Unit,
+    listener: (List<Any>) -> Unit,
     errorListener: (String) -> (Unit)
   ) {
     fpjsClient.getVisitorId(
       tags,
       linkedId,
-      listener = {result -> listener(result)},
+      listener = {result -> listener(Triple(result.requestId, result.confidenceScore.score, result.asJson).toList())},
       errorListener = {error -> errorListener(error.description.toString())}
     )
   }
