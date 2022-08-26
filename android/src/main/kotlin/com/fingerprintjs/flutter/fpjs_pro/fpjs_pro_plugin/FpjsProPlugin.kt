@@ -41,8 +41,9 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
           val regionString = call.argument<String>("region")
           val endpoint = call.argument<String>("endpoint")
           val region = regionString?.let { parseRegion(it) }
+          val extendedResponseFormat = call.argument<Boolean>("extendedResponseFormat") ?: false
 
-          initFpjs(token, region, endpoint)
+          initFpjs(token, region, endpoint, extendedResponseFormat)
           result.success("Successfully initialized FingerprintJS Pro Client")
         }
       GET_VISITOR_ID -> {
@@ -73,9 +74,9 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(null)
   }
 
-  private fun initFpjs(apiToken: String, region: Configuration.Region?, endpoint: String?) {
+  private fun initFpjs(apiToken: String, region: Configuration.Region?, endpoint: String?, extendedResponseFormat: Boolean) {
     val factory = FingerprintJSFactory(applicationContext)
-    val configuration = Configuration(apiToken, region ?: Configuration.Region.US, endpoint ?: region?.endpointUrl ?: Configuration.Region.US.endpointUrl)
+    val configuration = Configuration(apiToken, region ?: Configuration.Region.US, endpoint ?: region?.endpointUrl ?: Configuration.Region.US.endpointUrl, extendedResponseFormat)
 
     fpjsClient = factory.createInstance(configuration)
   }

@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initFpjs(String apiToken) async {
-    await FpjsProPlugin.initFpjs(apiToken);
+    await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true);
   }
 
   /// The native FingerprintJS libraries expose a method called `getVisitorId`
@@ -61,8 +61,8 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> _getDeviceData() async {
-    Object deviceData;
+  Future<void> _getDeviceData(BuildContext context) async {
+    FingerprintJSProExtendedResponse deviceData;
     try {
       const tags = {
         'a': 'a',

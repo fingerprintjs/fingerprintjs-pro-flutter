@@ -20,8 +20,9 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         if (call.method == "init") {
             if let token = args["apiToken"] as? String {
                 let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String)
+                let extendedResponseFormat = args["extendedResponseFormat"] as? Bool ?? false
 
-                initFpjs(token: token, region: region)
+                initFpjs(token: token, region: region, extendedResponseFormat: extendedResponseFormat)
                 result("Successfully initialized FingerprintJS Pro Client")
             } else {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
@@ -72,8 +73,8 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         return region
     }
 
-    private func initFpjs(token: String, region: Region) {
-        let configuration = Configuration(apiKey: token, region: region)
+    private func initFpjs(token: String, region: Region, extendedResponseFormat: Bool) {
+        let configuration = Configuration(apiKey: token, region: region, extendedResponseFormat: extendedResponseFormat)
         fpjsClient = FingerprintProFactory.getInstance(configuration)
     }
 

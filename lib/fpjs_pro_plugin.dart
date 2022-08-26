@@ -15,11 +15,12 @@ class FpjsProPlugin {
   /// Initializes the native FingerprintJS Pro client
   /// Throws a [PlatformException] if [apiKey] is missing
   static Future<void> initFpjs(String apiKey,
-      {String? endpoint, Region? region}) async {
+      {String? endpoint, Region? region, bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
       'apiToken': apiKey,
       'endpoint': endpoint,
       'region': region?.stringValue,
+      'extendedResponseFormat': extendedResponseFormat,
     });
     _isInitialized = true;
   }
