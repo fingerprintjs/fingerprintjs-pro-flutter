@@ -6,8 +6,8 @@ void main() {
   const confidence = 0.995;
 
   group('FingerprintJSProResponse', () {
-    var jsonMock;
-    var extendedJsonMock;
+    Map<String, String> jsonMock = {};
+    Map<String, Object?> extendedJsonMock = {};
 
     setUp(() {
       jsonMock = {
@@ -30,15 +30,15 @@ void main() {
     });
 
     test('Check failed scenario with silly data', () {
-      (jsonMock as Map<String, Object?>).remove("visitorId");
+      jsonMock.remove("visitorId");
       expect(() => FingerprintJSProResponse.fromJson(jsonMock, requestId, confidence), throwsA(isA<TypeError>()));
     });
 
   });
 
   group('FingerprintJSProExtendedResponse', () {
-    var jsonMock;
-    var extendedJsonMock;
+    Map<String, Object> jsonMock = {};
+    Map<String, Object?> extendedJsonMock = {};
 
     setUp(() {
       jsonMock = {
@@ -108,12 +108,12 @@ void main() {
 
 
     test('Check failed scenario with missed `visitorId`', () {
-      (jsonMock as Map<String, Object?>).remove("visitorId");
+      jsonMock.remove("visitorId");
       expect(() => FingerprintJSProExtendedResponse.fromJson(jsonMock, requestId, confidence), throwsA(isA<TypeError>()));
     });
 
     test('Check failed scenario with missed `ipLocation`', () {
-      (jsonMock as Map<String, Object?>).remove("ipLocation");
+      jsonMock.remove("ipLocation");
       expect(() => FingerprintJSProExtendedResponse.fromJson(jsonMock, requestId, confidence), throwsA(isA<TypeError>()));
     });
 
