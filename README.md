@@ -51,7 +51,35 @@ dependencies:
 
 Run `pub get` to download and install the package.
 
-#### 2. Use the plugin in your application code to get the visitor identifier
+#### 2. Provide configuration to the plugin
+
+```dart
+import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+// ...
+
+// Initialization
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() async {
+    super.initState();
+    await FpjsProPlugin.initFpjs('<apiKey>'); // insert your actual API key here
+  }
+  // ...
+}
+```
+
+You can also configure `region` and `endpoint` in `initFpjs` method, like below:
+```dart
+void doInit() async {
+  await FpjsProPlugin.initFpjs('<apiKey>');
+  await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
+  await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
+}
+```
+
+#### 3. Use the plugin in your application code to identify visitor
+
+##### 3.1 Use `getVisitorId` method if you need only `visitorId`: 
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -60,29 +88,66 @@ import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 // Initialization
 class _MyAppState extends State<MyApp> {
   // ...
-  @override
-  void initState() async {
-    super.initState();
-    await FpjsProPlugin.initFpjs('<apiKey>'); // insert your actual API key here
-  }
-}
-
   // Usage
   void identify() async {
     try {
       visitorId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
       // use the visitor id
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       // process an error somehow
     }
   }
+}
 ```
 
-You can also configure `region` and `endpoint` in `initFpjs` method, like below:
+##### 3.2 Use `getVisitorData` to get extended result.
+
 ```dart
-await FpjsProPlugin.initFpjs('<apiKey>');
-await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
-await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
+import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+// ...
+
+// Initialization
+class _MyAppState extends State<MyApp> {
+  // ...
+  // Usage
+  void identify() async {
+    try {
+      deviceData = await FpjsProPlugin.getVisitorData();
+      // use the visitor id
+    } on PlatformException catch (e) {
+      // process an error somehow
+    }
+  }
+}
+```
+
+By default `getVisitorData()` will return shirt answer with the `FingerprintJSProResponse` type.
+Provide `extendedResponseFormat=true` to the `initFpjs` function to get extended result of `FingerprintJSProExtendedResponse` type.
+
+```dart
+void doInit() async {
+  await FpjsProPlugin.initFpjs('<apiKey>', extendedResponseFormat: true);
+}
+```
+
+#### 4. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to mark identification request with additional data
+
+```dart
+void doIdentification() async {
+  const tags = {
+    'foo': 'bar',
+    'numberField': 1234,
+    'objectField': {
+      'booleanSubfield': true,
+      'arraySubfield': [1, 2, 3]
+    },
+    'booleanField': false
+  };
+  const linkedId = 'custom_linked_id';
+
+  visitorId = await FpjsProPlugin.getVisitorId(linkedId: linkedId, tags: tags);
+  deviceData = await FpjsProPlugin.getVisitorData(linkedId: linkedId, tags: tags);
+}
 ```
 
 ## Additional Resources
