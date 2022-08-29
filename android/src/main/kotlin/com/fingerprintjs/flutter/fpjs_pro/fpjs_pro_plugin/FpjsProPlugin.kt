@@ -104,7 +104,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
     fpjsClient.getVisitorId(
       tags,
       linkedId,
-      listener = {result -> listener(Triple(result.requestId, result.confidenceScore.score, result.asJson).toList())},
+      listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson))},
       errorListener = {error -> errorListener(error.description.toString())}
     )
   }
