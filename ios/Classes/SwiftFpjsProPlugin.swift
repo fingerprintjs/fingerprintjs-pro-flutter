@@ -20,8 +20,9 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         if (call.method == "init") {
             if let token = args["apiToken"] as? String {
                 let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String)
+                let extendedResponseFormat = args["extendedResponseFormat"] as? Bool ?? false
 
-                initFpjs(token: token, region: region)
+                initFpjs(token: token, region: region, extendedResponseFormat: extendedResponseFormat)
                 result("Successfully initialized FingerprintJS Pro Client")
             } else {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
@@ -29,6 +30,9 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         } else if (call.method == "getVisitorId") {
             let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
             getVisitorId(metadata, result)
+        } else if (call.method == "getVisitorData") {
+            let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
+            getVisitorData(metadata, result)
         }
     }
     
@@ -69,8 +73,8 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         return region
     }
 
-    private func initFpjs(token: String, region: Region) {
-        let configuration = Configuration(apiKey: token, region: region)
+    private func initFpjs(token: String, region: Region, extendedResponseFormat: Bool) {
+        let configuration = Configuration(apiKey: token, region: region, extendedResponseFormat: extendedResponseFormat)
         fpjsClient = FingerprintProFactory.getInstance(configuration)
     }
 
@@ -85,6 +89,27 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 result(visitorId)
             } catch FPJSError.apiError(let apiError) {
                 result(FlutterError.init(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
+            } catch {
+                result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
+            }
+        }
+    }
+    
+    private func getVisitorData(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
+        guard let client = fpjsClient else {
+            result(FlutterError(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
+            return
+        }
+        Task {
+            do {
+                let visitorDataResponse = try await client.getVisitorIdResponse(metadata)
+                result([
+                    visitorDataResponse.requestId,
+                    visitorDataResponse.confidence,
+                    visitorDataResponse.asJSON()
+                ])
+            } catch FPJSError.apiError(let apiError) {
+                result(FlutterError(code: "errorGetVisitorData", message: apiError.error?.message, details: nil))
             } catch {
                 result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
             }

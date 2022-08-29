@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/region.dart';
+import 'package:fpjs_pro_plugin/result.dart';
 
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
@@ -11,16 +13,19 @@ class FpjsProPlugin {
   static const MethodChannel _channel = MethodChannel(channelName);
 
   static var _isInitialized = false;
+  static var _isExtendedResult = false;
 
   /// Initializes the native FingerprintJS Pro client
   /// Throws a [PlatformException] if [apiKey] is missing
   static Future<void> initFpjs(String apiKey,
-      {String? endpoint, Region? region}) async {
+      {String? endpoint, Region? region, bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
       'apiToken': apiKey,
       'endpoint': endpoint,
       'region': region?.stringValue,
+      'extendedResponseFormat': extendedResponseFormat,
     });
+    _isExtendedResult = extendedResponseFormat;
     _isInitialized = true;
   }
 
@@ -38,5 +43,28 @@ class FpjsProPlugin {
       'tags': tags
     });
     return visitorId;
+  }
+
+  static Future<T> getVisitorData<T extends FingerprintJSProResponse>({Map<String, dynamic>? tags, String? linkedId}) async {
+    if (!_isInitialized) {
+      throw Exception(
+          'You need to initialize the FPJS Client first by calling the "initFpjs" method');
+    }
+
+    final visitorDataTuple = await _channel.invokeMethod('getVisitorData', {
+      'linkedId': linkedId,
+      'tags': tags
+    });
+
+    final String requestId = visitorDataTuple[0];
+    final num confidence = visitorDataTuple[1];
+    final String visitorDataJsonString = visitorDataTuple[2];
+    final visitorDataJson = jsonDecode(visitorDataJsonString);
+
+    final visitorData = _isExtendedResult
+        ? FingerprintJSProExtendedResponse.fromJson(visitorDataJson, requestId, confidence)
+        : FingerprintJSProResponse.fromJson(visitorDataJson, requestId, confidence);
+
+    return visitorData as T;
   }
 }

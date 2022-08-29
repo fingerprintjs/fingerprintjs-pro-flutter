@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:env_flutter/env_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -28,7 +30,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initFpjs(String apiToken) async {
-    await FpjsProPlugin.initFpjs(apiToken);
+    await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true);
   }
 
   /// The native FingerprintJS libraries expose a method called `getVisitorId`
@@ -61,6 +63,27 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<String> _getDeviceData() async {
+    String identificationInfo;
+    try {
+      const tags = {
+        'a': 'a',
+        'b': 0,
+        'c': {
+          'foo': true,
+          'bar': [1, 2, 3]
+        },
+        'd': false
+      };
+      const encoder = JsonEncoder.withIndent('    ');
+      final deviceData = await FpjsProPlugin.getVisitorData(tags: tags, linkedId: 'some linkedId');
+      identificationInfo = encoder.convert(deviceData);
+    } on PlatformException {
+      identificationInfo = 'Failed to get device info.';
+    }
+    return identificationInfo;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -69,15 +92,48 @@ class _MyAppState extends State<MyApp> {
           title: const Text('FPJS Pro Flutter plugin'),
         ),
         body: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-                onPressed: _getDeviceId, child: const Text('Identify!')),
-            Text('The device id is: $_deviceId\n'),
-          ],
-        )),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => _getDeviceId(),
+                child: const Text('Identify!')),
+              Text('The device id is: $_deviceId\n'),
+              _ExtendedResultDialog(handleIdentificate: _getDeviceData)
+          ])
+        ),
       ),
+    );
+  }
+}
+
+class _ExtendedResultDialog extends StatelessWidget {
+  const _ExtendedResultDialog({Key? key, required this.handleIdentificate}) : super(key: key);
+
+  final AsyncCallback handleIdentificate;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => {
+        handleIdentificate().then((identificationInfo) => showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Extended result'),
+            content: FittedBox(
+              fit: BoxFit.contain,
+              child: Text(identificationInfo as String),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ))
+      },
+      child: const Text('Identify with extended result!'),
     );
   }
 }
