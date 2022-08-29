@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 
+// Update it on each release
+const pluginVersion = '1.0.4';
+
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
   static const channelName = 'fpjs_pro_plugin';
@@ -24,6 +27,7 @@ class FpjsProPlugin {
       'endpoint': endpoint,
       'region': region?.stringValue,
       'extendedResponseFormat': extendedResponseFormat,
+      'pluginVersion': pluginVersion,
     });
     _isExtendedResult = extendedResponseFormat;
     _isInitialized = true;
