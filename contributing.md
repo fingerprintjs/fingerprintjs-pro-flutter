@@ -25,5 +25,6 @@ The `main` branch is locked for the push action. For proposing changes, use the 
 3. Update version in `android/build.gradle`
 4. Update version in `README.md` in adding instruction
 5. Update `pluginVersion` in `fpjs_pro_plugin.dart` that used for the integration info
-6. Update library version for the example lock files (TODO: provide correct scenario)
-7. Add information about the release to the `CHANGELOG.md`
+6. Run `flutter pub get` in `example` folder to update `pubspec.lock` file
+7. Run `pod update` in `example/ios` folder to update `Podfile.lock` file
+8. Add information about the release to the `CHANGELOG.md`
