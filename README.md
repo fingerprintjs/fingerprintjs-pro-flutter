@@ -51,7 +51,7 @@ dependencies:
 
 Run `pub get` to download and install the package.
 
-#### 2. Provide configuration to the plugin
+#### 2. Provide a configuration to the plugin
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-You can also configure `region` and `endpoint` in `initFpjs` method, like below:
+You can also configure `region` and `endpoint` in the `initFpjs` method, like below:
 ```dart
 void doInit() async {
   await FpjsProPlugin.initFpjs('<apiKey>');
@@ -77,9 +77,9 @@ void doInit() async {
 }
 ```
 
-#### 3. Use the plugin in your application code to identify visitor
+#### 3. Use the plugin in your application code to identify a visitor
 
-##### 3.1 Use `getVisitorId` method if you need only `visitorId`: 
+##### 3.1 Use the `getVisitorId` method if you need a `visitorId` only: 
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -121,7 +121,7 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-By default `getVisitorData()` will return shirt answer with the `FingerprintJSProResponse` type.
+By default `getVisitorData()` will return a short response with the `FingerprintJSProResponse` type.
 Provide `extendedResponseFormat=true` to the `initFpjs` function to get extended result of `FingerprintJSProExtendedResponse` type.
 
 ```dart
@@ -130,7 +130,7 @@ void doInit() async {
 }
 ```
 
-#### 4. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to mark identification request with additional data
+#### 4. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label identification event with additional data
 
 ```dart
 void doIdentification() async {
