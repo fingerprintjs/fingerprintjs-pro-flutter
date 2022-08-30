@@ -79,7 +79,7 @@ void doInit() async {
 
 #### 3. Use the plugin in your application code to identify a visitor
 
-##### 3.1 Use the `getVisitorId` method if you need a `visitorId` only: 
+##### 3.1. Use the `getVisitorId` method if you need a `visitorId` only: 
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-##### 3.2 Use `getVisitorData` to get extended result.
+##### 3.2. Use `getVisitorData` to get extended result.
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
