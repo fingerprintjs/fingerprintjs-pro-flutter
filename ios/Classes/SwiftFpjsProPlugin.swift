@@ -84,14 +84,17 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             result(FlutterError.init(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
             return
         }
-        Task {
-            do {
-                let visitorId = try await client.getVisitorId(metadata)
+        
+        client.getVisitorId(metadata) { visitorIdResult in
+            switch visitorIdResult {
+            case .success(let visitorId):
                 result(visitorId)
-            } catch FPJSError.apiError(let apiError) {
-                result(FlutterError.init(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
-            } catch {
-                result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
+            case .failure(let error):
+                if case .apiError(let apiError) = error {
+                    result(FlutterError(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
+                } else {
+                    result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
+                }
             }
         }
     }
@@ -101,18 +104,21 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
             return
         }
-        Task {
-            do {
-                let visitorDataResponse = try await client.getVisitorIdResponse(metadata)
+        
+        client.getVisitorIdResponse(metadata) { visitorIdResponseResult in
+            switch visitorIdResponseResult {
+            case .success(let visitorDataResponse):
                 result([
                     visitorDataResponse.requestId,
                     visitorDataResponse.confidence,
                     visitorDataResponse.asJSON()
                 ])
-            } catch FPJSError.apiError(let apiError) {
-                result(FlutterError(code: "errorGetVisitorData", message: apiError.error?.message, details: nil))
-            } catch {
-                result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
+            case .failure(let error):
+                if case .apiError(let apiError) = error {
+                    result(FlutterError(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
+                } else {
+                    result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
+                }
             }
         }
     }
