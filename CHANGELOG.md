@@ -1,3 +1,8 @@
+## 1.2.0
+
+### New Features
+* Now library support iOS 12 again. (Was broken in 1.1.0)
+
 ## 1.1.0
 
 ### New Features
