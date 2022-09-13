@@ -90,11 +90,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             case .success(let visitorId):
                 result(visitorId)
             case .failure(let error):
-                if case .apiError(let apiError) = error {
-                    result(FlutterError(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
-                } else {
-                    result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
-                }
+                self.processNativeLibraryError(error, result: result)
             }
         }
     }
@@ -114,12 +110,16 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                     visitorDataResponse.asJSON()
                 ])
             case .failure(let error):
-                if case .apiError(let apiError) = error {
-                    result(FlutterError(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
-                } else {
-                    result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
-                }
+                self.processNativeLibraryError(error, result: result)
             }
+        }
+    }
+    
+    private func processNativeLibraryError(_ error: FPJSError, result: @escaping FlutterResult) {
+        if case .apiError(let apiError) = error {
+            result(FlutterError(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
+        } else {
+            result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
         }
     }
 }
