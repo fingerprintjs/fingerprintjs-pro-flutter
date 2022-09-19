@@ -6,6 +6,25 @@ import com.fingerprintjs.android.fpjs_pro.Configuration
 import com.fingerprintjs.android.fpjs_pro.FingerprintJS
 import com.fingerprintjs.android.fpjs_pro.FingerprintJSFactory
 import com.fingerprintjs.android.fpjs_pro.FingerprintJSProResponse
+import com.fingerprintjs.android.fpjs_pro.Error
+import com.fingerprintjs.android.fpjs_pro.ApiKeyRequired
+import com.fingerprintjs.android.fpjs_pro.ApiKeyNotFound
+import com.fingerprintjs.android.fpjs_pro.ApiKeyExpired
+import com.fingerprintjs.android.fpjs_pro.RequestCannotBeParsed
+import com.fingerprintjs.android.fpjs_pro.Failed
+import com.fingerprintjs.android.fpjs_pro.RequestTimeout
+import com.fingerprintjs.android.fpjs_pro.TooManyRequest
+import com.fingerprintjs.android.fpjs_pro.OriginNotAvailable
+import com.fingerprintjs.android.fpjs_pro.HeaderRestricted
+import com.fingerprintjs.android.fpjs_pro.NotAvailableForCrawlBots
+import com.fingerprintjs.android.fpjs_pro.NotAvailableWithoutUA
+import com.fingerprintjs.android.fpjs_pro.WrongRegion
+import com.fingerprintjs.android.fpjs_pro.SubscriptionNotActive
+import com.fingerprintjs.android.fpjs_pro.UnsupportedVersion
+import com.fingerprintjs.android.fpjs_pro.InstallationMethodRestricted
+import com.fingerprintjs.android.fpjs_pro.ResponseCannotBeParsed
+import com.fingerprintjs.android.fpjs_pro.NetworkError
+import com.fingerprintjs.android.fpjs_pro.UnknownError
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -48,21 +67,21 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
           result.success("Successfully initialized FingerprintJS Pro Client")
         }
       GET_VISITOR_ID -> {
-          val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
-          val linkedId = call.argument<String>("linkedId") ?: ""
-          getVisitorId(linkedId, tags, {
-                visitorId -> result.success(visitorId)
-            }, {
-                errorMessage -> result.error("fpjs_error", errorMessage, null)
-            })
-          }
+        val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
+        val linkedId = call.argument<String>("linkedId") ?: ""
+        getVisitorId(linkedId, tags, { visitorId ->
+          result.success(visitorId)
+        }, { errorCode, errorMessage ->
+          result.error(errorCode, errorMessage, null)
+        })
+      }
       GET_VISITOR_DATA -> {
         val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
         val linkedId = call.argument<String>("linkedId") ?: ""
-        getVisitorData(linkedId, tags, {
-            getVisitorData -> result.success(getVisitorData)
-        }, {
-            errorMessage -> result.error("fpjs_error", errorMessage, null)
+        getVisitorData(linkedId, tags, { getVisitorData ->
+          result.success(getVisitorData)
+        }, { errorCode, errorMessage ->
+          result.error(errorCode, errorMessage, null)
         })
       }
       else -> {
@@ -92,13 +111,13 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
     linkedId: String,
     tags: Map<String, Any>,
     listener: (String) -> Unit,
-    errorListener: (String) -> (Unit)
+    errorListener: (String, String) -> (Unit)
   ) {
     fpjsClient.getVisitorId(
       tags,
       linkedId,
       listener = {result -> listener(result.visitorId)},
-      errorListener = {error -> errorListener(error.description.toString())}
+      errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
     )
   }
 
@@ -106,13 +125,13 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
     linkedId: String,
     tags: Map<String, Any>,
     listener: (List<Any>) -> Unit,
-    errorListener: (String) -> (Unit)
+    errorListener: (String, String) -> (Unit)
   ) {
     fpjsClient.getVisitorId(
       tags,
       linkedId,
       listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson))},
-      errorListener = {error -> errorListener(error.description.toString())}
+      errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
     )
   }
 }
@@ -129,3 +148,28 @@ fun parseRegion(region: String): Configuration.Region {
 const val INIT = "init"
 const val GET_VISITOR_ID = "getVisitorId"
 const val GET_VISITOR_DATA = "getVisitorData"
+
+private fun getErrorCode(error: Error): String {
+  val errorType = when(error) {
+    is ApiKeyRequired -> "ApiKeyRequired"
+    is ApiKeyNotFound ->  "ApiKeyNotFound"
+    is ApiKeyExpired -> "ApiKeyExpired"
+    is RequestCannotBeParsed -> "RequestCannotBeParsed"
+    is Failed -> "Failed"
+    is RequestTimeout -> "RequestTimeout"
+    is TooManyRequest -> "TooManyRequest"
+    is OriginNotAvailable -> "OriginNotAvailable"
+    is HeaderRestricted -> "HeaderRestricted"
+    is NotAvailableForCrawlBots -> "NotAvailableForCrawlBots"
+    is NotAvailableWithoutUA -> "NotAvailableWithoutUA"
+    is WrongRegion -> "WrongRegion"
+    is SubscriptionNotActive -> "SubscriptionNotActive"
+    is UnsupportedVersion -> "UnsupportedVersion"
+    is InstallationMethodRestricted -> "InstallationMethodRestricted"
+    is ResponseCannotBeParsed -> "ResponseCannotBeParsed"
+    is NetworkError -> "NetworkError"
+    is UnknownError -> "UnknownError"
+    else -> "UnknownError"
+  }
+  return errorType
+}

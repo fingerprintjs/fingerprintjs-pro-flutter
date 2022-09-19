@@ -116,10 +116,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
     }
     
     private func processNativeLibraryError(_ error: FPJSError, result: @escaping FlutterResult) {
-        if case .apiError(let apiError) = error {
-            result(FlutterError(code: "errorGetVisitorId", message: apiError.error?.message, details: nil))
-        } else {
-            result(FlutterError(code: "unknownError", message: error.localizedDescription, details: nil))
-        }
+        let (code, description) = error.flutterFields
+        result(FlutterError(code: code, message: description, details: nil))
     }
 }

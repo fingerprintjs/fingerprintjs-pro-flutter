@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 
 Future main() async {
@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
         'd': false
       };
       deviceId = await FpjsProPlugin.getVisitorId(tags: tags, linkedId: 'some linkedId') ?? 'Unknown';
-    } on PlatformException {
+    } on FingerprintProError {
       deviceId = 'Failed to get device id.';
     }
 
@@ -78,8 +78,8 @@ class _MyAppState extends State<MyApp> {
       const encoder = JsonEncoder.withIndent('    ');
       final deviceData = await FpjsProPlugin.getVisitorData(tags: tags, linkedId: 'some linkedId');
       identificationInfo = encoder.convert(deviceData);
-    } on PlatformException {
-      identificationInfo = 'Failed to get device info.';
+    } on FingerprintProError catch (error) {
+      identificationInfo = "Failed to get device info.\n$error";
     }
     return identificationInfo;
   }
