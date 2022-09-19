@@ -93,8 +93,9 @@ class _MyAppState extends State<MyApp> {
     try {
       visitorId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
       // use the visitor id
-    } on PlatformException catch (e) {
+    } on FingerprintProError catch (e) {
       // process an error somehow
+      // check lib/error.dart to get more info about error types
     }
   }
 }
@@ -114,8 +115,9 @@ class _MyAppState extends State<MyApp> {
     try {
       deviceData = await FpjsProPlugin.getVisitorData();
       // use the visitor id
-    } on PlatformException catch (e) {
+    } on FingerprintProError catch (e) {
       // process an error somehow
+      // check lib/error.dart to get more info about error types
     }
   }
 }
