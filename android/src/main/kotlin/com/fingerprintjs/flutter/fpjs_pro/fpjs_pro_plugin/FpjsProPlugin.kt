@@ -168,7 +168,6 @@ private fun getErrorCode(error: Error): String {
     is InstallationMethodRestricted -> "InstallationMethodRestricted"
     is ResponseCannotBeParsed -> "ResponseCannotBeParsed"
     is NetworkError -> "NetworkError"
-    is UnknownError -> "UnknownError"
     else -> "UnknownError"
   }
   return errorType
