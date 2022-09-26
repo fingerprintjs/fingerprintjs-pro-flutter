@@ -1,3 +1,8 @@
+## 1.2.1
+
+### New Features
+* iOS agent updated to allow request filtering
+
 ## 1.2.0
 
 ### New Features

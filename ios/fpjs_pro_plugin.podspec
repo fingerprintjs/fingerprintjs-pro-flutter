@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'fpjs_pro_plugin'
-  s.version          = '1.2.0'
+  s.version          = '1.2.1'
   s.summary          = 'Flutter plugin for FingerprintJS Pro.'
   s.description      = <<-DESC
 Flutter plugin for FingerprintJS Pro.
@@ -15,7 +15,7 @@ Flutter plugin for FingerprintJS Pro.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'FingerprintPro', '~> 2.1.0'
+  s.dependency 'FingerprintPro', '~> 2.1.3'
 
   s.platform = :ios, '12.0'
 
