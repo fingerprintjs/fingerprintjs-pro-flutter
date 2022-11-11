@@ -1,3 +1,8 @@
+## 1.2.2
+
+### New Features
+* Android agent updated to improve identification
+
 ## 1.2.1
 
 ### New Features
