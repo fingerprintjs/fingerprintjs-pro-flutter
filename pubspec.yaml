@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +35,11 @@ flutter:
         pluginClass: FpjsProPlugin
       ios:
         pluginClass: FpjsProPlugin
+      web:
+        pluginClass: FpjsProPluginWeb
+        fileName: fpjs_pro_plugin_web.dart
+  assets:
+    - web/index.js
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
