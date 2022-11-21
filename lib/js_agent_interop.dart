@@ -1,7 +1,6 @@
 @JS('FingerprintJSFlutter')
 library fingerprint_js;
 
-import 'package:flutter/cupertino.dart';
 import 'package:js/js.dart';
 
 
@@ -27,10 +26,15 @@ class IdentificationResult {
 @anonymous
 class FingerprintJSOptions {
   external String get apiKey;
-  external String? get region;
-  // external String? get endpoint;
+  external List<String> get integrationInfo;
 
-  external factory FingerprintJSOptions({String apiKey, String? region/*, String? endpoint*/});
+  external String? get region;
+  external set region(String? region);
+
+  external String? get endpoint;
+  external set endpoint(String? endpoint);
+
+  external factory FingerprintJSOptions({String apiKey, List<String> integrationInfo});
 }
 
 @JS()

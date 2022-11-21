@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/error.dart';
@@ -73,8 +74,14 @@ class FpjsProPlugin {
 
       final String requestId = visitorDataTuple[0];
       final num confidence = visitorDataTuple[1];
-      final String visitorDataJsonString = visitorDataTuple[2];
-      final visitorDataJson = jsonDecode(visitorDataJsonString);
+
+      Map<String, dynamic> visitorDataJson;
+      if (kIsWeb) {
+        visitorDataJson = Map<String, dynamic>.from(visitorDataTuple[2]);
+      } else {
+        final String visitorDataJsonString = visitorDataTuple[2];
+        visitorDataJson = jsonDecode(visitorDataJsonString);
+      }
 
       final visitorData = _isExtendedResult
           ? FingerprintJSProExtendedResponse.fromJson(

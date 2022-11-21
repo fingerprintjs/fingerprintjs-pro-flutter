@@ -12,6 +12,13 @@ class FingerprintJSProResponse {
         confidenceScore = ConfidenceScore(confidence),
         errorMessage = json['errorMessage'];
 
+  FingerprintJSProResponse.fromJsObject(
+      dynamic jsObject)
+      : visitorId = jsObject.visitorId,
+        requestId = jsObject.requestId,
+        confidenceScore = ConfidenceScore(jsObject.confidence.score),
+        errorMessage = jsObject.errorMessage;
+
   Map toJson() {
     Map fromObject = {
       "requestId": requestId,
@@ -42,14 +49,26 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   FingerprintJSProExtendedResponse.fromJson(
       Map<String, dynamic> json, String requestId, num confidence)
       : visitorFound = json['visitorFound'],
-        ipAddress = json['ip'],
-        ipLocation = IpLocation.fromJson(json['ipLocation']),
-        osName = json['os'],
+        ipAddress = json['ip'] == Null ? json['ip'] : json['ipAddress'],
+        ipLocation = IpLocation.fromJson(Map<String, dynamic>.from(json['ipLocation'])),
+        osName = json['os'] == Null ? json['os'] : json['osName'],
         osVersion = json['osVersion'],
         device = json['device'],
-        firstSeenAt = StSeenAt.fromJson(json['firstSeenAt']),
-        lastSeenAt = StSeenAt.fromJson(json['lastSeenAt']),
+        firstSeenAt = StSeenAt.fromJson(Map<String, dynamic>.from(json['firstSeenAt'])),
+        lastSeenAt = StSeenAt.fromJson(Map<String, dynamic>.from(json['lastSeenAt'])),
         super.fromJson(json, requestId, confidence);
+
+  FingerprintJSProExtendedResponse.fromJsObject(
+      dynamic jsObject)
+      : visitorFound = jsObject.visitorFound,
+        ipAddress = jsObject.ip,
+        ipLocation = IpLocation.fromJsObject(jsObject.ipLocation),
+        osName = jsObject.os,
+        osVersion = jsObject.osVersion,
+        device = jsObject.device,
+        firstSeenAt = StSeenAt.fromJsObject(jsObject.firstSeenAt),
+        lastSeenAt = StSeenAt.fromJsObject(jsObject.lastSeenAt),
+        super.fromJsObject(jsObject);
 
   @override
   Map toJson() {
@@ -100,11 +119,23 @@ class IpLocation {
         longitude = json['longitude'],
         postalCode = json['postalCode'],
         timezone = json['timezone'],
-        city = City.fromJson(json['city']),
-        country = Country.fromJson(json['country']),
-        continent = Continent.fromJson(json['continent']),
+        city = City.fromJson(Map<String, dynamic>.from(json['city'])),
+        country = Country.fromJson(Map<String, dynamic>.from(json['country'])),
+        continent = Continent.fromJson(Map<String, dynamic>.from(json['continent'])),
         subdivisions = List<Subdivision>.from((json['subdivisions'] as List)
-            .map((subdivision) => Subdivision.fromJson(subdivision)));
+            .map((subdivision) => Subdivision.fromJson(Map<String, dynamic>.from(subdivision))));
+
+  IpLocation.fromJsObject(dynamic jsObject)
+      : accuracyRadius = jsObject.accuracyRadius,
+        latitude = jsObject.latitude,
+        longitude = jsObject.longitude,
+        postalCode = jsObject.postalCode,
+        timezone = jsObject.timezone,
+        city = City.fromJsObject(jsObject.city),
+        country = Country.fromJsObject(jsObject.country),
+        continent = Continent.fromJsObject(jsObject.continent),
+        subdivisions = List<Subdivision>.from((jsObject.subdivisions as List)
+            .map((subdivision) => Subdivision.fromJsObject(subdivision)));
 
   Map toJson() {
     Map fromObject = {
@@ -129,6 +160,8 @@ class City {
 
   City.fromJson(Map<String, dynamic> json) : name = json['name'];
 
+  City.fromJsObject(dynamic jsObject): name = jsObject.name;
+
   Map toJson() {
     Map fromObject = {
       "name": name,
@@ -145,6 +178,10 @@ class Country {
   Country.fromJson(Map<String, dynamic> json)
       : code = json['code'],
         name = json['name'];
+
+  Country.fromJsObject(dynamic jsObject)
+      : code = jsObject.code,
+        name = jsObject.name;
 
   Map toJson() {
     Map fromObject = {
@@ -164,6 +201,10 @@ class Continent {
       : code = json['code'],
         name = json['name'];
 
+  Continent.fromJsObject(dynamic jsObject)
+      : code = jsObject.code,
+        name = jsObject.name;
+
   Map toJson() {
     Map fromObject = {
       "code": code,
@@ -182,6 +223,10 @@ class Subdivision {
       : isoCode = json['isoCode'],
         name = json['name'];
 
+  Subdivision.fromJsObject(dynamic jsObject)
+      : isoCode = jsObject.isoCode,
+        name = jsObject.name;
+
   Map toJson() {
     Map fromObject = {
       "isoCode": isoCode,
@@ -199,6 +244,10 @@ class StSeenAt {
   StSeenAt.fromJson(Map<String, dynamic> json)
       : global = json['global'],
         subscription = json['subscription'];
+
+  StSeenAt.fromJsObject(dynamic jsObject)
+      : global = jsObject.global,
+        subscription = jsObject.subscription;
 
   Map toJson() {
     Map fromObject = {
