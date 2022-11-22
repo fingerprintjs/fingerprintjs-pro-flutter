@@ -49,9 +49,9 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   FingerprintJSProExtendedResponse.fromJson(
       Map<String, dynamic> json, String requestId, num confidence)
       : visitorFound = json['visitorFound'],
-        ipAddress = json['ip'] == Null ? json['ip'] : json['ipAddress'],
+        ipAddress = json['ip'] is String ? json['ip'] : json['ipAddress'],
         ipLocation = IpLocation.fromJson(Map<String, dynamic>.from(json['ipLocation'])),
-        osName = json['os'] == Null ? json['os'] : json['osName'],
+        osName = json['os'] is String ? json['os'] : json['osName'],
         osVersion = json['osVersion'],
         device = json['device'],
         firstSeenAt = StSeenAt.fromJson(Map<String, dynamic>.from(json['firstSeenAt'])),
