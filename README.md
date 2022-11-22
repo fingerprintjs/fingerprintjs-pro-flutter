@@ -132,6 +132,14 @@ void doInit() async {
 }
 ```
 
+#### 3.3 Web platform configuration
+
+Add `script` tag with js agent loader inside `head` tag in your html template to use `fpjs_pro_plugin` on web platform.
+
+```html
+<script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
+```
+
 #### 4. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label identification event with additional data
 
 ```dart
