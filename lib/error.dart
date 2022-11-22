@@ -135,6 +135,22 @@ class InvalidResponseTypeError extends FingerprintProError {
       : super('InvalidResponseTypeError', message);
 }
 
+/// Failed to load the JS agent code
+class ScriptLoadFailError extends FingerprintProError {
+  ScriptLoadFailError(String? message) : super('ScriptLoadFailError', message);
+}
+
+/// Blocked by the Content Security Policy of the page
+class CspBlockError extends FingerprintProError {
+  CspBlockError(String? message) : super('CspBlockError', message);
+}
+
+/// Failure on the integration side
+class IntegrationFailureError extends FingerprintProError {
+  IntegrationFailureError(String? message)
+      : super('IntegrationFailureError', message);
+}
+
 /// Other error
 class UnknownError extends FingerprintProError {
   UnknownError(String? message) : super('UnknownError', message);
@@ -143,48 +159,67 @@ class UnknownError extends FingerprintProError {
 FingerprintProError unwrapError(PlatformException error) {
   switch (error.code) {
     case 'InvalidURL':
+    case 'InvalidUrlError':
       return InvalidUrlError(error.message);
     case 'InvalidURLParams':
+    case 'InvalidURLParamsError':
       return InvalidURLParamsError(error.message);
     case 'ApiError':
       return ApiError(error.message);
     // Api Errors block
     case 'ApiKeyRequired':
     case 'TokenRequired':
+    case 'ApiKeyRequiredError':
       return ApiKeyRequiredError(error.message);
     case 'ApiKeyNotFound':
     case 'TokenNotFound':
+    case 'ApiKeyNotFoundError':
       return ApiKeyNotFoundError(error.message);
     case 'ApiKeyExpired':
     case 'TokenExpired':
+    case 'ApiKeyExpiredError':
       return ApiKeyExpiredError(error.message);
     case 'RequestCannotBeParsed':
+    case 'RequestCannotBeParsedError':
       return RequestCannotBeParsedError(error.message);
     case 'Failed':
+    case 'FailedError':
       return FailedError(error.message);
     case 'RequestTimeout':
+    case 'RequestTimeoutError':
       return RequestTimeoutError(error.message);
     case 'TooManyRequest':
+    case 'TooManyRequestError':
       return TooManyRequestError(error.message);
     case 'OriginNotAvailable':
+    case 'OriginNotAvailableError':
       return OriginNotAvailableError(error.message);
     case 'HeaderRestricted':
+    case 'HeaderRestrictedError':
       return HeaderRestrictedError(error.message);
     case 'HostnameRestricted':
+    case 'HostnameRestrictedError':
       return HostnameRestrictedError(error.message);
     case 'NotAvailableForCrawlBots':
+    case 'NotAvailableForCrawlBotsError':
       return NotAvailableForCrawlBotsError(error.message);
     case 'NotAvailableWithoutUA':
+    case 'NotAvailableWithoutUAError':
       return NotAvailableWithoutUAError(error.message);
     case 'WrongRegion':
+    case 'WrongRegionError':
       return WrongRegionError(error.message);
     case 'SubscriptionNotActive':
+    case 'SubscriptionNotActiveError':
       return SubscriptionNotActiveError(error.message);
     case 'UnsupportedVersion':
+    case 'UnsupportedVersionError':
       return UnsupportedVersionError(error.message);
     case 'InstallationMethodRestricted':
+    case 'InstallationMethodRestrictedError':
       return InstallationMethodRestrictedError(error.message);
     case 'ResponseCannotBeParsed':
+    case 'ResponseCannotBeParsedError':
       return ResponseCannotBeParsedError(error.message);
     // end of API Errors block
     case 'NetworkError':
@@ -192,7 +227,14 @@ FingerprintProError unwrapError(PlatformException error) {
     case 'JsonParsingError':
       return JsonParsingError(error.message);
     case 'InvalidResponseType':
+    case 'InvalidResponseTypeError':
       return InvalidResponseTypeError(error.message);
+    case 'ScriptLoadFailError':
+      return ScriptLoadFailError(error.message);
+    case 'CspBlockError':
+      return CspBlockError(error.message);
+    case 'IntegrationFailureError':
+      return IntegrationFailureError(error.message);
     default:
       return UnknownError(error.message);
   }
