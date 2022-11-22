@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
+import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
-import 'package:fpjs_pro_plugin/error.dart';
 
 // Update it on each release
 const pluginVersion = '1.2.2';
