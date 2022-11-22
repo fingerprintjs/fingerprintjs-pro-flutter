@@ -3,7 +3,6 @@ library fingerprint_js;
 
 import 'package:js/js.dart';
 
-
 @JS('FingerprintJS')
 class FingerprintJS {
   external static Future<FingerprintJSAgent> load(FingerprintJSOptions options);
@@ -34,7 +33,8 @@ class FingerprintJSOptions {
   external String? get endpoint;
   external set endpoint(String? endpoint);
 
-  external factory FingerprintJSOptions({String apiKey, List<String> integrationInfo});
+  external factory FingerprintJSOptions(
+      {String apiKey, List<String> integrationInfo});
 }
 
 @JS()
@@ -44,6 +44,8 @@ class FingerprintJSGetOptions {
   external String? get linkedId;
   external bool extendedResult;
 
-  external factory FingerprintJSGetOptions({Map<String, dynamic>? tag, String? linkedId, bool extendedResult = false});
+  external factory FingerprintJSGetOptions(
+      {Map<String, dynamic>? tag,
+      String? linkedId,
+      bool extendedResult = false});
 }
-

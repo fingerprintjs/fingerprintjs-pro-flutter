@@ -11,8 +11,6 @@ import 'package:fpjs_pro_plugin/result.dart';
 
 import 'js_agent_interop.dart';
 
-
-
 /// A web implementation of the FpjsProPlugin plugin.
 class FpjsProPluginWeb {
   static bool _isExtendedResult = false;
@@ -39,24 +37,30 @@ class FpjsProPluginWeb {
         initFpjs(call);
         return;
       case 'getVisitorId':
-        return getVisitorId(linkedId: call.arguments['linkedId'], tags: Map.from(call.arguments['tags']));
+        return getVisitorId(
+            linkedId: call.arguments['linkedId'],
+            tags: Map.from(call.arguments['tags']));
       case 'getVisitorData':
-        return getVisitorData(linkedId: call.arguments['linkedId'], tags: Map.from(call.arguments['tags']));
+        return getVisitorData(
+            linkedId: call.arguments['linkedId'],
+            tags: Map.from(call.arguments['tags']));
       default:
         throw PlatformException(
           code: 'Unimplemented',
-          details: 'fpjs_pro_plugin for web doesn\'t implement \'${call.method}\'',
+          details:
+              'fpjs_pro_plugin for web doesn\'t implement \'${call.method}\'',
         );
     }
   }
-
 
   /// Initializes the native FingerprintJS Pro client
   /// Throws a [PlatformException] if [apiKey] is missing
   static Future<void> initFpjs(MethodCall call) async {
     final options = FingerprintJSOptions(
       apiKey: call.arguments['apiToken'],
-      integrationInfo: ["fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"],
+      integrationInfo: [
+        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"
+      ],
     );
     if (call.arguments['region'] != null) {
       options.region = call.arguments['region'];
@@ -73,13 +77,16 @@ class FpjsProPluginWeb {
   /// Support [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [linkedId](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<String?> getVisitorId({Map<String, dynamic>? tags, String? linkedId}) async {
+  static Future<String?> getVisitorId(
+      {Map<String, dynamic>? tags, String? linkedId}) async {
     if (!_isInitialized) {
-      throw Exception('You need to initialize the FPJS Client first by calling the "initFpjs" method');
+      throw Exception(
+          'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
     FingerprintJSAgent fp = await (_fpPromise as Future<FingerprintJSAgent>);
-    var result = await promiseToFuture(fp.get(FingerprintJSGetOptions(linkedId: linkedId, tag: tags)));
+    var result = await promiseToFuture(
+        fp.get(FingerprintJSGetOptions(linkedId: linkedId, tag: tags)));
     return result.visitorId;
   }
 
@@ -87,13 +94,16 @@ class FpjsProPluginWeb {
   /// Support [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [linkedId](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<List<Object>> getVisitorData({Map<String, dynamic>? tags, String? linkedId}) async {
+  static Future<List<Object>> getVisitorData(
+      {Map<String, dynamic>? tags, String? linkedId}) async {
     if (!_isInitialized) {
-      throw Exception('You need to initialize the FPJS Client first by calling the "initFpjs" method');
+      throw Exception(
+          'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
     FingerprintJSAgent fp = await (_fpPromise as Future<FingerprintJSAgent>);
-    final getOptions = FingerprintJSGetOptions(linkedId: linkedId, tag: tags, extendedResult: _isExtendedResult);
+    final getOptions = FingerprintJSGetOptions(
+        linkedId: linkedId, tag: tags, extendedResult: _isExtendedResult);
     final result = await promiseToFuture(fp.get(getOptions));
 
     FingerprintJSProResponse typedResult;
@@ -105,6 +115,10 @@ class FpjsProPluginWeb {
     }
 
     final serializedResult = typedResult.toJson();
-    return [typedResult.requestId, typedResult.confidenceScore.score, serializedResult];
+    return [
+      typedResult.requestId,
+      typedResult.confidenceScore.score,
+      serializedResult
+    ];
   }
 }

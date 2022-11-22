@@ -48,7 +48,9 @@ class _MyAppState extends State<MyApp> {
         },
         'd': false
       };
-      deviceId = await FpjsProPlugin.getVisitorId(tags: tags, linkedId: 'some linkedId') ?? 'Unknown';
+      deviceId = await FpjsProPlugin.getVisitorId(
+              tags: tags, linkedId: 'some linkedId') ??
+          'Unknown';
     } on FingerprintProError {
       deviceId = 'Failed to get device id.';
     }
@@ -76,7 +78,8 @@ class _MyAppState extends State<MyApp> {
         'd': false
       };
       const encoder = JsonEncoder.withIndent('    ');
-      final deviceData = await FpjsProPlugin.getVisitorData(tags: tags, linkedId: 'some linkedId');
+      final deviceData = await FpjsProPlugin.getVisitorData(
+          tags: tags, linkedId: 'some linkedId');
       identificationInfo = encoder.convert(deviceData);
     } on FingerprintProError catch (error) {
       identificationInfo = "Failed to get device info.\n$error";
@@ -92,23 +95,21 @@ class _MyAppState extends State<MyApp> {
           title: const Text('FPJS Pro Flutter plugin'),
         ),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () => _getDeviceId(),
-                child: const Text('Identify!')),
-              Text('The device id is: $_deviceId\n'),
-              _ExtendedResultDialog(handleIdentificate: _getDeviceData)
-          ])
-        ),
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          ElevatedButton(
+              onPressed: () => _getDeviceId(), child: const Text('Identify!')),
+          Text('The device id is: $_deviceId\n'),
+          _ExtendedResultDialog(handleIdentificate: _getDeviceData)
+        ])),
       ),
     );
   }
 }
 
 class _ExtendedResultDialog extends StatelessWidget {
-  const _ExtendedResultDialog({Key? key, required this.handleIdentificate}) : super(key: key);
+  const _ExtendedResultDialog({Key? key, required this.handleIdentificate})
+      : super(key: key);
 
   final AsyncCallback handleIdentificate;
 
@@ -117,21 +118,21 @@ class _ExtendedResultDialog extends StatelessWidget {
     return ElevatedButton(
       onPressed: () => {
         handleIdentificate().then((identificationInfo) => showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: const Text('Extended result'),
-            content: FittedBox(
-              fit: BoxFit.contain,
-              child: Text(identificationInfo as String),
-            ),
-            actions: <Widget>[
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK'),
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Extended result'),
+                content: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(identificationInfo as String),
+                ),
+                actions: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, 'OK'),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ))
+            ))
       },
       child: const Text('Identify with extended result!'),
     );

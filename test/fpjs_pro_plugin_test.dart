@@ -11,9 +11,7 @@ void main() {
   const requestId = 'test_request_id';
   const linkedId = 'test_linked_id';
   const confidence = 0.09;
-  const extendedResultAsJson = {
-    'visitorId': testVisitorId
-  };
+  const extendedResultAsJson = {'visitorId': testVisitorId};
   final extendedResultAsJsonString = jsonEncode(extendedResultAsJson);
   const getVisitorDataResponse = {
     "requestId": "test_request_id",
@@ -35,7 +33,6 @@ void main() {
   });
 
   group('getVisitorId', () {
-
     setUp(() {
       channel.setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorId') {

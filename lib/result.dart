@@ -12,8 +12,7 @@ class FingerprintJSProResponse {
         confidenceScore = ConfidenceScore(confidence),
         errorMessage = json['errorMessage'];
 
-  FingerprintJSProResponse.fromJsObject(
-      dynamic jsObject)
+  FingerprintJSProResponse.fromJsObject(dynamic jsObject)
       : visitorId = jsObject.visitorId,
         requestId = jsObject.requestId,
         confidenceScore = ConfidenceScore(jsObject.confidence.score),
@@ -50,16 +49,18 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
       Map<String, dynamic> json, String requestId, num confidence)
       : visitorFound = json['visitorFound'],
         ipAddress = json['ip'] is String ? json['ip'] : json['ipAddress'],
-        ipLocation = IpLocation.fromJson(Map<String, dynamic>.from(json['ipLocation'])),
+        ipLocation =
+            IpLocation.fromJson(Map<String, dynamic>.from(json['ipLocation'])),
         osName = json['os'] is String ? json['os'] : json['osName'],
         osVersion = json['osVersion'],
         device = json['device'],
-        firstSeenAt = StSeenAt.fromJson(Map<String, dynamic>.from(json['firstSeenAt'])),
-        lastSeenAt = StSeenAt.fromJson(Map<String, dynamic>.from(json['lastSeenAt'])),
+        firstSeenAt =
+            StSeenAt.fromJson(Map<String, dynamic>.from(json['firstSeenAt'])),
+        lastSeenAt =
+            StSeenAt.fromJson(Map<String, dynamic>.from(json['lastSeenAt'])),
         super.fromJson(json, requestId, confidence);
 
-  FingerprintJSProExtendedResponse.fromJsObject(
-      dynamic jsObject)
+  FingerprintJSProExtendedResponse.fromJsObject(dynamic jsObject)
       : visitorFound = jsObject.visitorFound,
         ipAddress = jsObject.ip,
         ipLocation = IpLocation.fromJsObject(jsObject.ipLocation),
@@ -121,9 +122,11 @@ class IpLocation {
         timezone = json['timezone'],
         city = City.fromJson(Map<String, dynamic>.from(json['city'])),
         country = Country.fromJson(Map<String, dynamic>.from(json['country'])),
-        continent = Continent.fromJson(Map<String, dynamic>.from(json['continent'])),
+        continent =
+            Continent.fromJson(Map<String, dynamic>.from(json['continent'])),
         subdivisions = List<Subdivision>.from((json['subdivisions'] as List)
-            .map((subdivision) => Subdivision.fromJson(Map<String, dynamic>.from(subdivision))));
+            .map((subdivision) =>
+                Subdivision.fromJson(Map<String, dynamic>.from(subdivision))));
 
   IpLocation.fromJsObject(dynamic jsObject)
       : accuracyRadius = jsObject.accuracyRadius,
@@ -160,7 +163,7 @@ class City {
 
   City.fromJson(Map<String, dynamic> json) : name = json['name'];
 
-  City.fromJsObject(dynamic jsObject): name = jsObject.name;
+  City.fromJsObject(dynamic jsObject) : name = jsObject.name;
 
   Map toJson() {
     Map fromObject = {

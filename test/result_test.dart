@@ -16,24 +16,25 @@ void main() {
 
       extendedJsonMock = {
         "requestId": requestId,
-        "confidenceScore": {
-          "score": confidence
-        },
+        "confidenceScore": {"score": confidence},
         "errorMessage": null
       };
       extendedJsonMock.addAll(jsonMock);
     });
 
     test('Check success scenario with full data', () {
-      final responseInstance = FingerprintJSProResponse.fromJson(jsonMock, requestId, confidence);
+      final responseInstance =
+          FingerprintJSProResponse.fromJson(jsonMock, requestId, confidence);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
     test('Check failed scenario with silly data', () {
       jsonMock.remove("visitorId");
-      expect(() => FingerprintJSProResponse.fromJson(jsonMock, requestId, confidence), throwsA(isA<TypeError>()));
+      expect(
+          () => FingerprintJSProResponse.fromJson(
+              jsonMock, requestId, confidence),
+          throwsA(isA<TypeError>()));
     });
-
   });
 
   group('FingerprintJSProExtendedResponse', () {
@@ -73,9 +74,7 @@ void main() {
 
       extendedJsonMock = {
         "requestId": requestId,
-        "confidenceScore": {
-          "score": confidence
-        },
+        "confidenceScore": {"score": confidence},
         "errorMessage": null,
         "ipAddress": jsonMock["ip"],
         "osName": jsonMock["os"]
@@ -86,15 +85,15 @@ void main() {
     });
 
     test('Check success scenario with full data', () {
-      final responseInstance = FingerprintJSProExtendedResponse.fromJson(jsonMock, requestId, confidence);
+      final responseInstance = FingerprintJSProExtendedResponse.fromJson(
+          jsonMock, requestId, confidence);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
-    test('Check success scenario with nulled fileds of `lastSeenAt` and `firstSeenAt`', () {
-      const seenAt = {
-        'global': null,
-        'subscription': null
-      };
+    test(
+        'Check success scenario with nulled fileds of `lastSeenAt` and `firstSeenAt`',
+        () {
+      const seenAt = {'global': null, 'subscription': null};
 
       jsonMock["firstSeenAt"] = seenAt;
       jsonMock["lastSeenAt"] = seenAt;
@@ -102,21 +101,25 @@ void main() {
       extendedJsonMock["firstSeenAt"] = seenAt;
       extendedJsonMock["lastSeenAt"] = seenAt;
 
-      final responseInstance = FingerprintJSProExtendedResponse.fromJson(jsonMock, requestId, confidence);
+      final responseInstance = FingerprintJSProExtendedResponse.fromJson(
+          jsonMock, requestId, confidence);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
-
     test('Check failed scenario with missed `visitorId`', () {
       jsonMock.remove("visitorId");
-      expect(() => FingerprintJSProExtendedResponse.fromJson(jsonMock, requestId, confidence), throwsA(isA<TypeError>()));
+      expect(
+          () => FingerprintJSProExtendedResponse.fromJson(
+              jsonMock, requestId, confidence),
+          throwsA(isA<TypeError>()));
     });
 
     test('Check failed scenario with missed `ipLocation`', () {
       jsonMock.remove("ipLocation");
-      expect(() => FingerprintJSProExtendedResponse.fromJson(jsonMock, requestId, confidence), throwsA(isA<TypeError>()));
+      expect(
+          () => FingerprintJSProExtendedResponse.fromJson(
+              jsonMock, requestId, confidence),
+          throwsA(isA<TypeError>()));
     });
-
   });
-
 }
