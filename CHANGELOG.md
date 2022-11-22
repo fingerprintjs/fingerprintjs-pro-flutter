@@ -1,3 +1,8 @@
+## 1.2.3-dev.1
+
+### New Features
+* Added support for web platform 
+
 ## 1.2.2
 
 ### New Features
