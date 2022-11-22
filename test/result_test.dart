@@ -121,5 +121,22 @@ void main() {
               jsonMock, requestId, confidence),
           throwsA(isA<TypeError>()));
     });
+
+    test('Check serialization and deserialization', () {
+      final instance = FingerprintJSProExtendedResponse.fromJson(
+          jsonMock, requestId, confidence);
+      final serializedInstance = Map<String, dynamic>.from(instance.toJson());
+      final deSerializedInstance = FingerprintJSProExtendedResponse.fromJson(
+          serializedInstance, requestId, confidence);
+      expect(deSerializedInstance.toJson(), extendedJsonMock);
+    });
+
+    test('Check `fromJson()` work for web data', () {
+      jsonMock['ipAddress'] = '8.8.8.8';
+      jsonMock['osName'] = 'iOS';
+
+      jsonMock.remove('ip');
+      jsonMock.remove('os');
+    });
   });
 }
