@@ -46,7 +46,7 @@ dependencies:
   flutter:
     sdk: flutter
   ...
-  fpjs_pro_plugin: ^1.2.3-dev.1
+  fpjs_pro_plugin: ^1.2.3-dev.2
 ```
 
 Run `pub get` to download and install the package.

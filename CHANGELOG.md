@@ -1,3 +1,8 @@
+## 1.2.3-dev.2
+
+### Bug Fixes
+* Fix empty tag in methods `getVisitorId` and `getVisitorData` for web platform
+
 ## 1.2.3-dev.1
 
 ### New Features
