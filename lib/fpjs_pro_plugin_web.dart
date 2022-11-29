@@ -42,11 +42,11 @@ class FpjsProPluginWeb {
       case 'getVisitorId':
         return getVisitorId(
             linkedId: call.arguments['linkedId'],
-            tags: Map.from(call.arguments['tags'] ?? {}));
+            tags: getTags(call.arguments['tags']));
       case 'getVisitorData':
         return getVisitorData(
             linkedId: call.arguments['linkedId'],
-            tags: Map.from(call.arguments['tags'] ?? {}));
+            tags: getTags(call.arguments['tags']));
       default:
         throw PlatformException(
           code: 'Unimplemented',
@@ -84,8 +84,7 @@ class FpjsProPluginWeb {
   /// Support [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [linkedId](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<String?> getVisitorId(
-      {Map<String, dynamic>? tags, String? linkedId}) async {
+  static Future<String?> getVisitorId({Object? tags, String? linkedId}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
@@ -106,7 +105,7 @@ class FpjsProPluginWeb {
   /// Support [linkedId](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Throws a [FingerprintProError] if identification request fails for any reason
   static Future<List<Object>> getVisitorData(
-      {Map<String, dynamic>? tags, String? linkedId}) async {
+      {Object? tags, String? linkedId}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
@@ -115,12 +114,14 @@ class FpjsProPluginWeb {
       FingerprintJSAgent fp = await (_fpPromise as Future<FingerprintJSAgent>);
       final getOptions = FingerprintJSGetOptions(
           linkedId: linkedId, tag: tags, extendedResult: _isExtendedResult);
-      final result = await promiseToFuture(fp.get(getOptions));
+      final IdentificationResult result =
+          await promiseToFuture(fp.get(getOptions));
 
       FingerprintJSProResponse typedResult;
 
       if (_isExtendedResult) {
-        typedResult = FingerprintJSProExtendedResponse.fromJsObject(result);
+        typedResult = FingerprintJSProExtendedResponse.fromJsObject(
+            result as IdentificationExtendedResult);
       } else {
         typedResult = FingerprintJSProResponse.fromJsObject(result);
       }
@@ -135,4 +136,8 @@ class FpjsProPluginWeb {
       throw unwrapWebError(e as WebException);
     }
   }
+}
+
+Object? getTags(Object? tags) {
+  return tags != null ? jsify(tags) : null;
 }

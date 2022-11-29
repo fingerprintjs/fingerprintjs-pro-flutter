@@ -42,6 +42,75 @@ class FingerprintJSAgent {
 class IdentificationResult {
   external String visitorId;
   external String requestId;
+  external IdentificationResultConfidenceScore confidence;
+  external String? errorMessage;
+}
+
+@JS()
+@anonymous
+class IdentificationExtendedResult extends IdentificationResult {
+  external bool visitorFound;
+  external String ip;
+  external IdentificationResultIpLocation? ipLocation;
+  external String os;
+  external String osVersion;
+  external String device;
+  external IdentificationResultStSeenAt firstSeenAt;
+  external IdentificationResultStSeenAt lastSeenAt;
+}
+
+@JS()
+@anonymous
+class IdentificationResultConfidenceScore {
+  external num score;
+}
+
+@JS()
+@anonymous
+class IdentificationResultIpLocation {
+  external num accuracyRadius;
+  external num latitude;
+  external num longitude;
+  external String postalCode;
+  external String timezone;
+  external IdentificationResultCity city;
+  external IdentificationResultCountry country;
+  external IdentificationResultContinent continent;
+  external List<IdentificationResultSubdivision> subdivisions;
+}
+
+@JS()
+@anonymous
+class IdentificationResultCity {
+  external String name;
+}
+
+@JS()
+@anonymous
+class IdentificationResultCountry {
+  external String code;
+  external String name;
+}
+
+@JS()
+@anonymous
+class IdentificationResultContinent {
+  external String code;
+  external String name;
+}
+
+@JS()
+@anonymous
+class IdentificationResultSubdivision {
+  external String isoCode;
+  external String name;
+}
+
+@JS()
+@anonymous
+class IdentificationResultStSeenAt {
+  external String? global;
+  external String? subscription;
 }
 
 @JS()
@@ -68,9 +137,7 @@ class FingerprintJSGetOptions {
   external bool extendedResult;
 
   external factory FingerprintJSGetOptions(
-      {Map<String, dynamic>? tag,
-      String? linkedId,
-      bool extendedResult = false});
+      {Object? tag, String? linkedId, bool extendedResult = false});
 }
 
 @JS()
