@@ -1,3 +1,8 @@
+## 1.2.3-dev.3
+
+### Bug Fixes
+* Fix js interop problems in dart2js environment
+
 ## 1.2.3-dev.2
 
 ### Bug Fixes
