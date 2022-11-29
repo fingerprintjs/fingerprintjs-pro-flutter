@@ -42,11 +42,11 @@ class FpjsProPluginWeb {
       case 'getVisitorId':
         return getVisitorId(
             linkedId: call.arguments['linkedId'],
-            tags: Map.from(call.arguments['tags']));
+            tags: Map.from(call.arguments['tags'] ?? {}));
       case 'getVisitorData':
         return getVisitorData(
             linkedId: call.arguments['linkedId'],
-            tags: Map.from(call.arguments['tags']));
+            tags: Map.from(call.arguments['tags'] ?? {}));
       default:
         throw PlatformException(
           code: 'Unimplemented',
