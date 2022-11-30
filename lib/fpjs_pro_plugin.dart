@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
+import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
-import 'package:fpjs_pro_plugin/error.dart';
 
 // Update it on each release
-const pluginVersion = '1.2.2';
+const pluginVersion = '1.3.0';
 
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
@@ -22,7 +23,9 @@ class FpjsProPlugin {
   /// Initializes the native FingerprintJS Pro client
   /// Throws a [PlatformException] if [apiKey] is missing
   static Future<void> initFpjs(String apiKey,
-      {String? endpoint, Region? region, bool extendedResponseFormat = false}) async {
+      {String? endpoint,
+      Region? region,
+      bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
       'apiToken': apiKey,
       'endpoint': endpoint,
@@ -38,19 +41,18 @@ class FpjsProPlugin {
   /// Support [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [linkedId](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<String?> getVisitorId({Map<String, dynamic>? tags, String? linkedId}) async {
+  static Future<String?> getVisitorId(
+      {Map<String, dynamic>? tags, String? linkedId}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
     try {
-      final String? visitorId = await _channel.invokeMethod('getVisitorId', {
-        'linkedId': linkedId,
-        'tags': tags
-      });
+      final String? visitorId = await _channel
+          .invokeMethod('getVisitorId', {'linkedId': linkedId, 'tags': tags});
       return visitorId;
-    } on PlatformException catch(exception) {
+    } on PlatformException catch (exception) {
       throw unwrapError(exception);
     }
   }
@@ -59,31 +61,36 @@ class FpjsProPlugin {
   /// Support [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [linkedId](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<T> getVisitorData<T extends FingerprintJSProResponse>({Map<String, dynamic>? tags, String? linkedId}) async {
+  static Future<T> getVisitorData<T extends FingerprintJSProResponse>(
+      {Map<String, dynamic>? tags, String? linkedId}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
     try {
-      final visitorDataTuple = await _channel.invokeMethod('getVisitorData', {
-        'linkedId': linkedId,
-        'tags': tags
-      });
+      final visitorDataTuple = await _channel
+          .invokeMethod('getVisitorData', {'linkedId': linkedId, 'tags': tags});
 
       final String requestId = visitorDataTuple[0];
       final num confidence = visitorDataTuple[1];
-      final String visitorDataJsonString = visitorDataTuple[2];
-      final visitorDataJson = jsonDecode(visitorDataJsonString);
+
+      Map<String, dynamic> visitorDataJson;
+      if (kIsWeb) {
+        visitorDataJson = Map<String, dynamic>.from(visitorDataTuple[2]);
+      } else {
+        final String visitorDataJsonString = visitorDataTuple[2];
+        visitorDataJson = jsonDecode(visitorDataJsonString);
+      }
 
       final visitorData = _isExtendedResult
           ? FingerprintJSProExtendedResponse.fromJson(
-          visitorDataJson, requestId, confidence)
+              visitorDataJson, requestId, confidence)
           : FingerprintJSProResponse.fromJson(
-          visitorDataJson, requestId, confidence);
+              visitorDataJson, requestId, confidence);
 
       return visitorData as T;
-    } on PlatformException catch(exception) {
+    } on PlatformException catch (exception) {
       throw unwrapError(exception);
     }
   }

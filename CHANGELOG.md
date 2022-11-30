@@ -1,3 +1,26 @@
+## 1.3.0
+
+### New Features
+* Added support for web platform
+
+### Bug Fixes
+* Fix empty tag in methods `getVisitorId` and `getVisitorData` for web platform
+
+## 1.2.3-dev.3
+
+### Bug Fixes
+* Fix js interop problems in dart2js environment
+
+## 1.2.3-dev.2
+
+### Bug Fixes
+* Fix empty tag in methods `getVisitorId` and `getVisitorData` for web platform
+
+## 1.2.3-dev.1
+
+### New Features
+* Added support for web platform 
+
 ## 1.2.2
 
 ### New Features

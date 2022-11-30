@@ -46,7 +46,7 @@ dependencies:
   flutter:
     sdk: flutter
   ...
-  fpjs_pro_plugin: ^1.2.2
+  fpjs_pro_plugin: ^1.3.0
 ```
 
 Run `pub get` to download and install the package.
@@ -130,6 +130,14 @@ Provide `extendedResponseFormat=true` to the `initFpjs` function to get extended
 void doInit() async {
   await FpjsProPlugin.initFpjs('<apiKey>', extendedResponseFormat: true);
 }
+```
+
+#### 3.3 Web platform configuration
+
+Add `script` tag with js agent loader inside `head` tag in your html template to use `fpjs_pro_plugin` on web platform.
+
+```html
+<script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
 ```
 
 #### 4. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label identification event with additional data

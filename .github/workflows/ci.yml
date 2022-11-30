@@ -15,7 +15,7 @@ jobs:
       - name: Install and set Flutter version
         uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
         with:
-          flutter-version: '2.10.0'
+          flutter-version: '3.3.8'
       - name: Restore packages
         run: flutter pub get
       - name: Create .env.local
