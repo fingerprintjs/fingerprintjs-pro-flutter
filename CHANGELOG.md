@@ -1,3 +1,11 @@
+## 1.3.0
+
+### New Features
+* Added support for web platform
+
+### Bug Fixes
+* Fix empty tag in methods `getVisitorId` and `getVisitorData` for web platform
+
 ## 1.2.3-dev.3
 
 ### Bug Fixes

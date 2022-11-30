@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'fpjs_pro_plugin'
-  s.version          = '1.2.3-dev.3'
+  s.version          = '1.3.0'
   s.summary          = 'Flutter plugin for FingerprintJS Pro.'
   s.description      = <<-DESC
 Flutter plugin for FingerprintJS Pro.
