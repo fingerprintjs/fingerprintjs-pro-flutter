@@ -1,3 +1,8 @@
+## 1.4.0-dev.1
+
+### New Features
+* Added support for proxy integrations
+
 ## 1.3.0
 
 ### New Features
