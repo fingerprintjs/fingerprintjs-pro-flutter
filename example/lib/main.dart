@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fpjs_pro_plugin/region.dart';
 
 const tags = {
   'a': 'a',
@@ -33,6 +34,14 @@ class _MyAppState extends State<MyApp> {
   String _deviceId = 'Unknown';
   String _checksResult = 'Not runned';
   final String _apiKey = dotenv.env['API_KEY'] ?? 'test_api_key';
+  final bool _useProxyIntegration = dotenv.env['PROXY_INTEGRATION_PATH'] != '';
+  final String _proxyIntegrationPath =
+      dotenv.env['PROXY_INTEGRATION_PATH'] ?? 'no_proxy_integration';
+  final String _proxyIntegrationRequestPath =
+      dotenv.env['PROXY_INTEGRATION_REQUEST_PATH'] ?? 'no_proxy_integration';
+  final String? _proxyIntegrationScriptPath =
+      dotenv.env['PROXY_INTEGRATION_SCRIPT_PATH'] ?? 'no_proxy_integration';
+  final String _region = dotenv.env['REGION'] ?? 'us';
 
   @override
   void initState() {
@@ -40,8 +49,34 @@ class _MyAppState extends State<MyApp> {
     _initFpjs(_apiKey);
   }
 
+  Region? _parseRegion(String region) {
+    switch (region) {
+      case 'us':
+        return Region.us;
+      case 'eu':
+        return Region.eu;
+      case 'ap':
+        return Region.ap;
+    }
+    return null;
+  }
+
   Future<void> _initFpjs(String apiToken) async {
-    await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true);
+    if (_useProxyIntegration) {
+      final region = _parseRegion(_region);
+      final regionQueryParam = (region != null && region != Region.us)
+          ? "?region=${region.stringValue}"
+          : '';
+      await FpjsProPlugin.initFpjs(apiToken,
+          extendedResponseFormat: true,
+          endpoint:
+              "$_proxyIntegrationPath/$_proxyIntegrationRequestPath$regionQueryParam",
+          scriptUrlPattern:
+              "$_proxyIntegrationPath/$_proxyIntegrationScriptPath",
+          region: region);
+    } else {
+      await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true);
+    }
   }
 
   /// The native FingerprintJS libraries expose a method called `getVisitorId`

@@ -71,6 +71,9 @@ class FpjsProPluginWeb {
     if (call.arguments['endpoint'] != null) {
       options.endpoint = call.arguments['endpoint'];
     }
+    if (call.arguments['scriptUrlPattern'] != null) {
+      options.scriptUrlPattern = call.arguments['scriptUrlPattern'];
+    }
     try {
       _fpPromise = promiseToFuture(FingerprintJS.load(options));
       _isExtendedResult = call.arguments['extendedResponseFormat'];

@@ -24,11 +24,13 @@ class FpjsProPlugin {
   /// Throws a [PlatformException] if [apiKey] is missing
   static Future<void> initFpjs(String apiKey,
       {String? endpoint,
+      String? scriptUrlPattern,
       Region? region,
       bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
       'apiToken': apiKey,
       'endpoint': endpoint,
+      'scriptUrlPattern': scriptUrlPattern,
       'region': region?.stringValue,
       'extendedResponseFormat': extendedResponseFormat,
       'pluginVersion': pluginVersion,

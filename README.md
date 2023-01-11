@@ -77,6 +77,14 @@ void doInit() async {
 }
 ```
 
+For web platform it is additional `scriptUrlPattern` property as for JavaScript Agent.
+```dart
+void doInit() async {
+  await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://your.domain/request_path', region: 'eu',
+      scriptUrlPattern: 'https://your.domain/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>');
+}
+```
+
 #### 3. Use the plugin in your application code to identify a visitor
 
 ##### 3.1 Use the `getVisitorId` method if you need a `visitorId` only: 
