@@ -104,15 +104,15 @@ class ConfidenceScore {
 }
 
 class IpLocation {
-  final num accuracyRadius;
-  final num latitude;
-  final num longitude;
-  final String postalCode;
-  final String timezone;
-  final City city;
-  final Country country;
-  final Continent continent;
-  final List<Subdivision> subdivisions;
+  final num? accuracyRadius;
+  final num? latitude;
+  final num? longitude;
+  final String? postalCode;
+  final String? timezone;
+  final City? city;
+  final Country? country;
+  final Continent? continent;
+  final List<Subdivision>? subdivisions;
 
   IpLocation.fromJson(Map<String, dynamic> json)
       : accuracyRadius = json['accuracyRadius'],
@@ -120,13 +120,20 @@ class IpLocation {
         longitude = json['longitude'],
         postalCode = json['postalCode'],
         timezone = json['timezone'],
-        city = City.fromJson(Map<String, dynamic>.from(json['city'])),
-        country = Country.fromJson(Map<String, dynamic>.from(json['country'])),
-        continent =
-            Continent.fromJson(Map<String, dynamic>.from(json['continent'])),
-        subdivisions = List<Subdivision>.from((json['subdivisions'] as List)
-            .map((subdivision) =>
-                Subdivision.fromJson(Map<String, dynamic>.from(subdivision))));
+        city = json['city'] != null
+            ? City.fromJson(Map<String, dynamic>.from(json['city']))
+            : null,
+        country = json['country'] != null
+            ? Country.fromJson(Map<String, dynamic>.from(json['country']))
+            : null,
+        continent = json['continent'] != null
+            ? Continent.fromJson(Map<String, dynamic>.from(json['continent']))
+            : null,
+        subdivisions = json['subdivisions'] != null
+            ? List<Subdivision>.from((json['subdivisions'] as List).map(
+                (subdivision) => Subdivision.fromJson(
+                    Map<String, dynamic>.from(subdivision))))
+            : null;
 
   IpLocation.fromJsObject(dynamic jsObject)
       : accuracyRadius = jsObject.accuracyRadius,
@@ -147,12 +154,14 @@ class IpLocation {
       "longitude": longitude,
       "postalCode": postalCode,
       "timezone": timezone,
-      "city": city.toJson(),
-      "country": country.toJson(),
-      "continent": continent.toJson(),
+      "city": city?.toJson(),
+      "country": country?.toJson(),
+      "continent": continent?.toJson(),
       "subdivisions":
-          subdivisions.map((subdivision) => subdivision.toJson()).toList(),
+          subdivisions?.map((subdivision) => subdivision.toJson()).toList(),
     };
+
+    fromObject.removeWhere((key, value) => value == null);
 
     return fromObject;
   }
