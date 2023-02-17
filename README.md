@@ -73,15 +73,20 @@ You can also configure `region` and `endpoint` in the `initFpjs` method, like be
 void doInit() async {
   await FpjsProPlugin.initFpjs('<apiKey>');
   await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
-  await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
+  await FpjsProPlugin.initFpjs('<apiKey>', region: Region.eu);
 }
 ```
 
-For web platform it is additional `scriptUrlPattern` property as for JavaScript Agent.
+For web platform it is additional `scriptUrlPattern` property as for JavaScript Agent. You should use it for proxy integrations.
 ```dart
 void doInit() async {
-  await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://your.domain/request_path', region: 'eu',
-      scriptUrlPattern: 'https://your.domain/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>');
+  const region = Region.eu;
+  await FpjsProPlugin.initFpjs(
+    '<apiKey>',
+    endpoint: "https://your.domain/fp_js/request_path?region=${region.stringValue}",
+    region: region,
+    scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>'
+  );
 }
 ```
 
