@@ -77,7 +77,7 @@ void doInit() async {
 }
 ```
 
-For web platform it is additional `scriptUrlPattern` property as for JavaScript Agent. You should use it for proxy integrations.
+For the web platform, you can use an additional `scriptUrlPattern` property to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
 ```dart
 void doInit() async {
   const region = Region.eu;
