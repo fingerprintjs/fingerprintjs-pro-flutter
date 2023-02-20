@@ -8,7 +8,7 @@ import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 
 // Update it on each release
-const pluginVersion = '1.3.0';
+const pluginVersion = '1.4.0';
 
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
@@ -24,11 +24,13 @@ class FpjsProPlugin {
   /// Throws a [PlatformException] if [apiKey] is missing
   static Future<void> initFpjs(String apiKey,
       {String? endpoint,
+      String? scriptUrlPattern,
       Region? region,
       bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
       'apiToken': apiKey,
       'endpoint': endpoint,
+      'scriptUrlPattern': scriptUrlPattern,
       'region': region?.stringValue,
       'extendedResponseFormat': extendedResponseFormat,
       'pluginVersion': pluginVersion,

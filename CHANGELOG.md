@@ -1,3 +1,17 @@
+## 1.4.0
+
+### New Features
+* Add support for proxy integrations
+* Add `scriptUrlPattern` param for web platform
+
+### Bug Fixes
+* Make all `IpLocation` fields nullable
+
+## 1.4.0-dev.1
+
+### New Features
+* Added support for proxy integrations
+
 ## 1.3.0
 
 ### New Features

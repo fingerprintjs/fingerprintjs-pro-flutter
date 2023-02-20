@@ -125,6 +125,9 @@ class FingerprintJSOptions {
   external String? get endpoint;
   external set endpoint(String? endpoint);
 
+  external String? get scriptUrlPattern;
+  external set scriptUrlPattern(String? scriptUrlPattern);
+
   external factory FingerprintJSOptions(
       {String apiKey, List<String> integrationInfo});
 }

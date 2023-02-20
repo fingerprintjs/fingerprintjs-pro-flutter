@@ -46,7 +46,7 @@ dependencies:
   flutter:
     sdk: flutter
   ...
-  fpjs_pro_plugin: ^1.3.0
+  fpjs_pro_plugin: ^1.4.0
 ```
 
 Run `pub get` to download and install the package.
@@ -73,7 +73,20 @@ You can also configure `region` and `endpoint` in the `initFpjs` method, like be
 void doInit() async {
   await FpjsProPlugin.initFpjs('<apiKey>');
   await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
-  await FpjsProPlugin.initFpjs('<apiKey>', region: 'eu');
+  await FpjsProPlugin.initFpjs('<apiKey>', region: Region.eu);
+}
+```
+
+For the web platform, you can use an additional `scriptUrlPattern` property to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
+```dart
+void doInit() async {
+  const region = Region.eu;
+  await FpjsProPlugin.initFpjs(
+    '<apiKey>',
+    endpoint: "https://your.domain/fp_js/request_path?region=${region.stringValue}",
+    region: region,
+    scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>'
+  );
 }
 ```
 

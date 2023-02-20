@@ -137,6 +137,18 @@ void main() {
 
       jsonMock.remove('ip');
       jsonMock.remove('os');
+
+      final responseInstance = FingerprintJSProExtendedResponse.fromJson(
+          jsonMock, requestId, confidence);
+      expect(responseInstance.toJson(), extendedJsonMock);
+    });
+
+    test('Check success scenario with empty fields for ipLocation', () {
+      jsonMock['ipLocation'] = {};
+      extendedJsonMock['ipLocation'] = {};
+      final responseInstance = FingerprintJSProExtendedResponse.fromJson(
+          jsonMock, requestId, confidence);
+      expect(responseInstance.toJson(), extendedJsonMock);
     });
   });
 }
