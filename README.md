@@ -29,7 +29,7 @@ This plugin can be used in a Flutter application to call the native FingerprintJ
 
 FingerprintJS Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
 
-Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [api key](https://dev.fingerprint.com/docs). 
+Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [API key](https://dev.fingerprint.com/docs). 
 
 Native libraries used under the hood:
 - [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
@@ -60,31 +60,27 @@ import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 // Initialization
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() async {
+  void initState() {
     super.initState();
-    await FpjsProPlugin.initFpjs('<apiKey>'); // insert your actual API key here
+    doInit();
+  }
+  
+  void doInit() async {
+    await FpjsProPlugin.initFpjs(
+      '<apiKey>' // insert your actual API key here
+    );
   }
   // ...
 }
 ```
 
-You can also configure `region` and `endpoint` in the `initFpjs` method, like below:
+You can also configure `region` and `endpoint` in the `initFpjs` method, like below. For the web platform, you can use an additional `scriptUrlPattern` property to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
 ```dart
 void doInit() async {
-  await FpjsProPlugin.initFpjs('<apiKey>');
-  await FpjsProPlugin.initFpjs('<apiKey>', endpoint: 'https://subdomain.domain.com');
-  await FpjsProPlugin.initFpjs('<apiKey>', region: Region.eu);
-}
-```
-
-For the web platform, you can use an additional `scriptUrlPattern` property to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
-```dart
-void doInit() async {
-  const region = Region.eu;
   await FpjsProPlugin.initFpjs(
     '<apiKey>',
-    endpoint: "https://your.domain/fp_js/request_path?region=${region.stringValue}",
-    region: region,
+    endpoint: 'https://subdomain.domain.com',
+    region: Region.eu, // or Region.ap, Region.us
     scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>'
   );
 }
