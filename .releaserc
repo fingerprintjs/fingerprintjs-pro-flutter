@@ -118,6 +118,7 @@
           "lib/fpjs_pro_plugin.dart"
         ]
       }
-    ]
+    ],
+    "@semantic-release/github"
   ]
 }
