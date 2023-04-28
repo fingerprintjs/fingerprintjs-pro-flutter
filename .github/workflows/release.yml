@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - add-automated-releases
+      - test
 jobs:
   release:
     name: Release
