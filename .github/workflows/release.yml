@@ -33,5 +33,7 @@ jobs:
             conventional-changelog-conventionalcommits@5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish - dry run
+        run: dart pub publish --dry-run
       - name: Publish to pub
         run: dart pub publish -f
