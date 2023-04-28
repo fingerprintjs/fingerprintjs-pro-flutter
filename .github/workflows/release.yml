@@ -33,7 +33,3 @@ jobs:
             conventional-changelog-conventionalcommits@5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish
-        uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-        with:
-          environment: 'production'
