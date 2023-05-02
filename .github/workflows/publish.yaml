@@ -8,6 +8,20 @@ on:
 
 jobs:
   publish:
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      environment: 'production'
+    name: Publish
+    runs-on: ubuntu-latest
+    environment: 'production'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      # This action adds a token needed for pub.dev
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          flutter-version: '3.3.8'
+      - name: Publish to pub.dev
+        run: flutter pub publish --force
