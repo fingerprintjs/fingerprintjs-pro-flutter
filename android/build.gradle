@@ -1,5 +1,5 @@
 group 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
-version '1.4.1'
+version '1.4.1-test.1'
 
 buildscript {
     ext.kotlin_version = '1.6.10'
