@@ -116,7 +116,8 @@
           "ios/fpjs_pro_plugin.podspec",
           "android/build.gradle",
           "lib/fpjs_pro_plugin.dart"
-        ]
+        ],
+        "message": "chore(release): ${nextRelease.version} \\n\\n${nextRelease.notes}"
       }
     ],
     "@semantic-release/github"
