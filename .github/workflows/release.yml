@@ -9,11 +9,18 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
+      # This action adds a token needed for pub.dev
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
       - name: Install and set Flutter version
         uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
         with:
@@ -35,3 +42,5 @@ jobs:
             conventional-changelog-conventionalcommits@5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
+      - name: Publish to pub.dev
+        run: flutter pub publish --force
