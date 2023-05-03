@@ -1,3 +1,11 @@
+## [1.5.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.4.1...v1.5.0) (2023-05-03)
+
+
+### Features
+
+* bump android to 2.3.1 ([7bd0f4a](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/7bd0f4af3d2be5e374bee2a3a4fa3240cbbfbc9e))
+* update pubspec.lock ([7d86a88](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/7d86a8896064764fc7ece1fef67c6fd9a8ea44c1))
+
 ## [1.4.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.4.0...v1.4.1) (2023-05-03)
 
 
