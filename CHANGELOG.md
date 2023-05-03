@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.4.0...v1.4.1) (2023-05-03)
+
+
+### Bug Fixes
+
+* update Android agent to 2.3.0 ([f204bd0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/f204bd0bfcdb82ba9be95f7c4b2747c86a0d5aab))
+
 ## [1.4.1-test.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.4.0...v1.4.1-test.1) (2023-05-03)
 
 
