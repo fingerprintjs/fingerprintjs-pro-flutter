@@ -16,8 +16,7 @@ void main() {
   const getVisitorDataResponse = {
     "requestId": "test_request_id",
     "visitorId": "test_visitor_id",
-    "confidenceScore": {"score": 0.09},
-    "errorMessage": null
+    "confidenceScore": {"score": 0.09}
   };
 
   TestWidgetsFlutterBinding.ensureInitialized();

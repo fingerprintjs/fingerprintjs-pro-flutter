@@ -16,8 +16,7 @@ void main() {
 
       extendedJsonMock = {
         "requestId": requestId,
-        "confidenceScore": {"score": confidence},
-        "errorMessage": null
+        "confidenceScore": {"score": confidence}
       };
       extendedJsonMock.addAll(jsonMock);
     });
@@ -75,7 +74,6 @@ void main() {
       extendedJsonMock = {
         "requestId": requestId,
         "confidenceScore": {"score": confidence},
-        "errorMessage": null,
         "ipAddress": jsonMock["ip"],
         "osName": jsonMock["os"]
       };

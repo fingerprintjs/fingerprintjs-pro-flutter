@@ -4,26 +4,22 @@ class FingerprintJSProResponse {
   final String requestId;
   final String visitorId;
   final ConfidenceScore confidenceScore;
-  final String? errorMessage;
 
   FingerprintJSProResponse.fromJson(
       Map<String, dynamic> json, this.requestId, num confidence)
       : visitorId = json['visitorId'],
-        confidenceScore = ConfidenceScore(confidence),
-        errorMessage = json['errorMessage'];
+        confidenceScore = ConfidenceScore(confidence);
 
   FingerprintJSProResponse.fromJsObject(dynamic jsObject)
       : visitorId = jsObject.visitorId,
         requestId = jsObject.requestId,
-        confidenceScore = ConfidenceScore(jsObject.confidence.score),
-        errorMessage = jsObject.errorMessage;
+        confidenceScore = ConfidenceScore(jsObject.confidence.score);
 
   Map toJson() {
     Map fromObject = {
       "requestId": requestId,
       "visitorId": visitorId,
-      "confidenceScore": confidenceScore.toJson(),
-      "errorMessage": errorMessage
+      "confidenceScore": confidenceScore.toJson()
     };
 
     return fromObject;
