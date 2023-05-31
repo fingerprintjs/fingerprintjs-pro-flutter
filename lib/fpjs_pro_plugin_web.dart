@@ -57,7 +57,7 @@ class FpjsProPluginWeb {
   }
 
   /// Initializes the native FingerprintJS Pro client
-  /// Throws a [PlatformException] if [apiKey] is missing
+  /// Throws a [FingerprintProError] if initialisation fails
   static Future<void> initFpjs(MethodCall call) async {
     final options = FingerprintJSOptions(
       apiKey: call.arguments['apiToken'],
@@ -141,6 +141,7 @@ class FpjsProPluginWeb {
   }
 }
 
+/// Casts [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests) from Dart Object to JavaScript Object
 Object? getTags(Object? tags) {
   return tags != null ? jsify(tags) : null;
 }

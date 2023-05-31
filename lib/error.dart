@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+/// Basic class for the identification error
 abstract class FingerprintProError extends PlatformException {
   FingerprintProError(String code, String? message)
       : super(code: code, message: message);
@@ -108,6 +109,7 @@ class UnsupportedVersionError extends FingerprintProError {
       : super('UnsupportedVersionError', message);
 }
 
+/// The installation method of the mobile agent is not allowed for the customer
 class InstallationMethodRestrictedError extends FingerprintProError {
   InstallationMethodRestrictedError(String? message)
       : super('InstallationMethodRestrictedError', message);
@@ -156,6 +158,7 @@ class UnknownError extends FingerprintProError {
   UnknownError(String? message) : super('UnknownError', message);
 }
 
+/// Casts error from generic platform type to FingerprintProError
 FingerprintProError unwrapError(PlatformException error) {
   switch (error.code) {
     case 'InvalidURL':
