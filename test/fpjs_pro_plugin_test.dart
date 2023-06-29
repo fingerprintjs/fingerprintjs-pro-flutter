@@ -34,15 +34,18 @@ void main() {
 
   group('getVisitorId', () {
     setUp(() {
-      channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorId') {
           return testVisitorId;
         }
+        return null;
       });
     });
 
     tearDown(() {
-      channel.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
     });
 
     test('should return visitor id when called without tags', () async {
@@ -67,15 +70,18 @@ void main() {
 
   group('getVisitorData', () {
     setUp(() {
-      channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorData') {
           return [requestId, confidence, extendedResultAsJsonString];
         }
+        return null;
       });
     });
 
     tearDown(() {
-      channel.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
     });
 
     test('should return visitor id when called without tags', () async {
