@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.5.0...v1.6.0) (2023-06-30)
+
+
+### Features
+
+* bump iOS Agent to v2.2.0 to introduce new Smart Signals INTER-46 ([882938b](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/882938b83c56276496df5ab456d44be2ca78b1c4))
+
 ## [1.5.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.4.1...v1.5.0) (2023-05-03)
 
 
