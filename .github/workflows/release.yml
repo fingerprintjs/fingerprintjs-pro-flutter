@@ -5,34 +5,15 @@ on:
       - main
       - test
 jobs:
+  test:
+    name: 'Build and check code before release'
+    uses: ./.github/workflows/build-and-run-check-workflow.yml
+
   release:
-    name: Release
-    runs-on: ubuntu-latest
-    environment: production
-    if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - name: Install and set Flutter version
-        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
-        with:
-          channel: 'stable'
-      - name: Restore packages
-        run: flutter pub get
-      - name: Create .env.local
-        run: cp ./example/.env ./example/.env.local
-        shell: bash
-      - name: Analyze
-        run: flutter analyze
-      - name: Run tests
-        run: flutter test
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@91ab76a4a393a8d0c4739e9aea1818b56bc953ea
-        with:
-          extra_plugins: |
-            @semantic-release/exec@6.0.3
-            conventional-changelog-conventionalcommits@5.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
+    name: 'Prepare new version'
+    uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-server-sdk.yml@v1
+    with:
+      language: flutter
+      language-version: '3.x'
+    secrets:
+      GH_RELEASE_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}

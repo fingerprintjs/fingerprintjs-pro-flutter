@@ -1,0 +1,24 @@
+name: 'Build and run checks'
+on:
+  workflow_call:
+
+jobs:
+  build-and-run-checks:
+    name: 'Build and run checks'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          channel: 'stable'
+      - name: Restore packages
+        run: flutter pub get
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+      - name: Analyze
+        run: flutter analyze
+      - name: Run tests
+        run: flutter test

@@ -1,38 +1,11 @@
-name: Lint Commit Messages
-on: [pull_request]
+name: Analyze Commit Messages
+on:
+  pull_request:
 
 permissions:
   pull-requests: write
+  contents: write
 jobs:
-  commitlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@456526eec71276a59e74aafdfe06a9632ac2eee1
-        id: commitlint
-      - if: ${{ failure() && steps.commitlint.outcome == 'failure' }}
-        uses: marocchino/sticky-pull-request-comment@3d60a5b2dae89d44e0c6ddc69dd7536aec2071cd
-        with:
-          header: Commitlint
-          recreate: true
-          message: |
-            ## Wrong commit message format detected
-            We use [Semantic Commit Messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716) in our project.
-            
-            > **Warning**
-            > Probably you forgot to activate local git hooks.
-
-            Run the next command in the project root to activate local hooks:
-            ```sh
-            sh ./scripts/install_hooks.sh
-            ```
-            
-            More info you can find in [job logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-      - if: ${{ success() }}
-        uses: marocchino/sticky-pull-request-comment@3d60a5b2dae89d44e0c6ddc69dd7536aec2071cd
-        with:
-          header: Commitlint
-          hide: true
-          hide_classify: "OUTDATED"
+  analyze-commits:
+    name: Generate docs and coverage report
+    uses: fingerprintjs/dx-team-toolkit/.github/workflows/analyze-commits.yml@v1
