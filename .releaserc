@@ -115,7 +115,8 @@
           "pubspec.yaml",
           "ios/fpjs_pro_plugin.podspec",
           "android/build.gradle",
-          "lib/fpjs_pro_plugin.dart"
+          "lib/fpjs_pro_plugin.dart",
+          "example/pubspec.lock"
         ],
         "message": "chore(release): ${nextRelease.version} \\n\\n${nextRelease.notes}"
       }
