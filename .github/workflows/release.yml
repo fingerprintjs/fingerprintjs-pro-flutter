@@ -11,6 +11,7 @@ jobs:
 
   release:
     name: 'Prepare new version'
+    needs: test
     uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-server-sdk.yml@v1
     with:
       language: flutter
