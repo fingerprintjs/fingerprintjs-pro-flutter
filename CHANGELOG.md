@@ -1,3 +1,14 @@
+## [2.0.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.7.0...v2.0.0) (2023-08-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove wrong `errorMessage` field from `FingerprintJSProResponse`
+
+### Features
+
+* remove wrong `errorMessage` field from `FingerprintJSProResponse` ([6154081](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/6154081044fbc6d04f83faf7ade6a58f0301f36c))
+
 ## [1.7.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.6.0...v1.7.0) (2023-08-07)
 
 
