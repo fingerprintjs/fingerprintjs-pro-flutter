@@ -32,8 +32,8 @@ FingerprintJS Pro is a professional visitor identification service that processe
 Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [API key](https://dev.fingerprint.com/docs). 
 
 Native libraries used under the hood:
-- [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
-- [FingerprintJS Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
+- [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios) - requires Android 5.0 (API level 21+) or higher
+- [FingerprintJS Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android) - requires iOS/tvOS 12, Swift 5.7 or higher 
 
 
 ## Quick start
