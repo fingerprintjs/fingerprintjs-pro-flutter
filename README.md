@@ -25,15 +25,15 @@
 # Fingerprint Pro Flutter
 ### Official Flutter plugin for 100% accurate device identification, created for FingerprintJS Pro.
 
-This plugin can be used in a Flutter application to call the native FingerprintJS Pro libraries and identify devices.
+This plugin can be used in a Flutter application to call the native Fingerprint Pro libraries and identify devices.
 
-FingerprintJS Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
+Fingerprint Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
 
-Retrieve an accurate, sticky and stable [FingerprintJS Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the FingerprintJS Pro API and requires an [API key](https://dev.fingerprint.com/docs). 
+Retrieve an accurate, sticky and stable [Fingerprint Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the Fingerprint Pro API and requires an [API key](https://dev.fingerprint.com/docs). 
 
 Native libraries used under the hood:
-- [FingerprintJS Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios) - requires Android 5.0 (API level 21+) or higher
-- [FingerprintJS Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android) - requires iOS/tvOS 12, Swift 5.7 or higher 
+- [Fingerprint Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios) - requires Android 5.0 (API level 21+) or higher
+- [Fingerprint Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android) - requires iOS/tvOS 12, Swift 5.7 or higher 
 
 
 ## Quick start
