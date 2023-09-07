@@ -1,3 +1,11 @@
+## [2.0.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.0.0...v2.0.1) (2023-09-07)
+
+
+### Documentation
+
+* **README:** add minimum OS versions ([e14fd70](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/e14fd70000a3cac21e1174134ddf2b287b250ff2))
+* **README:** fingerprintJS Pro -> Fingerprint Pro ([3555881](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/35558812a89555fc41232583aab39bf902c14307))
+
 ## [2.0.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v1.7.0...v2.0.0) (2023-08-30)
 
 
