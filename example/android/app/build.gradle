@@ -56,6 +56,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example'
 }
 
 flutter {
