@@ -45,6 +45,10 @@ android {
     defaultConfig {
         minSdkVersion 21
     }
+
+    if (project.android.hasProperty("namespace")) {
+        namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
+    }
 }
 
 dependencies {
