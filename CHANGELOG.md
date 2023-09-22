@@ -1,3 +1,10 @@
+## [2.0.2-test.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.0.1...v2.0.2-test.1) (2023-09-22)
+
+
+### Bug Fixes
+
+* support Gradle 8 ([499a397](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/499a3975b2d895e09af89593fbb965c14499630f))
+
 ## [2.0.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.0.0...v2.0.1) (2023-09-07)
 
 
