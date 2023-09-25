@@ -8,7 +8,7 @@ import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 
 // Update it on each release
-const pluginVersion = '2.0.1';
+const pluginVersion = '2.0.2';
 
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
