@@ -41,14 +41,14 @@ application to call the native Fingerprint Pro libraries (Android, iOS and Web) 
 - Android 5.0 (API level 21+) or higher
 - iOS/tvOS 12, Swift 5.7 or higher
 
-We aim to keep [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
+We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
 ## Dependencies
 - [Fingerprint Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
 - [Fingerprint Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
 
 ## How to install
-Add `fpjs_pro_plugin` to the pubspec.yaml in your Flutter app
+Add `fpjs_pro_plugin` to the pubspec.yaml in your Flutter app:
 
 ```yaml
 dependencies:
@@ -62,7 +62,7 @@ Run `pub get` to download and install the package.
 
 ### Web platform
 
-Add `script` tag with js agent loader inside `head` tag in your html template to use `fpjs_pro_plugin`.
+Add a `<script>` tag with the JS agent loader inside the `<head>` tag in your HTML template to use `fpjs_pro_plugin`:
 
 ```html
 <script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
@@ -71,11 +71,10 @@ Add `script` tag with js agent loader inside `head` tag in your html template to
 ## Usage
 To identify visitors, you need a Fingerprint Pro account (you can [sign up for free](https://dashboard.fingerprintjs.com/signup/)).
 
-- Go to [the Fingerprint Pro dashboard](https://dashboard.fingerprint.com/)
-- Open the API keys page from the sidebar
-- Find your Public API key
+- Go to [the Fingerprint Pro dashboard](https://dashboard.fingerprint.com/).
+- Navigate to **App Settings** > **API Keys** to find your _Public_ API Key.
 
-### 1. Provide a configuration to the plugin
+### 1. Configure the plugin
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -112,7 +111,7 @@ void doInit() async {
 
 ### 2. Use the plugin in your application code to identify a visitor
 
-#### 2.1 Use the `getVisitorId` method if you need a `visitorId` only: 
+#### 2.1 Use the `getVisitorId` method if you only need a `visitorId`: 
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -165,7 +164,7 @@ void doInit() async {
 }
 ```
 
-### 3. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label identification event with additional data
+### 3. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label the identification event with additional data
 
 ```dart
 void doIdentification() async {
@@ -187,7 +186,7 @@ void doIdentification() async {
 
 ## Additional Resources
 - [Server-to-Server API](https://dev.fingerprint.com/docs/server-api)
-- [FingerprintJS Pro documentation](https://dev.fingerprint.com/docs)
+- [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
 
 ## Support and feedback
 
