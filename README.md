@@ -23,23 +23,32 @@
 </p>
 
 # Fingerprint Pro Flutter
-### Official Flutter plugin for 100% accurate device identification, created for FingerprintJS Pro.
+[Fingerprint](https://fingerprint.com/) is a device intelligence platform offering 99.5% accurate visitor
+identification. Fingerprint Pro Flutter SDK is an easy way to integrate Fingerprint Pro into your Flutter
+application to call the native Fingerprint Pro libraries (Android, iOS and Web) and identify devices.
 
-This plugin can be used in a Flutter application to call the native Fingerprint Pro libraries and identify devices.
+## Table of contents
+* [Requirements](#requirements)
+* [Dependencies](#dependencies)
+* [How to install](#how-to-install)
+* [Usage](#usage)
+* [Additional Resources](#additional-resources)
+* [Support and feedback](#support-and-feedback)
+* [License](#license)
 
-Fingerprint Pro is a professional visitor identification service that processes all information server-side and transmits it securely to your servers using server-to-server APIs.
+## Requirements
+- Flutter 2.5.0 or higher
+- Android 5.0 (API level 21+) or higher
+- iOS/tvOS 12, Swift 5.7 or higher
 
-Retrieve an accurate, sticky and stable [Fingerprint Pro](https://fingerprint.com/) visitor identifier in an Android or an iOS app. This library communicates with the Fingerprint Pro API and requires an [API key](https://dev.fingerprint.com/docs). 
+We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
-Native libraries used under the hood:
-- [Fingerprint Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios) - requires Android 5.0 (API level 21+) or higher
-- [Fingerprint Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android) - requires iOS/tvOS 12, Swift 5.7 or higher 
+## Dependencies
+- [Fingerprint Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
+- [Fingerprint Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
 
-
-## Quick start
-
-#### 1. Add `fpjs_pro_plugin` to the pubspec.yaml in your Flutter app
-
+## How to install
+Add `fpjs_pro_plugin` to the pubspec.yaml in your Flutter app:
 
 ```yaml
 dependencies:
@@ -51,7 +60,21 @@ dependencies:
 
 Run `pub get` to download and install the package.
 
-#### 2. Provide a configuration to the plugin
+### Web platform
+
+Add a `<script>` tag with the JS agent loader inside the `<head>` tag in your HTML template to use `fpjs_pro_plugin`:
+
+```html
+<script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
+```
+
+## Usage
+To identify visitors, you need a Fingerprint Pro account (you can [sign up for free](https://dashboard.fingerprintjs.com/signup/)).
+
+- Go to [the Fingerprint Pro dashboard](https://dashboard.fingerprint.com/).
+- Navigate to **App Settings** > **API Keys** to find your _Public_ API Key.
+
+### 1. Configure the plugin
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -86,9 +109,9 @@ void doInit() async {
 }
 ```
 
-#### 3. Use the plugin in your application code to identify a visitor
+### 2. Use the plugin in your application code to identify a visitor
 
-##### 3.1 Use the `getVisitorId` method if you need a `visitorId` only: 
+#### 2.1 Use the `getVisitorId` method if you only need a `visitorId`: 
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -110,7 +133,7 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-##### 3.2 Use `getVisitorData` to get extended result
+#### 2.2 Use `getVisitorData` to get extended result
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -141,15 +164,7 @@ void doInit() async {
 }
 ```
 
-#### 3.3 Web platform configuration
-
-Add `script` tag with js agent loader inside `head` tag in your html template to use `fpjs_pro_plugin` on web platform.
-
-```html
-<script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
-```
-
-#### 4. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label identification event with additional data
+### 3. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label the identification event with additional data
 
 ```dart
 void doIdentification() async {
@@ -171,7 +186,13 @@ void doIdentification() async {
 
 ## Additional Resources
 - [Server-to-Server API](https://dev.fingerprint.com/docs/server-api)
-- [FingerprintJS Pro documentation](https://dev.fingerprint.com/docs)
+- [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
+
+## Support and feedback
+
+To report problems, ask questions or provide feedback, please
+use [Issues](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues). If you need private support, please
+email us at `oss-support@fingerprint.com`.
 
 ## License
-This library is MIT licensed.
+This project is licensed under the [MIT license](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/LICENSE).
