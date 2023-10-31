@@ -39,7 +39,7 @@ application to call the native Fingerprint Pro libraries (Android, iOS and Web) 
 ## Requirements
 - Flutter 2.5.0 or higher
 - Android 5.0 (API level 21+) or higher
-- iOS/tvOS 12, Swift 5.7 or higher
+- iOS/tvOS 13, Swift 5.7 or higher
 
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
