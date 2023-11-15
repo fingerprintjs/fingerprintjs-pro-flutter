@@ -45,6 +45,7 @@ android {
         applicationId "com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example"
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
+        compileSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -55,6 +56,9 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
         }
+    }
+    if (project.android.hasProperty("namespace")) {
+        namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example'
     }
 }
 
