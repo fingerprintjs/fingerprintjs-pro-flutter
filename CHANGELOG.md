@@ -1,3 +1,12 @@
+## [2.1.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.0.2...v2.1.0) (2023-11-15)
+
+
+### Features
+
+* bump gradle plugin for example ([0c83a57](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/0c83a57cb9a2748926f174e40617d4282086cf80))
+* update Android agent to 2.3.4 ([0322065](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/03220654a62f76d465f0fbf6a93f7a75da2be5f8))
+* update iOS agent to 2.3.1 ([459c7ff](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/459c7ffb475787ca4fc8e2971242c8b23e48b497))
+
 ## [2.0.2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.0.1...v2.0.2) (2023-09-25)
 
 
