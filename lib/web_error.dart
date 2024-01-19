@@ -35,7 +35,7 @@ FingerprintProError unwrapWebError(WebException error) {
     return RequestTimeoutError(message);
   }
   if (message == FingerprintJS.ERROR_RATE_LIMIT) {
-    // return RequestTimeoutError(message); ???????
+    return TooManyRequestError(message);
   }
   if (message == FingerprintJS.ERROR_FORBIDDEN_ORIGIN) {
     return OriginNotAvailableError(message);
