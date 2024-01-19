@@ -79,7 +79,11 @@ class FpjsProPluginWeb {
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
-      throw unwrapWebError(e as WebException);
+      if (e is WebException) {
+        throw unwrapWebError(e);
+      } else {
+        throw UnknownError(e.toString());
+      }
     }
   }
 
@@ -99,7 +103,11 @@ class FpjsProPluginWeb {
           fp.get(FingerprintJSGetOptions(linkedId: linkedId, tag: tags)));
       return result.visitorId;
     } catch (e) {
-      throw unwrapWebError(e as WebException);
+      if (e is WebException) {
+        throw unwrapWebError(e);
+      } else {
+        throw UnknownError(e.toString());
+      }
     }
   }
 
@@ -136,7 +144,11 @@ class FpjsProPluginWeb {
         serializedResult
       ];
     } catch (e) {
-      throw unwrapWebError(e as WebException);
+      if (e is WebException) {
+        throw unwrapWebError(e);
+      } else {
+        throw UnknownError(e.toString());
+      }
     }
   }
 }
