@@ -1,3 +1,11 @@
+## [2.1.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.1.0...v2.1.1) (2024-01-19)
+
+
+### Bug Fixes
+
+* add TooManyRequestError for web platform ([219467f](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/219467f1b310a655f4e80091d7e0c949ffc645fe))
+* improve error reporting for web platform ([df3739c](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/df3739c147a9e1e1f9e98604848a50754326c282))
+
 ## [2.1.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.0.2...v2.1.0) (2023-11-15)
 
 
