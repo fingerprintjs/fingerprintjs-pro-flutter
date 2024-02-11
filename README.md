@@ -104,6 +104,7 @@ void doInit() async {
     '<apiKey>',
     endpoint: 'https://subdomain.domain.com',
     region: Region.eu, // or Region.ap, Region.us
+    // Only necessary for the web platform
     scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>'
   );
 }
