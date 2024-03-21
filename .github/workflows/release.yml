@@ -17,5 +17,7 @@ jobs:
     with:
       language: flutter
       language-version: '3.x'
+      appId: ${{ vars.APP_ID }}
     secrets:
-      GH_RELEASE_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+      NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
