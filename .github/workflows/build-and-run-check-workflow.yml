@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install and set Flutter version
         uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
         with:
