@@ -15,7 +15,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # This action adds a token needed for pub.dev
       - name: Install Dart
         uses: dart-lang/setup-dart@v1
