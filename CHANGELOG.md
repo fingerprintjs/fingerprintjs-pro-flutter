@@ -1,3 +1,22 @@
+## [3.0.0-test.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.1.1...v3.0.0-test.1) (2024-03-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* sdk minimal version required to use this library is now 3.1.0+
+
+### Features
+
+* update dependencies ([1e7393e](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/1e7393e74524a75e9fb242b265d4fbcc9c104e7e))
+* update Fingerprint PRO for android to 2.4.0 ([ea092b1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/ea092b1870aa36a0b9d25364ebeabc4010844ac7))
+* update Fingerprint PRO for iOS to 2.4.0 ([d3a016a](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/d3a016a3e5d8632f65fdcde430cb24dc1560254d))
+* update required sdk minimal version to 3.1.0+ ([75c1e08](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/75c1e08343d0029646ab7b691b0a246cb2d5d6a0))
+
+
+### Bug Fixes
+
+* change sdk limitations ([b48231c](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/b48231c57e37509fc9668560d667aa8dd5e83a97))
+
 ## [2.1.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.1.0...v2.1.1) (2024-01-19)
 
 
