@@ -22,7 +22,7 @@ jobs:
         with:
           sdk: stable
       - name: Install and set Flutter version
-        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        uses: subosito/flutter-action@1c5eb12d812966ca84680edc38353a0851c8fd56
         with:
           channel: 'stable'
       - name: Publish to pub.dev
