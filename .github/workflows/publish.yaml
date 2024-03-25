@@ -26,4 +26,4 @@ jobs:
         with:
           channel: 'stable'
       - name: Publish to pub.dev
-        run: flutter pub publish --force
+        run: flutter pub publish --force --verbose
