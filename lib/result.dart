@@ -76,7 +76,7 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   FingerprintJSProExtendedResponse.fromJson(
-      Map<String, dynamic> json, String requestId, num confidence)
+      super.json, super.requestId, super.confidence)
       : visitorFound = json['visitorFound'],
         ipAddress = json['ip'] ?? json['ipAddress'],
         ipLocation =
@@ -88,10 +88,10 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
             StSeenAt.fromJson(Map<String, dynamic>.from(json['firstSeenAt'])),
         lastSeenAt =
             StSeenAt.fromJson(Map<String, dynamic>.from(json['lastSeenAt'])),
-        super.fromJson(json, requestId, confidence);
+        super.fromJson();
 
   /// Creates class instance from JavaScript object
-  FingerprintJSProExtendedResponse.fromJsObject(dynamic jsObject)
+  FingerprintJSProExtendedResponse.fromJsObject(super.jsObject)
       : visitorFound = jsObject.visitorFound,
         ipAddress = jsObject.ip,
         ipLocation = IpLocation.fromJsObject(jsObject.ipLocation),
@@ -100,7 +100,7 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
         device = jsObject.device,
         firstSeenAt = StSeenAt.fromJsObject(jsObject.firstSeenAt),
         lastSeenAt = StSeenAt.fromJsObject(jsObject.lastSeenAt),
-        super.fromJsObject(jsObject);
+        super.fromJsObject();
 
   /// Serialize instance to JSON Object
   @override
