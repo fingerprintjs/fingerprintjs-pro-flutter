@@ -157,20 +157,17 @@ void doInit() async {
 }
 ```
 
-### 3. Use [`linkedId`](https://dev.fingerprint.com/docs/js-agent#linkedid) and [`tags`](https://dev.fingerprint.com/docs/js-agent#tag) to label the identification event with additional data
+### Linking and tagging information
+
+The `visitorId` provided by Fingerprint Identification is especially useful when combined with information you already know about your users, for example, account IDs, order IDs, etc. To learn more about various applications of the `linkedId` and `tag`, see [Linking and tagging information](https://dev.fingerprint.com/docs/tagging-information).
 
 ```dart
-void doIdentification() async {
+void identify() async {
   const tags = {
-    'foo': 'bar',
-    'numberField': 1234,
-    'objectField': {
-      'booleanSubfield': true,
-      'arraySubfield': [1, 2, 3]
-    },
-    'booleanField': false
+    userAction: 'login',
+    analyticsId: 'UA-5555-1111-1'
   };
-  const linkedId = 'custom_linked_id';
+  const linkedId = 'user_1234';
 
   visitorId = await FpjsProPlugin.getVisitorId(linkedId: linkedId, tags: tags);
   deviceData = await FpjsProPlugin.getVisitorData(linkedId: linkedId, tags: tags);
