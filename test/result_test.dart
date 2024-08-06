@@ -112,8 +112,8 @@ void main() {
           throwsA(isA<TypeError>()));
     });
 
-    test('Check failed scenario with missed `ipLocation`', () {
-      jsonMock.remove("ipLocation");
+    test('Check failed scenario with missed `firstSeenAt`', () {
+      jsonMock.remove("firstSeenAt");
       expect(
           () => FingerprintJSProExtendedResponse.fromJson(
               jsonMock, requestId, confidence),
@@ -144,6 +144,14 @@ void main() {
     test('Check success scenario with empty fields for ipLocation', () {
       jsonMock['ipLocation'] = {};
       extendedJsonMock['ipLocation'] = {};
+      final responseInstance = FingerprintJSProExtendedResponse.fromJson(
+          jsonMock, requestId, confidence);
+      expect(responseInstance.toJson(), extendedJsonMock);
+    });
+
+    test('Check empty ipLocation for a new customers', () {
+      jsonMock.remove('ipLocation');
+      extendedJsonMock['ipLocation'] = null;
       final responseInstance = FingerprintJSProExtendedResponse.fromJson(
           jsonMock, requestId, confidence);
       expect(responseInstance.toJson(), extendedJsonMock);
