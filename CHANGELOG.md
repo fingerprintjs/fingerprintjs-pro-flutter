@@ -1,3 +1,16 @@
+## [3.0.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.0.0...v3.0.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* don't crash on empty `ipLocation` field for new subs ([1b8a657](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/1b8a6573473215385d24461e19e9f3b6bf084632))
+
+
+### Documentation
+
+* **README:** fix links formatting ([c7c2862](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/c7c2862f0358ca02cc28274696dc582b1fee1c88))
+* **README:** unify linkedId section ([9339040](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/9339040312decaf6cc8a3062fd2e16ac0047e0b2))
+
 ## [3.0.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v2.1.1...v3.0.0) (2024-03-25)
 
 
