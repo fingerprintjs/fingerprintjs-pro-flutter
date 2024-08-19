@@ -211,8 +211,8 @@ class FingerprintJSOptions {
   external set region(String? region);
 
   /// Your custom API endpoint for getting visitor data.
-  external String? get endpoint;
-  external set endpoint(String? endpoint);
+  external List<String>? get endpoint;
+  external set endpoint(List<String>? endpoint);
 
   /// A JS agent script URL pattern.
   ///
