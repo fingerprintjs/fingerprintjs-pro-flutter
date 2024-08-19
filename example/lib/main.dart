@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:env_flutter/env_flutter.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -39,7 +38,7 @@ class _MyAppState extends State<MyApp> {
       dotenv.env['PROXY_INTEGRATION_PATH'] ?? 'no_proxy_integration';
   final String _proxyIntegrationRequestPath =
       dotenv.env['PROXY_INTEGRATION_REQUEST_PATH'] ?? 'no_proxy_integration';
-  final String? _proxyIntegrationScriptPath =
+  final String _proxyIntegrationScriptPath =
       dotenv.env['PROXY_INTEGRATION_SCRIPT_PATH'] ?? 'no_proxy_integration';
   final String _region = dotenv.env['REGION'] ?? 'us';
 
@@ -133,8 +132,8 @@ class _MyAppState extends State<MyApp> {
             linkedId: 'checkDataWithTag', tags: tags),
       ];
 
-      for (var _check in checks) {
-        await _check();
+      for (var check in checks) {
+        await check();
         setState(() {
           _checksResult += '.';
         });
@@ -176,28 +175,37 @@ class _ExtendedResultDialog extends StatelessWidget {
   const _ExtendedResultDialog({Key? key, required this.handleIdentificate})
       : super(key: key);
 
-  final AsyncCallback handleIdentificate;
+  final Future<String> Function() handleIdentificate;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => {
-        handleIdentificate().then((identificationInfo) => showDialog<String>(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: const Text('Extended result'),
-                content: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(identificationInfo as String),
-                ),
-                actions: <Widget>[
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context, 'OK'),
-                    child: const Text('OK'),
-                  ),
-                ],
+      onPressed: () async {
+        final resultContext = context;
+        String identificationInfo;
+        try {
+          identificationInfo = await handleIdentificate();
+        } catch (e) {
+          identificationInfo = 'Identification error: $e';
+        }
+        if (resultContext.mounted) {
+          showDialog<String>(
+            context: resultContext,
+            builder: (BuildContext context) => AlertDialog(
+              title: const Text('Extended result'),
+              content: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(identificationInfo),
               ),
-            ))
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, 'OK'),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
       },
       child: const Text('Identify with extended result!'),
     );
