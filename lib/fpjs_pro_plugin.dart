@@ -26,6 +26,7 @@ class FpjsProPlugin {
       {String? endpoint,
       List<String>? endpointFallbacks,
       String? scriptUrlPattern,
+      List<String>? scriptUrlPatternFallbacks,
       Region? region,
       bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
@@ -33,6 +34,7 @@ class FpjsProPlugin {
       'endpoint': endpoint,
       'endpointFallbacks': endpointFallbacks,
       'scriptUrlPattern': scriptUrlPattern,
+      'scriptUrlPatternFallbacks': scriptUrlPatternFallbacks,
       'region': region?.stringValue,
       'extendedResponseFormat': extendedResponseFormat,
       'pluginVersion': pluginVersion,

@@ -75,7 +75,10 @@ class FpjsProPluginWeb {
       ];
     }
     if (call.arguments['scriptUrlPattern'] != null) {
-      options.scriptUrlPattern = call.arguments['scriptUrlPattern'];
+      options.scriptUrlPattern = [
+        call.arguments['scriptUrlPattern'],
+        ...(call.arguments['scriptUrlPatternFallbacks'] ?? [])
+      ];
     }
     try {
       _fpPromise = promiseToFuture(FingerprintJS.load(options));

@@ -220,8 +220,8 @@ class FingerprintJSOptions {
   /// - <version> — the major version of JS agent;
   /// - <apiKey> — the public key set via the `apiKey` option;
   /// - <loaderVersion> — the version of this package;
-  external String? get scriptUrlPattern;
-  external set scriptUrlPattern(String? scriptUrlPattern);
+  external List<String>? get scriptUrlPattern;
+  external set scriptUrlPattern(List<String>? scriptUrlPattern);
 
   external factory FingerprintJSOptions(
       {String apiKey, List<String> integrationInfo});
