@@ -56,7 +56,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         return metadata
     }
 
-    private func parseRegion(passedRegion: String?, endpoint: String?, endpointFallbacks: [String] = []) -> Region {
+    private func parseRegion(passedRegion: String?, endpoint: String?, endpointFallbacks: [String]) -> Region {
         var region: Region
         switch passedRegion {
         case "eu":
