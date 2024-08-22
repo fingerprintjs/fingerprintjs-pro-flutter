@@ -1,3 +1,13 @@
+## [3.1.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.0.1...v3.1.0) (2024-08-22)
+
+
+### Features
+
+* add `endpointFallbacks` configuration param ([aeae143](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/aeae143c807fe1ce736172501b1c15cc9f13a81c))
+* add `scriptUrlPatternFallbacks` configuration param ([ae44e86](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/ae44e86f3ebbd383250e7a24b8be69355ec59fb3))
+* update Android agent to v2.5.0 ([fd94c3a](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/fd94c3a0632f6ebda18405bb4775c4cb0d70f007))
+* update iOS agent to v2.6.0 ([f6627a2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/f6627a23e7c667249c6d995b60b24308be707a9a))
+
 ## [3.0.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.0.0...v3.0.1) (2024-08-06)
 
 
