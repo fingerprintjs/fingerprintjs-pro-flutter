@@ -89,15 +89,17 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-You can also configure `region` and `endpoint` in the `initFpjs` method, like below. For the web platform, you can use an additional `scriptUrlPattern` property to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
+You can also configure `region`, `endpoint` and `endpointFallbacks` in the `initFpjs` method, like below. For the web platform, you can use an additional `scriptUrlPattern` and `scriptUrlPatternFallbacks` properties to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
 ```dart
 void doInit() async {
   await FpjsProPlugin.initFpjs(
     '<apiKey>',
     endpoint: 'https://subdomain.domain.com',
+    endpointFallbacks: ['https://subdomain2.domain.com', 'https://subdomain3.domain.com'],
     region: Region.eu, // or Region.ap, Region.us
     // Only necessary for the web platform
-    scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>'
+    scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>',
+    scriptUrlPatternFallbacks: ['https://your.second-domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>']
   );
 }
 ```

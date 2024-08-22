@@ -69,10 +69,16 @@ class FpjsProPluginWeb {
       options.region = call.arguments['region'];
     }
     if (call.arguments['endpoint'] != null) {
-      options.endpoint = call.arguments['endpoint'];
+      options.endpoint = [
+        call.arguments['endpoint'],
+        ...(call.arguments['endpointFallbacks'] ?? [])
+      ];
     }
     if (call.arguments['scriptUrlPattern'] != null) {
-      options.scriptUrlPattern = call.arguments['scriptUrlPattern'];
+      options.scriptUrlPattern = [
+        call.arguments['scriptUrlPattern'],
+        ...(call.arguments['scriptUrlPatternFallbacks'] ?? [])
+      ];
     }
     try {
       _fpPromise = promiseToFuture(FingerprintJS.load(options));

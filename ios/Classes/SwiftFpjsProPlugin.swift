@@ -16,10 +16,10 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "missingArguments", message: "Missing or invalid arguments", details: nil))
             return
         }
-        
+
         if (call.method == "init") {
             if let token = args["apiToken"] as? String {
-                let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String)
+                let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String, endpointFallbacks: args["endpointFallbacks"] as? [String] ?? [])
                 let extendedResponseFormat = args["extendedResponseFormat"] as? Bool ?? false
                 let pluginVersion = args["pluginVersion"] as? String ?? "unknown"
 
@@ -36,7 +36,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             getVisitorData(metadata, result)
         }
     }
-    
+
     private func prepareMetadata(_ linkedId: String?, tags: Any?) -> Metadata {
         var metadata = Metadata(linkedId: linkedId)
         guard
@@ -45,7 +45,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         else {
             return metadata
         }
-        
+
         if let dict = jsonTags as? [String: JSONTypeConvertible] {
             dict.forEach { key, jsonType in
                 metadata.setTag(jsonType, forKey: key)
@@ -56,7 +56,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         return metadata
     }
 
-    private func parseRegion(passedRegion: String?, endpoint: String?) -> Region {
+    private func parseRegion(passedRegion: String?, endpoint: String?, endpointFallbacks: [String]) -> Region {
         var region: Region
         switch passedRegion {
         case "eu":
@@ -68,7 +68,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         }
 
         if let endpointString = endpoint {
-            region = .custom(domain: endpointString)
+            region = .custom(domain: endpointString, fallback: endpointFallbacks)
         }
 
         return region
@@ -84,7 +84,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             result(FlutterError.init(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
             return
         }
-        
+
         client.getVisitorId(metadata) { visitorIdResult in
             switch visitorIdResult {
             case .success(let visitorId):
@@ -94,13 +94,13 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             }
         }
     }
-    
+
     private func getVisitorData(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
         guard let client = fpjsClient else {
             result(FlutterError(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
             return
         }
-        
+
         client.getVisitorIdResponse(metadata) { visitorIdResponseResult in
             switch visitorIdResponseResult {
             case .success(let visitorDataResponse):
@@ -114,7 +114,7 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             }
         }
     }
-    
+
     private func processNativeLibraryError(_ error: FPJSError, result: @escaping FlutterResult) {
         let (code, description) = error.flutterFields
         result(FlutterError(code: code, message: description, details: nil))
