@@ -61,8 +61,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initFpjs(String apiToken) async {
+    final region = _parseRegion(_region);
+
     if (_useProxyIntegration) {
-      final region = _parseRegion(_region);
       final regionQueryParam = (region != null && region != Region.us)
           ? "?region=${region.stringValue}"
           : '';
@@ -74,7 +75,7 @@ class _MyAppState extends State<MyApp> {
               "$_proxyIntegrationPath/$_proxyIntegrationScriptPath",
           region: region);
     } else {
-      await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true);
+      await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true, region: region);
     }
   }
 
