@@ -1,3 +1,10 @@
+## [3.2.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.1.0...v3.2.0) (2024-10-08)
+
+
+### Features
+
+* use Fingerprint Pro Android v2.6.0 ([c3544b1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/c3544b1c45f2f6ea55231a29da52db366e5410b0))
+
 ## [3.1.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.0.1...v3.1.0) (2024-08-22)
 
 
