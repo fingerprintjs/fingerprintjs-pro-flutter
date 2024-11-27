@@ -107,7 +107,13 @@ class _MyAppState extends State<MyApp> {
       const encoder = JsonEncoder.withIndent('    ');
       final deviceData = await FpjsProPlugin.getVisitorData(
           tags: tags, linkedId: 'some linkedId');
-      identificationInfo = encoder.convert(deviceData);
+      final jsonDeviceData = deviceData.toJson();
+      if (deviceData.sealedResult != null &&
+          deviceData.sealedResult!.isNotEmpty) {
+        jsonDeviceData["sealedResult"] = deviceData.sealedResult
+            ?.replaceRange(10, deviceData.sealedResult?.length, '...');
+      }
+      identificationInfo = encoder.convert(jsonDeviceData);
     } on FingerprintProError catch (error) {
       identificationInfo = "Failed to get device info.\n$error";
     }
