@@ -9,7 +9,7 @@
     "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
-    "@fingerprintjs/fingerprintjs-pro": "^3.8.1"
+    "@fingerprintjs/fingerprintjs-pro": "^3.11.3"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.1",
