@@ -95,7 +95,9 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   FingerprintJSProExtendedResponse.fromJsObject(super.jsObject)
       : visitorFound = jsObject.visitorFound,
         ipAddress = jsObject.ip,
-        ipLocation = IpLocation.fromJsObject(jsObject.ipLocation),
+        ipLocation = jsObject.ipLocation
+            ? IpLocation.fromJsObject(jsObject.ipLocation)
+            : null,
         osName = jsObject.os,
         osVersion = jsObject.osVersion,
         device = jsObject.device,
