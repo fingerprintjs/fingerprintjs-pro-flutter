@@ -62,6 +62,10 @@ class IdentificationResult {
 
   /// A confidence score that tells how much the agent is sure about the visitor identifier
   external IdentificationResultConfidenceScore confidence;
+
+  /// Sealed result, which is an encrypted content of the `/events` Server API response for this requestId, encoded in
+  /// base64. The field will miss if Sealed Results are disabled or unavailable for another reason.
+  external String? sealedResult;
 }
 
 /// Result of requesting a visitor id when requested with `extendedResponseFormat: true`

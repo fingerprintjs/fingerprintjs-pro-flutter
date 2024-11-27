@@ -16,7 +16,17 @@ void main() {
   const getVisitorDataResponse = {
     "requestId": "test_request_id",
     "visitorId": "test_visitor_id",
-    "confidenceScore": {"score": 0.09}
+    "confidenceScore": {"score": 0.09},
+    "sealedResult": ''
+  };
+
+  const sealedResult = 'test_sealed_result';
+
+  const getVisitorDataResponseWithSealedResult = {
+    "requestId": "test_request_id",
+    "visitorId": "test_visitor_id",
+    "confidenceScore": {"score": 0.09},
+    "sealedResult": sealedResult
   };
 
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -72,7 +82,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorData') {
-          return [requestId, confidence, extendedResultAsJsonString];
+          return [requestId, confidence, extendedResultAsJsonString, null];
         }
         return null;
       });
@@ -100,6 +110,34 @@ void main() {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData(linkedId: linkedId);
       expect(result.toJson(), getVisitorDataResponse);
+    });
+  });
+
+  group('getVisitorDataSealed', () {
+    setUp(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        if (methodCall.method == 'getVisitorData') {
+          return [
+            requestId,
+            confidence,
+            extendedResultAsJsonString,
+            sealedResult
+          ];
+        }
+        return null;
+      });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    test('should return data with sealed result', () async {
+      await FpjsProPlugin.initFpjs(testApiKey);
+      final result = await FpjsProPlugin.getVisitorData();
+      expect(result.toJson(), getVisitorDataResponseWithSealedResult);
     });
   });
 }

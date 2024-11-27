@@ -107,7 +107,8 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 result([
                     visitorDataResponse.requestId,
                     visitorDataResponse.confidence,
-                    visitorDataResponse.asJSON()
+                    visitorDataResponse.asJSON(),
+                    visitorDataResponse.sealedResult
                 ])
             case .failure(let error):
                 self.processNativeLibraryError(error, result: result)

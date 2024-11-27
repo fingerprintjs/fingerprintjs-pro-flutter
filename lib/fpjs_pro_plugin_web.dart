@@ -147,7 +147,8 @@ class FpjsProPluginWeb {
       return [
         typedResult.requestId,
         typedResult.confidenceScore.score,
-        serializedResult
+        serializedResult,
+        typedResult.sealedResult ?? ''
       ];
     } catch (e) {
       if (e is WebException) {

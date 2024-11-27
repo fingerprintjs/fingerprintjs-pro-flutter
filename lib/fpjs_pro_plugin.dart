@@ -80,6 +80,7 @@ class FpjsProPlugin {
 
       final String requestId = visitorDataTuple[0];
       final num confidence = visitorDataTuple[1];
+      final String sealedResult = visitorDataTuple[3] ?? '';
 
       Map<String, dynamic> visitorDataJson;
       if (kIsWeb) {
@@ -91,9 +92,9 @@ class FpjsProPlugin {
 
       final visitorData = _isExtendedResult
           ? FingerprintJSProExtendedResponse.fromJson(
-              visitorDataJson, requestId, confidence)
+              visitorDataJson, requestId, confidence, sealedResult)
           : FingerprintJSProResponse.fromJson(
-              visitorDataJson, requestId, confidence);
+              visitorDataJson, requestId, confidence, sealedResult);
 
       return visitorData as T;
     } on PlatformException catch (exception) {
