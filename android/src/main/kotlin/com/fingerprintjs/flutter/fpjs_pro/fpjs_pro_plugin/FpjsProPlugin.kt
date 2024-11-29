@@ -24,6 +24,7 @@ import com.fingerprintjs.android.fpjs_pro.UnsupportedVersion
 import com.fingerprintjs.android.fpjs_pro.InstallationMethodRestricted
 import com.fingerprintjs.android.fpjs_pro.ResponseCannotBeParsed
 import com.fingerprintjs.android.fpjs_pro.NetworkError
+import com.fingerprintjs.android.fpjs_pro.ClientTimeout
 import com.fingerprintjs.android.fpjs_pro.UnknownError
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -70,7 +71,8 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
       GET_VISITOR_ID -> {
         val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
         val linkedId = call.argument<String>("linkedId") ?: ""
-        getVisitorId(linkedId, tags, { visitorId ->
+        val timeoutMillis = call.argument<Int>("timeoutMs")
+        getVisitorId(timeoutMillis, linkedId, tags, { visitorId ->
           result.success(visitorId)
         }, { errorCode, errorMessage ->
           result.error(errorCode, errorMessage, null)
@@ -79,7 +81,8 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
       GET_VISITOR_DATA -> {
         val tags = call.argument<Map<String, Any>>("tags") ?: emptyMap()
         val linkedId = call.argument<String>("linkedId") ?: ""
-        getVisitorData(linkedId, tags, { getVisitorData ->
+        val timeoutMillis = call.argument<Int>("timeoutMs")
+        getVisitorData(timeoutMillis, linkedId, tags, { getVisitorData ->
           result.success(getVisitorData)
         }, { errorCode, errorMessage ->
           result.error(errorCode, errorMessage, null)
@@ -110,31 +113,53 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun getVisitorId(
+    timeoutMillis: Int?,
     linkedId: String,
     tags: Map<String, Any>,
     listener: (String) -> Unit,
     errorListener: (String, String) -> (Unit)
   ) {
-    fpjsClient.getVisitorId(
-      tags,
-      linkedId,
-      listener = {result -> listener(result.visitorId)},
-      errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
-    )
+    if (timeoutMillis != null) {
+      fpjsClient.getVisitorId(
+        timeoutMillis,
+        tags,
+        linkedId,
+        listener = { result -> listener(result.visitorId) },
+        errorListener = { error -> errorListener(getErrorCode(error), error.description.toString()) }
+      )
+    } else {
+      fpjsClient.getVisitorId(
+        tags,
+        linkedId,
+        listener = { result -> listener(result.visitorId) },
+        errorListener = { error -> errorListener(getErrorCode(error), error.description.toString()) }
+      )
+    }
   }
 
   private fun getVisitorData(
+    timeoutMillis: Int?,
     linkedId: String,
     tags: Map<String, Any>,
     listener: (List<Any>) -> Unit,
     errorListener: (String, String) -> (Unit)
   ) {
-    fpjsClient.getVisitorId(
-      tags,
-      linkedId,
-      listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson, result.sealedResult ?: ""))},
-      errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
-    )
+    if (timeoutMillis != null) {
+      fpjsClient.getVisitorId(
+        timeoutMillis,
+        tags,
+        linkedId,
+        listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson, result.sealedResult ?: ""))},
+        errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
+      )
+    } else {
+      fpjsClient.getVisitorId(
+        tags,
+        linkedId,
+        listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson, result.sealedResult ?: ""))},
+        errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
+      )
+    }
   }
 }
 
@@ -170,6 +195,7 @@ private fun getErrorCode(error: Error): String {
     is InstallationMethodRestricted -> "InstallationMethodRestricted"
     is ResponseCannotBeParsed -> "ResponseCannotBeParsed"
     is NetworkError -> "NetworkError"
+    is ClientTimeout -> "ClientTimeout"
     else -> "UnknownError"
   }
   return errorType

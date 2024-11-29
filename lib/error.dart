@@ -158,6 +158,11 @@ class UnknownError extends FingerprintProError {
   UnknownError(String? message) : super('UnknownError', message);
 }
 
+/// ClientTimeout error
+class ClientTimeoutError extends FingerprintProError {
+  ClientTimeoutError(String? message) : super('ClientTimeoutError', message);
+}
+
 /// Casts error from generic platform type to FingerprintProError
 FingerprintProError unwrapError(PlatformException error) {
   switch (error.code) {
@@ -238,6 +243,9 @@ FingerprintProError unwrapError(PlatformException error) {
       return CspBlockError(error.message);
     case 'IntegrationFailureError':
       return IntegrationFailureError(error.message);
+    case 'ClientTimeout':
+    case 'ClientTimeoutError':
+      return ClientTimeoutError(error.message);
     default:
       return UnknownError(error.message);
   }
