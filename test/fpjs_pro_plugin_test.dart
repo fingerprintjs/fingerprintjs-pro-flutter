@@ -57,6 +57,12 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
+    test('should return visitor id when called with timeout', () async {
+      await FpjsProPlugin.initFpjs(testApiKey);
+      final result = await FpjsProPlugin.getVisitorId(timeoutMs: 1000);
+      expect(result, testVisitorId);
+    });
+
     test('should return visitor id when called without tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorId();
@@ -93,13 +99,19 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('should return visitor id when called without tags', () async {
+    test('should return visitor data when called with timeout', () async {
+      await FpjsProPlugin.initFpjs(testApiKey);
+      final result = await FpjsProPlugin.getVisitorData(timeoutMs: 1000);
+      expect(result.toJson(), getVisitorDataResponse);
+    });
+
+    test('should return visitor data when called without tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData();
       expect(result.toJson(), getVisitorDataResponse);
     });
 
-    test('should return visitor id when called with tags', () async {
+    test('should return visitor data when called with tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData(
           tags: {'sessionId': DateTime.now().millisecondsSinceEpoch});

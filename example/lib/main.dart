@@ -136,6 +136,13 @@ class _MyAppState extends State<MyApp> {
             FpjsProPlugin.getVisitorId(linkedId: 'checkIdWithTag', tags: tags),
         () async => FpjsProPlugin.getVisitorData(
             linkedId: 'checkDataWithTag', tags: tags),
+        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
+        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
+      ];
+
+      var timeoutChecks = [
+        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5),
+        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5)
       ];
 
       for (var check in checks) {
@@ -143,6 +150,16 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           _checksResult += '.';
         });
+      }
+      for (var check in timeoutChecks) {
+        try {
+          await check();
+          throw Exception('Expected timeout error');
+        } on FingerprintProError {
+          setState(() {
+            _checksResult += '!';
+          });
+        }
       }
       setState(() {
         _checksResult = 'Success!';

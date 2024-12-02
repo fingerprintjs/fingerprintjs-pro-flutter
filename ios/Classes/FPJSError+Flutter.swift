@@ -19,6 +19,8 @@ extension FPJSError {
             return ("JsonParsingError", jsonParsingError.localizedDescription)
         case .invalidResponseType:
             return ("InvalidResponseType", description)
+        case .clientTimeout:
+            return ("ClientTimeout", description)
         case .unknownError:
             fallthrough
         @unknown default:
