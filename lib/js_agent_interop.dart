@@ -62,6 +62,10 @@ class IdentificationResult {
 
   /// A confidence score that tells how much the agent is sure about the visitor identifier
   external IdentificationResultConfidenceScore confidence;
+
+  /// Sealed result, which is an encrypted content of the `/events` Server API response for this requestId, encoded in
+  /// base64. The field will miss if Sealed Results are disabled or unavailable for another reason.
+  external String? sealedResult;
 }
 
 /// Result of requesting a visitor id when requested with `extendedResponseFormat: true`
@@ -247,8 +251,16 @@ class FingerprintJSGetOptions {
   /// Adds details about the visitor to the result
   external bool extendedResult;
 
+  /// Controls client-side timeout. Client timeout controls total time (both client-side and server-side) that any
+  /// identification event is allowed to run. It doesn't include time when the page is in background (not visible).
+  /// The value is in milliseconds.
+  external int? get timeout;
+
   external factory FingerprintJSGetOptions(
-      {Object? tag, String? linkedId, bool extendedResult = false});
+      {Object? tag,
+      String? linkedId,
+      int? timeout,
+      bool extendedResult = false});
 }
 
 /// Interop for JS Agent exceptions

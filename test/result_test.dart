@@ -16,14 +16,15 @@ void main() {
 
       extendedJsonMock = {
         "requestId": requestId,
-        "confidenceScore": {"score": confidence}
+        "confidenceScore": {"score": confidence},
+        "sealedResult": ''
       };
       extendedJsonMock.addAll(jsonMock);
     });
 
     test('Check success scenario with full data', () {
-      final responseInstance =
-          FingerprintJSProResponse.fromJson(jsonMock, requestId, confidence);
+      final responseInstance = FingerprintJSProResponse.fromJson(
+          jsonMock, requestId, confidence, '');
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
@@ -31,7 +32,7 @@ void main() {
       jsonMock.remove("visitorId");
       expect(
           () => FingerprintJSProResponse.fromJson(
-              jsonMock, requestId, confidence),
+              jsonMock, requestId, confidence, null),
           throwsA(isA<TypeError>()));
     });
   });
@@ -75,7 +76,8 @@ void main() {
         "requestId": requestId,
         "confidenceScore": {"score": confidence},
         "ipAddress": jsonMock["ip"],
-        "osName": jsonMock["os"]
+        "osName": jsonMock["os"],
+        "sealedResult": null,
       };
       extendedJsonMock.addAll(jsonMock);
       extendedJsonMock.remove('ip');
@@ -84,7 +86,7 @@ void main() {
 
     test('Check success scenario with full data', () {
       final responseInstance = FingerprintJSProExtendedResponse.fromJson(
-          jsonMock, requestId, confidence);
+          jsonMock, requestId, confidence, null);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
@@ -100,7 +102,7 @@ void main() {
       extendedJsonMock["lastSeenAt"] = seenAt;
 
       final responseInstance = FingerprintJSProExtendedResponse.fromJson(
-          jsonMock, requestId, confidence);
+          jsonMock, requestId, confidence, null);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
@@ -108,7 +110,7 @@ void main() {
       jsonMock.remove("visitorId");
       expect(
           () => FingerprintJSProExtendedResponse.fromJson(
-              jsonMock, requestId, confidence),
+              jsonMock, requestId, confidence, null),
           throwsA(isA<TypeError>()));
     });
 
@@ -116,16 +118,16 @@ void main() {
       jsonMock.remove("firstSeenAt");
       expect(
           () => FingerprintJSProExtendedResponse.fromJson(
-              jsonMock, requestId, confidence),
+              jsonMock, requestId, confidence, null),
           throwsA(isA<TypeError>()));
     });
 
     test('Check serialization and deserialization', () {
       final instance = FingerprintJSProExtendedResponse.fromJson(
-          jsonMock, requestId, confidence);
+          jsonMock, requestId, confidence, null);
       final serializedInstance = Map<String, dynamic>.from(instance.toJson());
       final deSerializedInstance = FingerprintJSProExtendedResponse.fromJson(
-          serializedInstance, requestId, confidence);
+          serializedInstance, requestId, confidence, null);
       expect(deSerializedInstance.toJson(), extendedJsonMock);
     });
 
@@ -137,7 +139,7 @@ void main() {
       jsonMock.remove('os');
 
       final responseInstance = FingerprintJSProExtendedResponse.fromJson(
-          jsonMock, requestId, confidence);
+          jsonMock, requestId, confidence, null);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
@@ -145,7 +147,7 @@ void main() {
       jsonMock['ipLocation'] = {};
       extendedJsonMock['ipLocation'] = {};
       final responseInstance = FingerprintJSProExtendedResponse.fromJson(
-          jsonMock, requestId, confidence);
+          jsonMock, requestId, confidence, null);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
@@ -153,7 +155,7 @@ void main() {
       jsonMock.remove('ipLocation');
       extendedJsonMock['ipLocation'] = null;
       final responseInstance = FingerprintJSProExtendedResponse.fromJson(
-          jsonMock, requestId, confidence);
+          jsonMock, requestId, confidence, null);
       expect(responseInstance.toJson(), extendedJsonMock);
     });
   });

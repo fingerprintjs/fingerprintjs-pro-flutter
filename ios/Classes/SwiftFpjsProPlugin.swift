@@ -30,10 +30,10 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
             }
         } else if (call.method == "getVisitorId") {
             let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
-            getVisitorId(metadata, result)
+            getVisitorId(metadata, result, args["timeoutMs"] as? Double)
         } else if (call.method == "getVisitorData") {
             let metadata = prepareMetadata(args["linkedId"] as? String, tags: args["tags"])
-            getVisitorData(metadata, result)
+            getVisitorData(metadata, result, args["timeoutMs"] as? Double)
         }
     }
 
@@ -79,13 +79,13 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         fpjsClient = FingerprintProFactory.getInstance(configuration)
     }
 
-    private func getVisitorId(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
+    private func getVisitorId(_ metadata: Metadata?, _ result: @escaping FlutterResult, _ timeout: Double? = nil) {
         guard let client = fpjsClient else {
             result(FlutterError.init(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
             return
         }
 
-        client.getVisitorId(metadata) { visitorIdResult in
+        let completionHandler: FingerprintPro.VisitorIdBlock = { visitorIdResult in
             switch visitorIdResult {
             case .success(let visitorId):
                 result(visitorId)
@@ -93,25 +93,38 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 self.processNativeLibraryError(error, result: result)
             }
         }
+
+        if let timeout = timeout {
+            client.getVisitorId(metadata, timeout: timeout / 1000, completion: completionHandler)
+        } else {
+            client.getVisitorId(metadata, completion: completionHandler)
+        }
     }
 
-    private func getVisitorData(_ metadata: Metadata?, _ result: @escaping FlutterResult) {
+    private func getVisitorData(_ metadata: Metadata?, _ result: @escaping FlutterResult, _ timeout: Double? = nil) {
         guard let client = fpjsClient else {
             result(FlutterError(code: "undefinedFpClient", message: "You need to call init method first", details: nil))
             return
         }
 
-        client.getVisitorIdResponse(metadata) { visitorIdResponseResult in
+        let completionHandler: FingerprintPro.VisitorIdResponseBlock = { visitorIdResponseResult in
             switch visitorIdResponseResult {
             case .success(let visitorDataResponse):
                 result([
                     visitorDataResponse.requestId,
                     visitorDataResponse.confidence,
-                    visitorDataResponse.asJSON()
+                    visitorDataResponse.asJSON(),
+                    visitorDataResponse.sealedResult
                 ])
             case .failure(let error):
                 self.processNativeLibraryError(error, result: result)
             }
+        }
+
+        if let timeout = timeout {
+            client.getVisitorIdResponse(metadata, timeout: timeout / 1000, completion: completionHandler)
+        } else {
+            client.getVisitorIdResponse(metadata, completion: completionHandler)
         }
     }
 

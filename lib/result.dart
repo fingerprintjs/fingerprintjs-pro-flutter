@@ -14,10 +14,14 @@ class FingerprintJSProResponse {
   /// A confidence score that tells how much the agent is sure about the visitor identifier
   final ConfidenceScore confidenceScore;
 
+  /// Sealed result, which is an encrypted content of the `/events` Server API response for this requestId, encoded in
+  /// base64. The field will miss if Sealed Results are disabled or unavailable for another reason.
+  final String? sealedResult;
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
-  FingerprintJSProResponse.fromJson(
-      Map<String, dynamic> json, this.requestId, num confidence)
+  FingerprintJSProResponse.fromJson(Map<String, dynamic> json, this.requestId,
+      num confidence, this.sealedResult)
       : visitorId = json['visitorId'],
         confidenceScore = ConfidenceScore(confidence);
 
@@ -25,14 +29,16 @@ class FingerprintJSProResponse {
   FingerprintJSProResponse.fromJsObject(dynamic jsObject)
       : visitorId = jsObject.visitorId,
         requestId = jsObject.requestId,
-        confidenceScore = ConfidenceScore(jsObject.confidence.score);
+        confidenceScore = ConfidenceScore(jsObject.confidence.score),
+        sealedResult = jsObject.sealedResult;
 
   /// Serialize instance to JSON Object
   Map toJson() {
     Map fromObject = {
       "requestId": requestId,
       "visitorId": visitorId,
-      "confidenceScore": confidenceScore.toJson()
+      "confidenceScore": confidenceScore.toJson(),
+      "sealedResult": sealedResult
     };
 
     return fromObject;
@@ -76,7 +82,7 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   FingerprintJSProExtendedResponse.fromJson(
-      super.json, super.requestId, super.confidence)
+      super.json, super.requestId, super.confidence, super.sealedResult)
       : visitorFound = json['visitorFound'],
         ipAddress = json['ip'] ?? json['ipAddress'],
         ipLocation = json['ipLocation'] != null
@@ -95,7 +101,9 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   FingerprintJSProExtendedResponse.fromJsObject(super.jsObject)
       : visitorFound = jsObject.visitorFound,
         ipAddress = jsObject.ip,
-        ipLocation = IpLocation.fromJsObject(jsObject.ipLocation),
+        ipLocation = jsObject.ipLocation
+            ? IpLocation.fromJsObject(jsObject.ipLocation)
+            : null,
         osName = jsObject.os,
         osVersion = jsObject.osVersion,
         device = jsObject.device,

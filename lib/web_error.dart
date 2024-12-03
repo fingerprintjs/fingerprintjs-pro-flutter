@@ -29,7 +29,7 @@ FingerprintProError unwrapWebError(WebException error) {
     return FailedError(message);
   }
   if (message == FingerprintJS.ERROR_CLIENT_TIMEOUT) {
-    return RequestTimeoutError(message);
+    return ClientTimeoutError(message);
   }
   if (message == FingerprintJS.ERROR_SERVER_TIMEOUT) {
     return RequestTimeoutError(message);

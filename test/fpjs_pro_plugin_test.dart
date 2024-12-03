@@ -16,7 +16,17 @@ void main() {
   const getVisitorDataResponse = {
     "requestId": "test_request_id",
     "visitorId": "test_visitor_id",
-    "confidenceScore": {"score": 0.09}
+    "confidenceScore": {"score": 0.09},
+    "sealedResult": ''
+  };
+
+  const sealedResult = 'test_sealed_result';
+
+  const getVisitorDataResponseWithSealedResult = {
+    "requestId": "test_request_id",
+    "visitorId": "test_visitor_id",
+    "confidenceScore": {"score": 0.09},
+    "sealedResult": sealedResult
   };
 
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +57,12 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
+    test('should return visitor id when called with timeout', () async {
+      await FpjsProPlugin.initFpjs(testApiKey);
+      final result = await FpjsProPlugin.getVisitorId(timeoutMs: 1000);
+      expect(result, testVisitorId);
+    });
+
     test('should return visitor id when called without tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorId();
@@ -72,7 +88,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorData') {
-          return [requestId, confidence, extendedResultAsJsonString];
+          return [requestId, confidence, extendedResultAsJsonString, null];
         }
         return null;
       });
@@ -83,13 +99,19 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('should return visitor id when called without tags', () async {
+    test('should return visitor data when called with timeout', () async {
+      await FpjsProPlugin.initFpjs(testApiKey);
+      final result = await FpjsProPlugin.getVisitorData(timeoutMs: 1000);
+      expect(result.toJson(), getVisitorDataResponse);
+    });
+
+    test('should return visitor data when called without tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData();
       expect(result.toJson(), getVisitorDataResponse);
     });
 
-    test('should return visitor id when called with tags', () async {
+    test('should return visitor data when called with tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData(
           tags: {'sessionId': DateTime.now().millisecondsSinceEpoch});
@@ -100,6 +122,34 @@ void main() {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData(linkedId: linkedId);
       expect(result.toJson(), getVisitorDataResponse);
+    });
+  });
+
+  group('getVisitorDataSealed', () {
+    setUp(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        if (methodCall.method == 'getVisitorData') {
+          return [
+            requestId,
+            confidence,
+            extendedResultAsJsonString,
+            sealedResult
+          ];
+        }
+        return null;
+      });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    test('should return data with sealed result', () async {
+      await FpjsProPlugin.initFpjs(testApiKey);
+      final result = await FpjsProPlugin.getVisitorData();
+      expect(result.toJson(), getVisitorDataResponseWithSealedResult);
     });
   });
 }
