@@ -1,3 +1,19 @@
+## [3.3.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.2.0...v3.3.0) (2024-12-03)
+
+
+### Features
+
+* add `sealedResult` support ([5dec0bf](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/5dec0bf9893976bbe3c62ad41863dd7cec84c3fc))
+* add `timeoutMs` argument for `getVisitorId` and `getVisitorData` methods ([822504a](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/822504aadc140f180bcb60188f841af4dff1e06c))
+* use Fingerprint Pro Android v2.7.0 ([d2f24f2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/d2f24f20a7758953e88f416d24cf880be66dfa7b))
+* use Fingerprint Pro iOS v2.7.0 ([7144b0a](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/7144b0ada6cd466d63670c1403da192ed38b3246))
+* use Fingerprint Pro JSAgent loader v3.11.3 ([b789fb0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/b789fb01c36978f2d51cab507b652f7cabb5b3a7))
+
+
+### Bug Fixes
+
+* fix JSAgent issue with empty `ipLocation` ([ae53e8b](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/ae53e8b0f58995383f2cb852e93e0cf72bf32cdf))
+
 ## [3.2.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.1.0...v3.2.0) (2024-10-08)
 
 
