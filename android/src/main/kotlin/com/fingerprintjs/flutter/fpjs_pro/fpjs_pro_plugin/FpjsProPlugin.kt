@@ -106,7 +106,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
       endpoint ?: region?.endpointUrl ?: Configuration.Region.US.endpointUrl,
       extendedResponseFormat,
       endpointFallbacks ?: emptyList(),
-      listOf(Pair("fingerprintjs-pro-flutter", pluginVersion))
+      listOf(Pair("fingerprint-pro-flutter", pluginVersion))
     )
 
     fpjsClient = factory.createInstance(configuration)
