@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.0...v3.3.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* make integration info name consistent through all platforms ([8128cf4](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/8128cf474166d44c7fe3540f732f86bbbf3cc291))
+
 ## [3.3.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.2.0...v3.3.0) (2024-12-03)
 
 
