@@ -176,6 +176,22 @@ void identify() async {
 }
 ```
 
+### Specifying a custom timeout
+
+*Default timeout value:*
+- iOS: 60 seconds
+- Android: not specified
+- Web: 10 seconds
+
+You can override the default timeout with a custom value of your choice. If the `getVisitorId()` or `getVisitorData()` call does not complete within the specified (or default) timeout, you will receive a `ClientTimeoutError` error.
+
+```dart
+void identify() async {
+  visitorId = await FpjsProPlugin.getVisitorId(timeoutMs: 10000);
+  deviceData = await FpjsProPlugin.getVisitorData(timeoutMs: 10000);
+}
+```
+
 ## Additional Resources
 - [Server-to-Server API](https://dev.fingerprint.com/docs/server-api)
 - [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
