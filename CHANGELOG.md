@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.1...v3.3.2) (2024-12-09)
+
+
+### Documentation
+
+* **README:** add how to specify a custom timeout block ([66fb0bd](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/66fb0bd615a13245418d4101e8ced1c95d32e9c9))
+
 ## [3.3.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.0...v3.3.1) (2024-12-05)
 
 
