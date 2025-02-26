@@ -6,7 +6,7 @@ repository: https://github.com/fingerprintjs/fingerprintjs-pro-flutter
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=2.5.0"
+  flutter: ">=3.13.0"
 
 dependencies:
   flutter:
