@@ -1,0 +1,36 @@
+{
+  "name": "fpjs_pro_plugin",
+  "version": "3.3.2",
+  "summary": "Flutter plugin for FingerprintJS Pro.",
+  "description": "Flutter plugin for FingerprintJS Pro.",
+  "homepage": "https://github.com/fingerprintjs/fingerprintjs-pro-flutter",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "FingerprintJS, Inc (https://fingerprint.com)": "boris.lobanov@fingerprintjs.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "Flutter": [],
+    "FingerprintPro": [
+      ">= 2.7.0",
+      "< 3.0.0"
+    ]
+  },
+  "platforms": {
+    "ios": "13.0"
+  },
+  "xcconfig": {
+    "LIBRARY_SEARCH_PATHS": "\"${PROJECT_DIR}/..\"/*"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES",
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": "i386"
+  },
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
+}
