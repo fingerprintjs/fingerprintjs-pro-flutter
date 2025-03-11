@@ -1,3 +1,8 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
 group 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
 version '3.3.2'
 
@@ -8,11 +13,6 @@ rootProject.allprojects {
         maven { url 'https://maven.fpregistry.io/releases' }
         maven { url 'https://jitpack.io' }
     }
-}
-
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
 }
 
 android {
