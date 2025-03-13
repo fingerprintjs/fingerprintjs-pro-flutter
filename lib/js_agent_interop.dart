@@ -4,13 +4,13 @@
 @JS('FingerprintJSFlutter')
 library fingerprint_js;
 
-import 'package:js/js.dart';
+import 'dart:js_interop';
 
 /// FingerprintJS Pro library namespace
-@JS('FingerprintJS')
-class FingerprintJS {
+extension type FingerprintJS._(JSObject _) implements JSObject {
   /// Loads JS Agent script to the webpage and initialize it
-  external static Future<FingerprintJSAgent> load(FingerprintJSOptions options);
+  external static JSPromise<FingerprintJSAgent> load(
+      FingerprintJSOptions options);
   external static String get ERROR_NETWORK_CONNECTION;
   external static String get ERROR_NETWORK_ABORT;
   external static String get ERROR_API_KEY_MISSING;
@@ -35,21 +35,17 @@ class FingerprintJS {
 }
 
 /// FingerprintJS Pro [JavaScript agent](https://dev.fingerprint.com/docs/js-agent)
-@JS()
-@anonymous
-class FingerprintJSAgent {
+extension type FingerprintJSAgent._(JSObject _) implements JSObject {
   /// Gets the visitor identifier.
   /// When an error is emitted by the backend, it gets a `requestId` field, same as in successful result.
-  external Future<IdentificationResult> get(FingerprintJSGetOptions options);
+  external JSPromise<IdentificationResult> get(FingerprintJSGetOptions options);
 }
 
 /// Result of getting a visitor id.
 ///
 /// `visitorId` can be empty string when the visitor can't be identified.
 /// It happens only with bots and hackers that modify their browsers.
-@JS()
-@anonymous
-class IdentificationResult {
+extension type IdentificationResult._(JSObject _) implements JSObject {
   /// The visitor identifier
   external String visitorId;
 
@@ -69,9 +65,8 @@ class IdentificationResult {
 }
 
 /// Result of requesting a visitor id when requested with `extendedResponseFormat: true`
-@JS()
-@anonymous
-class IdentificationExtendedResult extends IdentificationResult {
+extension type IdentificationExtendedResult._(IdentificationResult _)
+    implements IdentificationResult {
   /// Whether the visitor is in incognito/private mode
   external bool incognito;
 
@@ -105,9 +100,8 @@ class IdentificationExtendedResult extends IdentificationResult {
 }
 
 /// A confidence score that tells how much the agent is sure about the visitor identifier
-@JS()
-@anonymous
-class IdentificationResultConfidenceScore {
+extension type IdentificationResultConfidenceScore._(JSObject _)
+    implements JSObject {
   /// A number between 0 and 1 that tells how much the agent is sure about the visitor identifier.
   /// The higher the number, the higher the chance of the visitor identifier to be true.
   external num score;
@@ -117,9 +111,8 @@ class IdentificationResultConfidenceScore {
 }
 
 /// IP address location. Can be empty for anonymous proxies.
-@JS()
-@anonymous
-class IdentificationResultIpLocation {
+extension type IdentificationResultIpLocation._(JSObject _)
+    implements JSObject {
   /// IP address location detection radius. Smaller values (<50mi) are business/residential,
   /// medium values (50 < x < 500) are cellular towers (usually),
   /// larger values (>= 500) are cloud IPs or proxies, VPNs.
@@ -152,45 +145,36 @@ class IdentificationResultIpLocation {
   /// Administrative subdivisions array (for example states|provinces -> counties|parishes).
   /// Can be empty or missing.
   /// When not empty, can contain only top-level administrative units within a country, e.g. a state.
-  external List<IdentificationResultSubdivision>? subdivisions;
+  external JSArray<IdentificationResultSubdivision>? subdivisions;
 }
 
 /// City, when available
-@JS()
-@anonymous
-class IdentificationResultCity {
+extension type IdentificationResultCity._(JSObject _) implements JSObject {
   external String name;
 }
 
 /// Country, when available. Will be missing for Tor/anonymous proxies.
-@JS()
-@anonymous
-class IdentificationResultCountry {
+extension type IdentificationResultCountry._(JSObject _) implements JSObject {
   external String code;
   external String name;
 }
 
 /// Continent, when available. Will be missing for Tor/anonymous proxies.
-@JS()
-@anonymous
-class IdentificationResultContinent {
+extension type IdentificationResultContinent._(JSObject _) implements JSObject {
   external String code;
   external String name;
 }
 
 /// Administrative subdivision (for example states|provinces -> counties|parishes).
 /// Can contain only top-level administrative units within a country, e.g. a state.
-@JS()
-@anonymous
-class IdentificationResultSubdivision {
+extension type IdentificationResultSubdivision._(JSObject _)
+    implements JSObject {
   external String isoCode;
   external String name;
 }
 
 /// When the visitor was seen
-@JS()
-@anonymous
-class IdentificationResultStSeenAt {
+extension type IdentificationResultStSeenAt._(JSObject _) implements JSObject {
   /// The date and time across all subscription. The string format is ISO-8601.
   external String? global;
 
@@ -199,24 +183,22 @@ class IdentificationResultStSeenAt {
 }
 
 /// Options that need to load JS Agent
-@JS()
-@anonymous
-class FingerprintJSOptions {
+extension type FingerprintJSOptions._(JSObject _) implements JSObject {
   /// Public API key
   external String get apiKey;
 
   /// Information about libraries and services used to integrate the JS agent.
   /// Each array item means a separate integration, the order doesn't matter.
   /// An example of an integration library is FingerprintJS Pro React.
-  external List<String> get integrationInfo;
+  external JSArray<JSString> get integrationInfo;
 
   /// Region of the FingerprintJS service server
   external String? get region;
   external set region(String? region);
 
   /// Your custom API endpoint for getting visitor data.
-  external List<String>? get endpoint;
-  external set endpoint(List<String>? endpoint);
+  external JSArray<JSString>? get endpoint;
+  external set endpoint(JSArray<JSString>? endpoint);
 
   /// A JS agent script URL pattern.
   ///
@@ -224,17 +206,15 @@ class FingerprintJSOptions {
   /// - <version> — the major version of JS agent;
   /// - <apiKey> — the public key set via the `apiKey` option;
   /// - <loaderVersion> — the version of this package;
-  external List<String>? get scriptUrlPattern;
-  external set scriptUrlPattern(List<String>? scriptUrlPattern);
+  external JSArray<JSString>? get scriptUrlPattern;
+  external set scriptUrlPattern(JSArray<JSString>? scriptUrlPattern);
 
   external factory FingerprintJSOptions(
-      {String apiKey, List<String> integrationInfo});
+      {String apiKey, JSArray<JSString> integrationInfo});
 }
 
 /// Options of getting a visitor identifier.
-@JS()
-@anonymous
-class FingerprintJSGetOptions {
+extension type FingerprintJSGetOptions._(JSObject _) implements JSObject {
   /// `Tag` is a user-provided value or object that will be returned back to you in a webhook message.
   /// You may want to use the `tag` value to be able to associate a server-side webhook event with a web request of the
   /// current visitor.
@@ -242,7 +222,7 @@ class FingerprintJSGetOptions {
   /// What values can be used as a `tag`?
   /// Anything that identifies a visitor or a request.
   /// You can pass the requestId as a `tag` and then get this requestId back in the webhook, associated with a visitorId.
-  external Map<String, dynamic>? get tag;
+  external JSObject? get tag;
 
   /// `linkedId` is a way of linking current identification event with a custom identifier.
   /// This can be helpful to be able to filter API visit information later.
@@ -257,16 +237,11 @@ class FingerprintJSGetOptions {
   external int? get timeout;
 
   external factory FingerprintJSGetOptions(
-      {Object? tag,
-      String? linkedId,
-      int? timeout,
-      bool extendedResult = false});
+      {JSObject? tag, String? linkedId, int? timeout, bool extendedResult});
 }
 
 /// Interop for JS Agent exceptions
-@JS()
-@anonymous
-class WebException {
+extension type WebException._(JSObject _) implements JSObject {
   external String get message;
   external String? get requestId;
 }

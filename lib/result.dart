@@ -18,19 +18,16 @@ class FingerprintJSProResponse {
   /// base64. The field will miss if Sealed Results are disabled or unavailable for another reason.
   final String? sealedResult;
 
+  /// Default constructor
+  FingerprintJSProResponse(
+      this.requestId, this.visitorId, this.confidenceScore, this.sealedResult);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   FingerprintJSProResponse.fromJson(Map<String, dynamic> json, this.requestId,
       num confidence, this.sealedResult)
       : visitorId = json['visitorId'],
         confidenceScore = ConfidenceScore(confidence);
-
-  /// Creates class instance from JavaScript object
-  FingerprintJSProResponse.fromJsObject(dynamic jsObject)
-      : visitorId = jsObject.visitorId,
-        requestId = jsObject.requestId,
-        confidenceScore = ConfidenceScore(jsObject.confidence.score),
-        sealedResult = jsObject.sealedResult;
 
   /// Serialize instance to JSON Object
   Map toJson() {
@@ -79,6 +76,21 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
   /// When the visitor was seen previous time
   final StSeenAt lastSeenAt;
 
+  /// Default constructor
+  FingerprintJSProExtendedResponse(
+      super.requestId,
+      super.visitorId,
+      super.confidenceScore,
+      super.sealedResult,
+      this.visitorFound,
+      this.ipAddress,
+      this.ipLocation,
+      this.osName,
+      this.osVersion,
+      this.device,
+      this.firstSeenAt,
+      this.lastSeenAt);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   FingerprintJSProExtendedResponse.fromJson(
@@ -96,20 +108,6 @@ class FingerprintJSProExtendedResponse extends FingerprintJSProResponse {
         lastSeenAt =
             StSeenAt.fromJson(Map<String, dynamic>.from(json['lastSeenAt'])),
         super.fromJson();
-
-  /// Creates class instance from JavaScript object
-  FingerprintJSProExtendedResponse.fromJsObject(super.jsObject)
-      : visitorFound = jsObject.visitorFound,
-        ipAddress = jsObject.ip,
-        ipLocation = jsObject.ipLocation
-            ? IpLocation.fromJsObject(jsObject.ipLocation)
-            : null,
-        osName = jsObject.os,
-        osVersion = jsObject.osVersion,
-        device = jsObject.device,
-        firstSeenAt = StSeenAt.fromJsObject(jsObject.firstSeenAt),
-        lastSeenAt = StSeenAt.fromJsObject(jsObject.lastSeenAt),
-        super.fromJsObject();
 
   /// Serialize instance to JSON Object
   @override
@@ -136,6 +134,7 @@ class ConfidenceScore {
   /// The higher the number, the higher the chance of the visitor identifier to be true.
   final num score;
 
+  /// Default constructor
   ConfidenceScore(this.score);
 
   /// Serialize instance to JSON Object
@@ -184,6 +183,18 @@ class IpLocation {
   /// When not empty, can contain only top-level administrative units within a country, e.g. a state.
   final List<Subdivision>? subdivisions;
 
+  /// Default constructor
+  IpLocation(
+      this.accuracyRadius,
+      this.latitude,
+      this.longitude,
+      this.postalCode,
+      this.timezone,
+      this.city,
+      this.country,
+      this.continent,
+      this.subdivisions);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   IpLocation.fromJson(Map<String, dynamic> json)
@@ -206,19 +217,6 @@ class IpLocation {
                 (subdivision) => Subdivision.fromJson(
                     Map<String, dynamic>.from(subdivision))))
             : null;
-
-  /// Creates class instance from JavaScript object
-  IpLocation.fromJsObject(dynamic jsObject)
-      : accuracyRadius = jsObject.accuracyRadius,
-        latitude = jsObject.latitude,
-        longitude = jsObject.longitude,
-        postalCode = jsObject.postalCode,
-        timezone = jsObject.timezone,
-        city = City.fromJsObject(jsObject.city),
-        country = Country.fromJsObject(jsObject.country),
-        continent = Continent.fromJsObject(jsObject.continent),
-        subdivisions = List<Subdivision>.from((jsObject.subdivisions as List)
-            .map((subdivision) => Subdivision.fromJsObject(subdivision)));
 
   /// Serialize instance to JSON Object
   Map toJson() {
@@ -245,12 +243,12 @@ class IpLocation {
 class City {
   final String name;
 
+  /// Default constructor
+  City(this.name);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   City.fromJson(Map<String, dynamic> json) : name = json['name'];
-
-  /// Creates class instance from JavaScript object
-  City.fromJsObject(dynamic jsObject) : name = jsObject.name;
 
   /// Serialize instance to JSON Object
   Map toJson() {
@@ -267,16 +265,14 @@ class Country {
   final String code;
   final String name;
 
+  /// Default constructor
+  Country(this.code, this.name);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   Country.fromJson(Map<String, dynamic> json)
       : code = json['code'],
         name = json['name'];
-
-  /// Creates class instance from JavaScript object
-  Country.fromJsObject(dynamic jsObject)
-      : code = jsObject.code,
-        name = jsObject.name;
 
   /// Serialize instance to JSON Object
   Map toJson() {
@@ -294,16 +290,14 @@ class Continent {
   final String code;
   final String name;
 
+  /// Default constructor
+  Continent(this.code, this.name);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   Continent.fromJson(Map<String, dynamic> json)
       : code = json['code'],
         name = json['name'];
-
-  /// Creates class instance from JavaScript object
-  Continent.fromJsObject(dynamic jsObject)
-      : code = jsObject.code,
-        name = jsObject.name;
 
   /// Serialize instance to JSON Object
   Map toJson() {
@@ -322,16 +316,14 @@ class Subdivision {
   final String isoCode;
   final String name;
 
+  /// Default constructor
+  Subdivision(this.isoCode, this.name);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   Subdivision.fromJson(Map<String, dynamic> json)
       : isoCode = json['isoCode'],
         name = json['name'];
-
-  /// Creates class instance from JavaScript object
-  Subdivision.fromJsObject(dynamic jsObject)
-      : isoCode = jsObject.isoCode,
-        name = jsObject.name;
 
   /// Serialize instance to JSON Object
   Map toJson() {
@@ -349,16 +341,14 @@ class StSeenAt {
   final String? global;
   final String? subscription;
 
+  /// Default constructor
+  StSeenAt(this.global, this.subscription);
+
   /// Creates class instance from JSON Object
   /// that can be returned by Android or iOS agent, or can be a serialization result
   StSeenAt.fromJson(Map<String, dynamic> json)
       : global = json['global'],
         subscription = json['subscription'];
-
-  /// Creates class instance from JavaScript object
-  StSeenAt.fromJsObject(dynamic jsObject)
-      : global = jsObject.global,
-        subscription = jsObject.subscription;
 
   /// Serialize instance to JSON Object
   Map toJson() {
