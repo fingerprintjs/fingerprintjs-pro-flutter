@@ -31,24 +31,20 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _deviceId = 'Unknown';
-  String _checksResult = 'Not runned';
-  final String _apiKey = dotenv.env['API_KEY'] ?? 'test_api_key';
-  final bool _useProxyIntegration = dotenv.env['PROXY_INTEGRATION_PATH'] != '';
-  final String _proxyIntegrationPath =
-      dotenv.env['PROXY_INTEGRATION_PATH'] ?? 'no_proxy_integration';
-  final String _proxyIntegrationRequestPath =
-      dotenv.env['PROXY_INTEGRATION_REQUEST_PATH'] ?? 'no_proxy_integration';
-  final String _proxyIntegrationScriptPath =
-      dotenv.env['PROXY_INTEGRATION_SCRIPT_PATH'] ?? 'no_proxy_integration';
-  final String _region = dotenv.env['REGION'] ?? 'us';
+  String _checksResult = 'Not run';
+  String? _initializationError;
+  final String? _apiKey = dotenv.env['API_KEY'];
+  final String? _region = dotenv.env['REGION'];
+  final String? _endpoint = dotenv.env['ENDPOINT'];
+  final String? _scriptUrlPattern = dotenv.env['SCRIPT_URL_PATTERN'];
 
   @override
   void initState() {
     super.initState();
-    _initFpjs(_apiKey);
+    _initFpjs();
   }
 
-  Region? _parseRegion(String region) {
+  Region? _parseRegion(String? region) {
     switch (region) {
       case 'us':
         return Region.us;
@@ -60,21 +56,23 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  Future<void> _initFpjs(String apiToken) async {
-    if (_useProxyIntegration) {
-      final region = _parseRegion(_region);
-      final regionQueryParam = (region != null && region != Region.us)
-          ? "?region=${region.stringValue}"
-          : '';
-      await FpjsProPlugin.initFpjs(apiToken,
-          extendedResponseFormat: true,
-          endpoint:
-              "$_proxyIntegrationPath/$_proxyIntegrationRequestPath$regionQueryParam",
-          scriptUrlPattern:
-              "$_proxyIntegrationPath/$_proxyIntegrationScriptPath",
-          region: region);
-    } else {
-      await FpjsProPlugin.initFpjs(apiToken, extendedResponseFormat: true);
+  Future<void> _initFpjs() async {
+    try {
+      if (_apiKey == null) {
+        throw Exception('Set the API_KEY environment variable');
+      }
+      // Must use ! because field promotion only available in Dart >3.2
+      // https://dart.dev/tools/non-promotion-reasons#language-version
+      await FpjsProPlugin.initFpjs(_apiKey!,
+          endpoint: _endpoint,
+          scriptUrlPattern: _scriptUrlPattern,
+          region: _parseRegion(_region),
+          extendedResponseFormat: true);
+    } catch (error) {
+      setState(() {
+        print('Failed to initialize Fingerprint agent: $error');
+        _initializationError = 'Failed to initialize Fingerprint agent: $error';
+      });
     }
   }
 
@@ -87,8 +85,8 @@ class _MyAppState extends State<MyApp> {
       deviceId = await FpjsProPlugin.getVisitorId(
               tags: tags, linkedId: 'some linkedId') ??
           'Unknown';
-    } on FingerprintProError {
-      deviceId = 'Failed to get device id.';
+    } catch (error) {
+      deviceId = 'Failed to get device id: $error';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -181,6 +179,7 @@ class _MyAppState extends State<MyApp> {
         body: Center(
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          if (_initializationError != null) Text(_initializationError!),
           ElevatedButton(
               onPressed: () => _runChecks(), child: const Text('Run tests!')),
           Text('Checks result: $_checksResult\n'),
