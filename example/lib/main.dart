@@ -18,7 +18,9 @@ const tags = {
 };
 
 Future main() async {
-  await dotenv.load();
+  // Explicitly define which files to load to avoid 
+  // console warnings about not finding other possible .env files
+  await dotenv.load(fileNames: ['.env', '.env.local']);
   runApp(const MyApp());
 }
 
@@ -58,7 +60,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initFpjs() async {
     try {
-      if (_apiKey == null) {
+      if (_apiKey == null || _apiKey!.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
       // Must use ! because field promotion only available in Dart >3.2
