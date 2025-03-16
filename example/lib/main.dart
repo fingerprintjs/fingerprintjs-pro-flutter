@@ -71,8 +71,8 @@ class _MyAppState extends State<MyApp> {
           region: _parseRegion(_region),
           extendedResponseFormat: true);
     } catch (error) {
+      // print('Failed to initialize Fingerprint agent: $error');
       setState(() {
-        print('Failed to initialize Fingerprint agent: $error');
         _initializationError = 'Failed to initialize Fingerprint agent: $error';
       });
     }
