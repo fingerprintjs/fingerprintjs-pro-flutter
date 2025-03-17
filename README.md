@@ -169,7 +169,7 @@ class _MyAppState extends State<MyApp> {
 
 
 By default, `getVisitorData()` will return a short response (`FingerprintJSProResponse`).
-Pass `extendedResponseFormat: true` to the `initFpjs` function to get an extended response (`FingerprintJSProExtendedResponse`) with .
+Pass `extendedResponseFormat: true` to the `initFpjs` function to get an extended response (`FingerprintJSProExtendedResponse`).
 
 ```dart
 void doInit() async {
