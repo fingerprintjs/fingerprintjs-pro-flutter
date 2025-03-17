@@ -118,7 +118,7 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://dev.fingerprint.com/docs/evading-adblockers) for more information.
+To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://dev.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers) for more information.
 
 To use a proxy integration, you can configure `endpoint`, `scriptUrlPattern` and their fallbacks.
 
