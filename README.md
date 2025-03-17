@@ -18,7 +18,7 @@
 
 [Fingerprint](https://fingerprint.com/) is a device intelligence platform offering visitor
 identification and device intelligence with industry-leading accuracy. Fingerprint Flutter SDK is an easy way to integrate Fingerprint into your Flutter
-application. The plugin allows you to call the underlying native Fingerprint agents (Android, iOS and Web) and identify devices.
+application. The plugin allows you to call the underlying native Fingerprint agents (Android, iOS, and Web) and identify devices.
 
 ## Table of contents
 - [Fingerprint Pro Flutter](#fingerprint-pro-flutter)
@@ -120,7 +120,7 @@ class _MyAppState extends State<MyApp> {
 
 To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://dev.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers) for more information.
 
-To use a proxy integration, you can configure `endpoint`, `scriptUrlPattern` and their fallbacks.
+To use a proxy integration, you can configure `endpoint`, `scriptUrlPattern`, and their fallbacks.
 
 ```dart
  void doInit() async {
@@ -216,7 +216,7 @@ void identify() async {
 
 ## Support and feedback
 
-To report problems, ask questions or provide feedback, please
+To report problems, ask questions, or provide feedback, please
 use [Issues](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues). If you need private support, please
 email us at `oss-support@fingerprint.com`.
 
