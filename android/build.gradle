@@ -1,3 +1,5 @@
+apply from: 'fingerprint.gradle'
+
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
@@ -41,5 +43,5 @@ android {
 }
 
 dependencies {
-    implementation "com.fingerprint.android:pro:[2.7.0, 3.0.0)"
+    implementation "com.fingerprint.android:pro:$fingerprint_native_sdk_version"
 }
