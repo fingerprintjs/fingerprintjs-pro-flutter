@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:js_util';
+import 'dart:js_interop';
 
 // In order to *not* need this ignore, consider extracting the "web" version
 // of your plugin as a separate package, instead of inlining it in the same
@@ -11,6 +11,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/web_error.dart';
+import 'package:fpjs_pro_plugin/web_result.dart';
 
 import 'js_agent_interop.dart';
 
@@ -65,7 +66,7 @@ class FpjsProPluginWeb {
       apiKey: call.arguments['apiToken'],
       integrationInfo: [
         "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"
-      ],
+      ] as JSArray<JSString>,
     );
     if (call.arguments['region'] != null) {
       options.region = call.arguments['region'];
@@ -74,16 +75,16 @@ class FpjsProPluginWeb {
       options.endpoint = [
         call.arguments['endpoint'],
         ...(call.arguments['endpointFallbacks'] ?? [])
-      ];
+      ] as JSArray<JSString>;
     }
     if (call.arguments['scriptUrlPattern'] != null) {
       options.scriptUrlPattern = [
         call.arguments['scriptUrlPattern'],
         ...(call.arguments['scriptUrlPatternFallbacks'] ?? [])
-      ];
+      ] as JSArray<JSString>;
     }
     try {
-      _fpPromise = promiseToFuture(FingerprintJS.load(options));
+      _fpPromise = FingerprintJS.load(options).toDart;
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
@@ -101,7 +102,7 @@ class FpjsProPluginWeb {
   /// Support [timeoutMs](https://dev.fingerprint.com/reference/get-function#timeout)
   /// Throws a [FingerprintProError] if identification request fails for any reason
   static Future<String?> getVisitorId(
-      {Object? tags, String? linkedId, int? timeoutMs}) async {
+      {JSObject? tags, String? linkedId, int? timeoutMs}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
@@ -109,8 +110,10 @@ class FpjsProPluginWeb {
 
     try {
       FingerprintJSAgent fp = await (_fpPromise as Future<FingerprintJSAgent>);
-      var result = await promiseToFuture(fp.get(FingerprintJSGetOptions(
-          linkedId: linkedId, tag: tags, timeout: timeoutMs)));
+      var result = await fp
+          .get(FingerprintJSGetOptions(
+              linkedId: linkedId, tag: tags, timeout: timeoutMs))
+          .toDart;
       return result.visitorId;
     } catch (e) {
       if (e is WebException) {
@@ -127,7 +130,7 @@ class FpjsProPluginWeb {
   /// Support [timeoutMs](https://dev.fingerprint.com/reference/get-function#timeout)
   /// Throws a [FingerprintProError] if identification request fails for any reason
   static Future<List<Object>> getVisitorData(
-      {Object? tags, String? linkedId, int? timeoutMs}) async {
+      {JSObject? tags, String? linkedId, int? timeoutMs}) async {
     if (!_isInitialized) {
       throw Exception(
           'You need to initialize the FPJS Client first by calling the "initFpjs" method');
@@ -139,16 +142,15 @@ class FpjsProPluginWeb {
           tag: tags,
           timeout: timeoutMs,
           extendedResult: _isExtendedResult);
-      final IdentificationResult result =
-          await promiseToFuture(fp.get(getOptions));
+      final IdentificationResult result = await fp.get(getOptions).toDart;
 
       FingerprintJSProResponse typedResult;
 
       if (_isExtendedResult) {
-        typedResult = FingerprintJSProExtendedResponse.fromJsObject(
+        typedResult = FingerprintJSProExtendedResponseWeb.fromJsObject(
             result as IdentificationExtendedResult);
       } else {
-        typedResult = FingerprintJSProResponse.fromJsObject(result);
+        typedResult = FingerprintJSProResponseWeb.fromJsObject(result);
       }
 
       final serializedResult = typedResult.toJson();
@@ -169,6 +171,9 @@ class FpjsProPluginWeb {
 }
 
 /// Casts [tags](https://dev.fingerprint.com/docs/quick-start-guide#tagging-your-requests) from Dart Object to JavaScript Object
-Object? getTags(Object? tags) {
-  return tags != null ? jsify(tags) : null;
+JSObject? getTags(Object? tags) {
+  if (tags != null && tags is Map) {
+    return tags.jsify() as JSObject;
+  }
+  return null;
 }

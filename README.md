@@ -15,32 +15,43 @@
 </p>
 
 # Fingerprint Pro Flutter
-[Fingerprint](https://fingerprint.com/) is a device intelligence platform offering 99.5% accurate visitor
-identification. Fingerprint Pro Flutter SDK is an easy way to integrate Fingerprint Pro into your Flutter
-application to call the native Fingerprint Pro libraries (Android, iOS and Web) and identify devices.
+
+[Fingerprint](https://fingerprint.com/) is a device intelligence platform offering visitor
+identification and device intelligence with industry-leading accuracy. Fingerprint Flutter SDK is an easy way to integrate Fingerprint into your Flutter
+application. The plugin allows you to call the underlying native Fingerprint agents (Android, iOS, and Web) and identify devices.
 
 ## Table of contents
-* [Requirements](#requirements)
-* [Dependencies](#dependencies)
-* [How to install](#how-to-install)
-* [Usage](#usage)
-* [Additional Resources](#additional-resources)
-* [Support and feedback](#support-and-feedback)
-* [License](#license)
+- [Fingerprint Pro Flutter](#fingerprint-pro-flutter)
+  - [Table of contents](#table-of-contents)
+  - [Requirements](#requirements)
+  - [Dependencies](#dependencies)
+  - [How to install](#how-to-install)
+    - [Web platform (Optional)](#web-platform-optional)
+  - [Usage](#usage)
+    - [1. Configure and initialize the plugin](#1-configure-and-initialize-the-plugin)
+    - [2. Identify visitors](#2-identify-visitors)
+    - [Linking and tagging information](#linking-and-tagging-information)
+    - [Specifying a custom timeout](#specifying-a-custom-timeout)
+  - [Additional Resources](#additional-resources)
+  - [Support and feedback](#support-and-feedback)
+  - [License](#license)
 
 ## Requirements
-- Flutter 3.10 or higher
+- Flutter 3.13 or higher
+- Dart 3.3 or higher
 - Android 5.0 (API level 21+) or higher
 - iOS 13+/tvOS 15+, Swift 5.7 or higher (stable releases)
 
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
 ## Dependencies
-- [Fingerprint Pro iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
-- [Fingerprint Pro Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
+- [Fingerprint JavaScript agent](https://www.npmjs.com/package/@fingerprintjs/fingerprintjs-pro)
+- [Fingerprint iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
+- [Fingerprint Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
 
 ## How to install
-Add `fpjs_pro_plugin` to the pubspec.yaml in your Flutter app:
+
+Add `fpjs_pro_plugin` to the `pubspec.yaml` file in your Flutter app:
 
 ```yaml
 dependencies:
@@ -50,27 +61,44 @@ dependencies:
   fpjs_pro_plugin: ^3.3.2
 ```
 
-Run `pub get` to download and install the package.
+Run `flutter pub get` to download and install the package.
 
-### Web platform
+### Web platform (Optional)
 
-Add a `<script>` tag with the JS agent loader inside the `<head>` tag in your HTML template to use `fpjs_pro_plugin`:
+To use this plugin on the web, add the JavaScript agent loader `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
 
 ```html
-<script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
+<head>
+  <!-- ... -->
+  <script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
+</head>
 ```
 
 ## Usage
-To identify visitors, you need a Fingerprint Pro account (you can [sign up for free](https://dashboard.fingerprintjs.com/signup/)).
+
+To identify visitors, you need to [sign up for a Fingerprint account](https://dashboard.fingerprintjs.com/signup/) (there is a free trial available).
 
 - Go to [the Fingerprint Pro dashboard](https://dashboard.fingerprint.com/).
 - Navigate to **App Settings** > **API Keys** to find your _Public_ API Key.
 
-### 1. Configure the plugin
+### 1. Configure and initialize the plugin
+
+Initialize the Fingerprint Flutter plugin inside a [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html), for example, in the `initState` method. 
+
+Use the [Public API key](https://dev.fingerprint.com/docs/quick-start-guide#2-get-your-api-key) and [region](https://dev.fingerprint.com/docs/regions) of your Fingerprint workspace (US region is used by default).
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-// ...
+import 'package:fpjs_pro_plugin/region.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
 // Initialization
 class _MyAppState extends State<MyApp> {
@@ -82,80 +110,70 @@ class _MyAppState extends State<MyApp> {
   
   void doInit() async {
     await FpjsProPlugin.initFpjs(
-      '<apiKey>' // insert your actual API key here
+      '<PUBLIC_API_KEY>', // insert your API key here
+      region: Region.us // or Region.eu, Region.ap
     );
   }
   // ...
 }
 ```
 
-You can also configure `region`, `endpoint` and `endpointFallbacks` in the `initFpjs` method, like below. For the web platform, you can use an additional `scriptUrlPattern` and `scriptUrlPatternFallbacks` properties to specify a custom URL for loading the JavaScript agent. This is required for proxy integrations.
+To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://dev.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers) for more information.
+
+To use a proxy integration, you can configure `endpoint`, `scriptUrlPattern`, and their fallbacks.
+
 ```dart
-void doInit() async {
-  await FpjsProPlugin.initFpjs(
-    '<apiKey>',
-    endpoint: 'https://subdomain.domain.com',
-    endpointFallbacks: ['https://subdomain2.domain.com', 'https://subdomain3.domain.com'],
-    region: Region.eu, // or Region.ap, Region.us
-    // Only necessary for the web platform
-    scriptUrlPattern: 'https://your.domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>',
-    scriptUrlPatternFallbacks: ['https://your.second-domain/fp_js/script_path?apiKey=<apiKey>&version=<version>&loaderVersion=<loaderVersion>']
-  );
-}
+ void doInit() async {
+    await FpjsProPlugin.initFpjs(
+      '<PUBLIC_API_KEY>',
+      region: Region.us,
+      // Your proxy integration identification endpoint
+      endpoint: 'https://metrics.yourwebsite.com',
+      endpointFallbacks: ['https://api.fpjs.io'], // region-specific fallback
+      // Your proxy integration script URL pattern
+      // Only necessary for the web platform
+      scriptUrlPattern: 'https://metrics.yourwebsite.com/web/v<version>/<apiKey>/loader_v<loaderVersion>.js',
+      scriptUrlPatternFallbacks: [
+        'https://fpjscdn.net/v<version>/<apiKey>/loader_v<loaderVersion>.js',
+      ],
+    );
+  }
 ```
 
-### 2. Use the plugin in your application code to identify a visitor
+### 2. Identify visitors
 
-#### 2.1 Use the `getVisitorId` method if you only need a `visitorId`: 
+Use `getVisitorId` to get just the visitor ID, or `getVisitorData` to get the identification response object.
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fpjs_pro_plugin/region.dart';
+import 'package:fpjs_pro_plugin/error.dart';
 // ...
 
-// Initialization
 class _MyAppState extends State<MyApp> {
-  // ...
-  // Usage
   void identify() async {
     try {
-      visitorId = await FpjsProPlugin.getVisitorId() ?? 'Unknown';
-      // use the visitor id
+      var visitorId = await FpjsProPlugin.getVisitorId();
+      var visitorData = await FpjsProPlugin.getVisitorData();
+
+      print('Visitor ID: $visitorId');
+      print('Visitor data: $visitorData');
     } on FingerprintProError catch (e) {
-      // process an error somehow
-      // check lib/error.dart to get more info about error types
+      // Process the error
+      print('Error identifying visitor: $e');
+      // See lib/error.dart to get more information about error types
     }
   }
 }
 ```
 
-#### 2.2 Use `getVisitorData` to get extended result
 
-```dart
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-// ...
-
-// Initialization
-class _MyAppState extends State<MyApp> {
-  // ...
-  // Usage
-  void identify() async {
-    try {
-      deviceData = await FpjsProPlugin.getVisitorData();
-      // use the visitor id
-    } on FingerprintProError catch (e) {
-      // process an error somehow
-      // check lib/error.dart to get more info about error types
-    }
-  }
-}
-```
-
-By default `getVisitorData()` will return a short response with the `FingerprintJSProResponse` type.
-Provide `extendedResponseFormat=true` to the `initFpjs` function to get extended result of `FingerprintJSProExtendedResponse` type.
+By default, `getVisitorData()` will return a short response (`FingerprintJSProResponse`).
+Pass `extendedResponseFormat: true` to the `initFpjs` function to get an extended response (`FingerprintJSProExtendedResponse`).
 
 ```dart
 void doInit() async {
-  await FpjsProPlugin.initFpjs('<apiKey>', extendedResponseFormat: true);
+  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', extendedResponseFormat: true);
 }
 ```
 
@@ -166,8 +184,8 @@ The `visitorId` provided by Fingerprint Identification is especially useful when
 ```dart
 void identify() async {
   const tags = {
-    userAction: 'login',
-    analyticsId: 'UA-5555-1111-1'
+    'userAction': 'login',
+    'analyticsId': 'UA-5555-1111-1'
   };
   const linkedId = 'user_1234';
 
@@ -193,14 +211,15 @@ void identify() async {
 ```
 
 ## Additional Resources
-- [Server-to-Server API](https://dev.fingerprint.com/docs/server-api)
 - [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
+- [Server API](https://dev.fingerprint.com/reference/server-api)
 
 ## Support and feedback
 
-To report problems, ask questions or provide feedback, please
+To report problems, ask questions, or provide feedback, please
 use [Issues](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues). If you need private support, please
 email us at `oss-support@fingerprint.com`.
 
 ## License
+
 This project is licensed under the [MIT license](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/LICENSE).
