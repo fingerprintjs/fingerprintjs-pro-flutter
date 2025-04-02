@@ -18,5 +18,6 @@ jobs:
       language: flutter
       language-version: '3.x'
       appId: ${{ vars.APP_ID }}
+      semantic-release-extra-plugins: '@fingerprintjs/semantic-release-native-dependency-plugin@^1.0.0'
     secrets:
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
