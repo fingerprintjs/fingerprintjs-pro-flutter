@@ -121,6 +121,18 @@ class ResponseCannotBeParsedError extends FingerprintProError {
       : super('ResponseCannotBeParsedError', message);
 }
 
+/// Integration headers are invalid
+class InvalidProxyIntegrationHeaders extends FingerprintProError {
+  InvalidProxyIntegrationHeaders(String? message)
+      : super('InvalidProxyIntegrationHeaders', message);
+}
+
+/// Integration secret is invalid
+class InvalidProxyIntegrationSecret extends FingerprintProError {
+  InvalidProxyIntegrationSecret(String? message)
+      : super('InvalidProxyIntegrationSecret', message);
+}
+
 /// Something wrong with network
 class NetworkError extends FingerprintProError {
   NetworkError(String? message) : super('NetworkError', message);
@@ -229,6 +241,12 @@ FingerprintProError unwrapError(PlatformException error) {
     case 'ResponseCannotBeParsed':
     case 'ResponseCannotBeParsedError':
       return ResponseCannotBeParsedError(error.message);
+    case 'InvalidProxyIntegrationHeaders':
+    case 'InvalidProxyIntegrationHeadersError':
+      return InvalidProxyIntegrationHeaders(error.message);
+    case 'InvalidProxyIntegrationSecret':
+    case 'InvalidProxyIntegrationSecretError':
+      return InvalidProxyIntegrationSecret(error.message);
     // end of API Errors block
     case 'NetworkError':
       return NetworkError(error.message);
