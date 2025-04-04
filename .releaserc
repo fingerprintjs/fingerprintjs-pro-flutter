@@ -42,6 +42,21 @@
         "message": "chore(release): ${nextRelease.version} \\n\\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/github"
+    "@semantic-release/github",
+    [
+      "@fingerprintjs/semantic-release-native-dependency-plugin",
+      {
+        "iOS": {
+          "podSpecJsonPath": "ios/fpjs_pro_plugin.podspec.json",
+          "dependencyName": "FingerprintPro",
+          "displayName": "Fingerprint iOS SDK"
+        },
+        "android": {
+          "path": "android",
+          "gradleTaskName": "printFingerprintNativeSDKVersion",
+          "displayName": "Fingerprint Android SDK"
+        }
+      }
+    ],
   ]
 }
