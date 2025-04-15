@@ -1,3 +1,29 @@
+## [4.0.0-test.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.2...v4.0.0-test.1) (2025-04-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* Flutter sdk minimal version is 3.13.0
+* Dart sdk minimal version is 3.3.0
+
+### Features
+
+* update required Dart sdk minimal version to 3.3.0 ([a968392](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/a968392bac170911c19259d42b207e91a1b7df34))
+* update required Flutter sdk minimal version to 3.13.0 ([1441f65](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/1441f65ec269c308038fc68c235aa47451dc6c30))
+
+
+### Bug Fixes
+
+* migrate from `dart:js_utils` and `package:js` to `dart:js_interop` for Web platform ([2d2a068](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/2d2a068c806b721fe329949bd8f547ec4982d87e))
+* remove `js` package from dependencies ([45f46bf](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/45f46bf8e590fc277f2772364f2371265c88f2cc))
+* use declarative Gradle plugin syntax ([8396f4e](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/8396f4e4d08c2f12828f1e7cfe1f896a29f87d85))
+
+
+
+Fingerprint Android SDK Version Range: **`>= 2.7.0 and < 3.0.0`**
+
+Fingerprint iOS SDK Version Range: **`>= 2.7.0 and < 3.0.0`**
+
 ## [3.3.2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.1...v3.3.2) (2024-12-09)
 
 
