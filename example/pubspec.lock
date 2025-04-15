@@ -94,7 +94,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "4.0.0-test.1"
+    version: "4.0.0-test.2"
   leak_tracker:
     dependency: transitive
     description:

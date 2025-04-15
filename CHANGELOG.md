@@ -1,3 +1,17 @@
+## [4.0.0-test.2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.0.0-test.1...v4.0.0-test.2) (2025-04-15)
+
+
+### Bug Fixes
+
+* a bugfix ([f4b5e25](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/f4b5e258ceb267dde4cfab1bc26c3fb30305981c))
+
+
+
+### Supported Native SDK Version Range
+
+* Fingerprint Android SDK Version Range: **`>= 2.7.0 and < 3.0.0`**
+* Fingerprint iOS SDK Version Range: **`>= 2.7.0 and < 3.0.0`**
+
 ## [4.0.0-test.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.2...v4.0.0-test.1) (2025-04-04)
 
 
