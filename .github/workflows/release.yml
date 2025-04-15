@@ -18,7 +18,7 @@ jobs:
       language: flutter
       language-version: '3.x'
       appId: ${{ vars.APP_ID }}
-      semantic-release-extra-plugins: '@fingerprintjs/semantic-release-native-dependency-plugin@^1.0.0'
+      semantic-release-extra-plugins: '@fingerprintjs/semantic-release-native-dependency-plugin@^1.1.0'
       prepare-command: 'echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties'
     secrets:
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
