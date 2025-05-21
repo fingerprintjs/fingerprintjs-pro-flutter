@@ -9,3 +9,9 @@ jobs:
   analyze-commits:
     name: Generate docs and coverage report
     uses: fingerprintjs/dx-team-toolkit/.github/workflows/analyze-commits.yml@v1
+    with:
+      language: 'flutter'
+      language-version: '3.x'
+      prepareCommand: 'sudo gem install -n /usr/local/bin cocoapods && echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties'
+      semanticReleasePlugins: |
+        @fingerprintjs/semantic-release-native-dependency-plugin@^1.2.1
