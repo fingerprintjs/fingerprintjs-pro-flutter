@@ -23,10 +23,10 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@fingerprintjs/fingerprintjs-pro@^3.11.3":
-  version "3.11.3"
-  resolved "https://registry.yarnpkg.com/@fingerprintjs/fingerprintjs-pro/-/fingerprintjs-pro-3.11.3.tgz#571e23ae84e92fe739aaf5b22e58a6786c86eb4f"
-  integrity sha512-ulpDKLT0bFcB8OcR3ppVUFRHMKTQRk45m0bTXmUEW4GytUcWbdKVZwQEvn5/jL9QKInVN1y09En4sBXk4JlaAQ==
+"@fingerprintjs/fingerprintjs-pro@3.11.8":
+  version "3.11.8"
+  resolved "https://registry.yarnpkg.com/@fingerprintjs/fingerprintjs-pro/-/fingerprintjs-pro-3.11.8.tgz#bde4fc4c370c82abe2ee7fc641c7ad9845658d2b"
+  integrity sha512-hZjFaSlBPYJvQv1nRlfJads9A+1QzaJEea/+EvECln+uZY13yrpeeIYKff+0REkohAWZRSVnG80+5PREIsgBpQ==
   dependencies:
     tslib "^2.4.1"
 
