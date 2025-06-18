@@ -2,7 +2,7 @@ PODS:
   - FingerprintPro (2.8.2)
   - Flutter (1.0.0)
   - fpjs_pro_plugin (3.3.2):
-    - FingerprintPro (>= 2.8.2, < 2.9.0)
+    - FingerprintPro (< 2.9.0, >= 2.8.2)
     - Flutter
 
 DEPENDENCIES:
