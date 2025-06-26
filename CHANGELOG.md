@@ -1,3 +1,18 @@
+## [4.0.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.0.0...v4.0.1) (2025-06-26)
+
+
+### Bug Fixes
+
+* add flutter.sdk path to the local.properties before running semantic release info ([a4a681e](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/a4a681e1072cddf5b49ab1b45b65d181202eb505))
+* pin Fingerprint native dependencies to MINOR version instead of MAJOR ([01070b2](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/01070b2c16fd09aff5ce02832fcdd5c0b4d04c58))
+
+
+
+### Supported Native SDK Version Range
+
+* Fingerprint Android SDK Version Range: **`>= 2.8.0 and < 2.9.0`**
+* Fingerprint iOS SDK Version Range: **`>= 2.8.2 and < 2.9.0`**
+
 ## [4.0.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v3.3.2...v4.0.0) (2025-05-06)
 
 
