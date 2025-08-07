@@ -26,9 +26,8 @@ import com.fingerprintjs.android.fpjs_pro.ResponseCannotBeParsed
 import com.fingerprintjs.android.fpjs_pro.NetworkError
 import com.fingerprintjs.android.fpjs_pro.ClientTimeout
 import com.fingerprintjs.android.fpjs_pro.UnknownError
-// We must wait for Android SDK 2.9
-// import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationHeaders
-// import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationSecret
+import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationHeaders
+import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationSecret
 import com.fingerprintjs.android.fpjs_pro.ProxyIntegrationSecretEnvironmentMismatch
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -200,9 +199,8 @@ private fun getErrorCode(error: Error): String {
     is ResponseCannotBeParsed -> "ResponseCannotBeParsed"
     is NetworkError -> "NetworkError"
     is ClientTimeout -> "ClientTimeout"
-    // We must wait for Android SDK 2.9
-    // is InvalidProxyIntegrationHeaders -> "InvalidProxyIntegrationHeaders"
-    // is InvalidProxyIntegrationSecret -> "InvalidProxyIntegrationSecret"
+    is InvalidProxyIntegrationHeaders -> "InvalidProxyIntegrationHeaders"
+    is InvalidProxyIntegrationSecret -> "InvalidProxyIntegrationSecret"
     is ProxyIntegrationSecretEnvironmentMismatch -> "ProxyIntegrationSecretEnvironmentMismatch"
     else -> "UnknownError"
   }
