@@ -34,6 +34,8 @@ extension type FingerprintJS._(JSObject _) implements JSObject {
   external static String get ERROR_INTEGRATION_FAILURE;
   external static String get ERROR_INVALID_PROXY_INTEGRATION_HEADERS;
   external static String get ERROR_INVALID_PROXY_INTEGRATION_SECRET;
+  external static String
+      get ERROR_PROXY_INTEGRATION_SECRET_ENVIRONMENT_MISMATCH;
 }
 
 /// FingerprintJS Pro [JavaScript agent](https://dev.fingerprint.com/docs/js-agent)
