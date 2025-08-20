@@ -67,6 +67,16 @@ FingerprintProError unwrapWebError(WebException error) {
   if (message == FingerprintJS.ERROR_INTEGRATION_FAILURE) {
     return IntegrationFailureError(message);
   }
+  if (message == FingerprintJS.ERROR_INVALID_PROXY_INTEGRATION_HEADERS) {
+    return InvalidProxyIntegrationHeaders(message);
+  }
+  if (message == FingerprintJS.ERROR_INVALID_PROXY_INTEGRATION_SECRET) {
+    return InvalidProxyIntegrationSecret(message);
+  }
+  if (message ==
+      FingerprintJS.ERROR_PROXY_INTEGRATION_SECRET_ENVIRONMENT_MISMATCH) {
+    return ProxyIntegrationSecretEnvironmentMismatch(message);
+  }
 
   return UnknownError(message);
 }

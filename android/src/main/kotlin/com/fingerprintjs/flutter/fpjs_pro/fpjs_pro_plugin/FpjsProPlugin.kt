@@ -26,6 +26,9 @@ import com.fingerprintjs.android.fpjs_pro.ResponseCannotBeParsed
 import com.fingerprintjs.android.fpjs_pro.NetworkError
 import com.fingerprintjs.android.fpjs_pro.ClientTimeout
 import com.fingerprintjs.android.fpjs_pro.UnknownError
+import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationHeaders
+import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationSecret
+import com.fingerprintjs.android.fpjs_pro.ProxyIntegrationSecretEnvironmentMismatch
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -196,6 +199,9 @@ private fun getErrorCode(error: Error): String {
     is ResponseCannotBeParsed -> "ResponseCannotBeParsed"
     is NetworkError -> "NetworkError"
     is ClientTimeout -> "ClientTimeout"
+    is InvalidProxyIntegrationHeaders -> "InvalidProxyIntegrationHeaders"
+    is InvalidProxyIntegrationSecret -> "InvalidProxyIntegrationSecret"
+    is ProxyIntegrationSecretEnvironmentMismatch -> "ProxyIntegrationSecretEnvironmentMismatch"
     else -> "UnknownError"
   }
   return errorType
