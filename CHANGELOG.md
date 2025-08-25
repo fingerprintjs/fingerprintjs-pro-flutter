@@ -1,3 +1,21 @@
+## [4.1.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.0.1...v4.1.0) (2025-08-25)
+
+
+### Features
+
+* add `ProxyIntegrationSecretEnvironmentMismatch` error ([f095967](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/f095967a45e13092693c991e5302d9cc824bfcb6))
+* add error handling for invalid proxy integration headers and secret ([02b921e](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/02b921ebb4f168250da3084895a4395425230797))
+* use Fingerprint Pro Android v2.9.0 ([66c3525](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/66c352573763839c0d262269dc5321c2f7de7a3f))
+* use Fingerprint Pro iOS v2.9.0 ([1f5daf9](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/1f5daf9159c86ba257d814851c87ef287769ff49))
+* use Fingerprint Pro JSAgent loader v3.11.13 ([6cf7efc](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/6cf7efc6ca4512877ede3792bc5261d34cc4c34b))
+
+
+
+### Supported Native SDK Version Range
+
+* Fingerprint Android SDK Version Range: **`>= 2.9.0 and < 2.10.0`**
+* Fingerprint iOS SDK Version Range: **`>= 2.9.0 and < 2.10.0`**
+
 ## [4.0.1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.0.0...v4.0.1) (2025-06-26)
 
 
