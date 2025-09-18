@@ -68,7 +68,20 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
           val extendedResponseFormat = call.argument<Boolean>("extendedResponseFormat") ?: false
           val pluginVersion = call.argument<String>("pluginVersion") ?: "unknown"
 
-          initFpjs(token, region, endpoint, endpointFallbacks, extendedResponseFormat, pluginVersion)
+          val allowUseOfLocationData = call.argument<Boolean>("allowUseOfLocationData") ?: false
+
+          val locationTimeoutMillis = call.argument<Int>("locationTimeoutMillis") ?: 5000
+
+          initFpjs(
+              token,
+              region,
+              endpoint,
+              endpointFallbacks,
+              extendedResponseFormat,
+              pluginVersion,
+              allowUseOfLocationData,
+              locationTimeoutMillis.toLong()
+          )
           result.success("Successfully initialized FingerprintJS Pro Client")
         }
       GET_VISITOR_ID -> {
@@ -101,7 +114,16 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(null)
   }
 
-  private fun initFpjs(apiToken: String, region: Configuration.Region?, endpoint: String?, endpointFallbacks:List<String>?, extendedResponseFormat: Boolean, pluginVersion: String) {
+    private fun initFpjs(
+        apiToken: String,
+        region: Configuration.Region?,
+        endpoint: String?,
+        endpointFallbacks: List<String>?,
+        extendedResponseFormat: Boolean,
+        pluginVersion: String,
+        allowUseOfLocationData: Boolean,
+        locationTimeoutMillis: Long
+    ) {
     val factory = FingerprintJSFactory(applicationContext)
     val configuration = Configuration(
       apiToken,
@@ -109,7 +131,9 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
       endpoint ?: region?.endpointUrl ?: Configuration.Region.US.endpointUrl,
       extendedResponseFormat,
       endpointFallbacks ?: emptyList(),
-      listOf(Pair("fingerprint-pro-flutter", pluginVersion))
+      listOf(Pair("fingerprint-pro-flutter", pluginVersion)),
+      allowUseOfLocationData,
+      locationTimeoutMillis,
     )
 
     fpjsClient = factory.createInstance(configuration)

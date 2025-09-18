@@ -210,6 +210,29 @@ void identify() async {
 }
 ```
 
+### Proximity Detection
+
+Proximity detection is a complementary, location-based signal available only on mobile platforms.
+More info you can find in [Android SDK documentation](https://dev.fingerprint.com/docs/native-android-integration#/proximity-detection-for-android-devices) or in
+[iOS SDK documentation](https://dev.fingerprint.com/docs/ios-sdk#/using-location-data-for-proximity-detection).
+
+The Fingerprint SDK will only collect location data if the `allowUseOfLocationData` option is set to `true`.
+
+```dart
+void doInit() async {
+  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', allowUseOfLocationData: true);
+}
+```
+
+For Android platform it's possible to configure the location retrieval timeout by setting the `locationTimeoutMillis` option to a desired value. By default, it's set to 5 seconds.
+
+```dart
+void doInit() async {
+  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', allowUseOfLocationData: true,
+   locationTimeoutMillis: 10000);
+}
+```
+
 ## Additional Resources
 - [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
 - [Server API](https://dev.fingerprint.com/reference/server-api)

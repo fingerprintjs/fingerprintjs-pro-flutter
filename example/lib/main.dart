@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/region.dart';
+import 'package:geolocator/geolocator.dart';
 
 const tags = {
   'a': 'a',
@@ -18,7 +19,7 @@ const tags = {
 };
 
 Future main() async {
-  // Explicitly define which files to load to avoid 
+  // Explicitly define which files to load to avoid
   // console warnings about not finding other possible .env files
   await dotenv.load(fileNames: ['.env', '.env.local']);
   runApp(const MyApp());
@@ -69,6 +70,8 @@ class _MyAppState extends State<MyApp> {
           endpoint: _endpoint,
           scriptUrlPattern: _scriptUrlPattern,
           region: _parseRegion(_region),
+          allowUseOfLocationData: true,
+          locationTimeoutMillis: 6000,
           extendedResponseFormat: true);
     } catch (error) {
       // print('Failed to initialize Fingerprint agent: $error');
@@ -78,10 +81,32 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> requestPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+  }
+
   /// The native FingerprintJS libraries expose a method called `getVisitorId`
   /// to stay consistent with the original Javascript library used for browser identification.
   /// However in the mobile application context a more accurate name would be something like `getDeviceId`.
   Future<void> _getDeviceId() async {
+    await requestPermission();
     String deviceId;
     try {
       deviceId = await FpjsProPlugin.getVisitorId(
@@ -102,6 +127,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<String> _getDeviceData() async {
+    await requestPermission();
     String identificationInfo;
     try {
       const encoder = JsonEncoder.withIndent('    ');
@@ -121,6 +147,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _runChecks() async {
+    await requestPermission();
     setState(() {
       _checksResult = 'Running';
     });

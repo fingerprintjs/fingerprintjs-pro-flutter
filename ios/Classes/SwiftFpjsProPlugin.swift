@@ -22,8 +22,9 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
                 let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String, endpointFallbacks: args["endpointFallbacks"] as? [String] ?? [])
                 let extendedResponseFormat = args["extendedResponseFormat"] as? Bool ?? false
                 let pluginVersion = args["pluginVersion"] as? String ?? "unknown"
+                let allowUseOfLocationData = args["allowUseOfLocationData"] as? Bool ?? false
 
-                initFpjs(token: token, region: region, extendedResponseFormat: extendedResponseFormat, pluginVersion: pluginVersion)
+                initFpjs(token: token, region: region, extendedResponseFormat: extendedResponseFormat, pluginVersion: pluginVersion, allowUseOfLocationData: allowUseOfLocationData)
                 result("Successfully initialized FingerprintJS Pro Client")
             } else {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
@@ -74,8 +75,8 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
         return region
     }
 
-    private func initFpjs(token: String, region: Region, extendedResponseFormat: Bool, pluginVersion: String) {
-        let configuration = Configuration(apiKey: token, region: region, integrationInfo: [("fingerprint-pro-flutter", pluginVersion)], extendedResponseFormat: extendedResponseFormat)
+    private func initFpjs(token: String, region: Region, extendedResponseFormat: Bool, pluginVersion: String, allowUseOfLocationData: Bool) {
+        let configuration = Configuration(apiKey: token, region: region, integrationInfo: [("fingerprint-pro-flutter", pluginVersion)], extendedResponseFormat: extendedResponseFormat, allowUseOfLocationData: allowUseOfLocationData)
         fpjsClient = FingerprintProFactory.getInstance(configuration)
     }
 
