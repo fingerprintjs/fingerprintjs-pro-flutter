@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> requestPermission() async {
+  Future<void> requestLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -106,7 +106,7 @@ class _MyAppState extends State<MyApp> {
   /// to stay consistent with the original Javascript library used for browser identification.
   /// However in the mobile application context a more accurate name would be something like `getDeviceId`.
   Future<void> _getDeviceId() async {
-    await requestPermission();
+    await requestLocationPermission();
     String deviceId;
     try {
       deviceId = await FpjsProPlugin.getVisitorId(
@@ -127,7 +127,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<String> _getDeviceData() async {
-    await requestPermission();
+    await requestLocationPermission();
     String identificationInfo;
     try {
       const encoder = JsonEncoder.withIndent('    ');
@@ -147,7 +147,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _runChecks() async {
-    await requestPermission();
+    await requestLocationPermission();
     setState(() {
       _checksResult = 'Running';
     });

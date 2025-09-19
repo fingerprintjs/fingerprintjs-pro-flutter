@@ -76,7 +76,12 @@ public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
     }
 
     private func initFpjs(token: String, region: Region, extendedResponseFormat: Bool, pluginVersion: String, allowUseOfLocationData: Bool) {
-        let configuration = Configuration(apiKey: token, region: region, integrationInfo: [("fingerprint-pro-flutter", pluginVersion)], extendedResponseFormat: extendedResponseFormat, allowUseOfLocationData: allowUseOfLocationData)
+        let configuration = Configuration(
+            apiKey: token,
+            region: region,
+            integrationInfo: [("fingerprint-pro-flutter", pluginVersion)],
+            extendedResponseFormat: extendedResponseFormat,
+            allowUseOfLocationData: allowUseOfLocationData)
         fpjsClient = FingerprintProFactory.getInstance(configuration)
     }
 
