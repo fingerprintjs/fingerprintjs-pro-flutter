@@ -224,12 +224,12 @@ void doInit() async {
 }
 ```
 
-For Android platform it's possible to configure the location retrieval timeout by setting the `locationTimeoutMillis` option to a desired value. By default, it's set to 5 seconds.
+For Android platform it's possible to configure the location retrieval timeout by setting the `locationTimeoutMillisAndroid` option to a desired value. By default, it's set to 5 seconds.
 
 ```dart
 void doInit() async {
-  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', allowUseOfLocationData: true,
-   locationTimeoutMillis: 10000);
+  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', allowUseOfLocationData: true, 
+      locationTimeoutMillisAndroid: 10000);
 }
 ```
 
