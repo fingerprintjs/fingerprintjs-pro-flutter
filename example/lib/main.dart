@@ -95,14 +95,20 @@ class _MyAppState extends State<MyApp> {
         // Android's shouldShowRequestPermissionRationale
         // returned true. According to Android guidelines
         // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
+        if (kDebugMode) {
+          print('Location permissions are denied');
+        }
+        return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+      if (kDebugMode) {
+        print(
+            'Location permissions are permanently denied, we cannot request permissions.');
+      }
+      return;
     }
   }
 
