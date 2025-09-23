@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example">
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <application
         android:label="fpjs_pro_plugin_example"
         android:name="${applicationName}"

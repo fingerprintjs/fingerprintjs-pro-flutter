@@ -19,6 +19,7 @@ dependencies:
   flutter:
     sdk: flutter
   env_flutter: ^0.1.4
+  geolocator: ^13.0.4
 
   fpjs_pro_plugin:
     # When depending on this package from a real application you should use:

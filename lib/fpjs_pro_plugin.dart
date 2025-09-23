@@ -28,6 +28,8 @@ class FpjsProPlugin {
       String? scriptUrlPattern,
       List<String>? scriptUrlPatternFallbacks,
       Region? region,
+      bool? allowUseOfLocationData,
+      int? locationTimeoutMillisAndroid,
       bool extendedResponseFormat = false}) async {
     await _channel.invokeMethod('init', {
       'apiToken': apiKey,
@@ -38,6 +40,8 @@ class FpjsProPlugin {
       'region': region?.stringValue,
       'extendedResponseFormat': extendedResponseFormat,
       'pluginVersion': pluginVersion,
+      'allowUseOfLocationData': allowUseOfLocationData,
+      'locationTimeoutMillis': locationTimeoutMillisAndroid,
     });
     _isExtendedResult = extendedResponseFormat;
     _isInitialized = true;
