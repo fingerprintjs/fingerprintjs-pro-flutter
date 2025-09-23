@@ -1,3 +1,17 @@
+## [4.3.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.2.0...v4.3.0) (2025-09-23)
+
+
+### Features
+
+* add Proximity Detection init options (`allowUseOfLocationData` - to allow collect location data and `locationTimeoutMillisAndroid` - to configure the location retrieval timeout on Android ([227d4c1](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/227d4c14b39c59039b44b9a85620fd6829baeca5))
+
+
+
+### Supported Native SDK Version Range
+
+* Fingerprint Android SDK Version Range: **`>= 2.10.0 and < 2.11.0`**
+* Fingerprint iOS SDK Version Range: **`>= 2.10.0 and < 2.11.0`**
+
 ## [4.2.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.1.0...v4.2.0) (2025-09-08)
 
 
