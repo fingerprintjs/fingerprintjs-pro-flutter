@@ -43,7 +43,7 @@ android {
         applicationId "com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
-        compileSdkVersion 34
+        compileSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
