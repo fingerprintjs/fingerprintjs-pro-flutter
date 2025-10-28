@@ -1,8 +1,8 @@
 PODS:
-  - FingerprintPro (2.10.0)
+  - FingerprintPro (2.11.0)
   - Flutter (1.0.0)
   - fpjs_pro_plugin (3.3.2):
-    - FingerprintPro (< 2.11.0, >= 2.10.0)
+    - FingerprintPro (< 2.12.0, >= 2.11.0)
     - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
@@ -26,9 +26,9 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geolocator_apple/darwin"
 
 SPEC CHECKSUMS:
-  FingerprintPro: f72cfc225731a66d53dd8be3545fbbbd4f4c4777
+  FingerprintPro: 2fbd0cda75fbab32055f7cb38bc5fc9d17168979
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  fpjs_pro_plugin: 17d12dddc60fe3d11011e9e98904bc8b30d48a47
+  fpjs_pro_plugin: 5f3e4b59ed2a5749de24a5d9f4bb242c3848ef49
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
 
 PODFILE CHECKSUM: 2f1a6d2470f392e010cfe7ae5f9f694d8487db82
