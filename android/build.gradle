@@ -6,7 +6,7 @@ plugins {
 apply from: 'fingerprint.gradle'
 
 group 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
-version '4.4.0'
+version '4.5.0'
 
 rootProject.allprojects {
     repositories {
