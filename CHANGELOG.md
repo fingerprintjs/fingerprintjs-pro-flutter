@@ -1,3 +1,18 @@
+## [4.6.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.5.0...v4.6.0) (2026-02-19)
+
+
+### Features
+
+* use Fingerprint Pro Android v2.13.0 ([f28380e](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/f28380e90596fa902ea308595271b08efaf35bec))
+* use Fingerprint Pro iOS v2.13.0 ([1a2b6fe](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/1a2b6feeb1276379d75d5bbb5e25fc26d2b63b16))
+
+
+
+### Supported Native SDK Version Range
+
+* Fingerprint Android SDK Version Range: **`>= 2.13.1 and < 2.14.0`**
+* Fingerprint iOS SDK Version Range: **`>= 2.13.0 and < 2.14.0`**
+
 ## [4.5.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.4.0...v4.5.0) (2025-12-11)
 
 
