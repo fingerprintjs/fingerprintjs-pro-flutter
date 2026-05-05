@@ -16,7 +16,7 @@
   "source_files": "Classes/**/*",
   "dependencies": {
     "Flutter": [],
-    "FingerprintPro": [">= 2.14.0", "< 2.15.0"]
+    "FingerprintPro": [">= 2.15.0", "< 2.16.0"]
   },
   "platforms": {
     "ios": "13.0"
