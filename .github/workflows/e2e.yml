@@ -89,11 +89,8 @@ jobs:
       - name: Run Chrome smoke test
         working-directory: example
         run: |
-          npx --yes @puppeteer/browsers@3.0.5 install chromedriver@stable \
-            --path "$RUNNER_TEMP/chromedriver"
-          CHROMEDRIVER="$(find "$RUNNER_TEMP/chromedriver" \
-            -type f -name chromedriver -perm -111 | head -1)"
-          test -n "$CHROMEDRIVER"
+          CHROMEDRIVER="$CHROMEWEBDRIVER/chromedriver"
+          test -x "$CHROMEDRIVER"
           "$CHROMEDRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
           CHROMEDRIVER_PID=$!
           trap 'kill "$CHROMEDRIVER_PID" 2>/dev/null || true' EXIT
@@ -179,7 +176,7 @@ jobs:
       - name: Start iOS simulator
         uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5
         with:
-          model: iPhone 15
+          model: iPhone 16
       - name: Run iOS smoke test
         working-directory: example
         run: |
