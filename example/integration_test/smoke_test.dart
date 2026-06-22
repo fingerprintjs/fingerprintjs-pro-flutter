@@ -24,6 +24,7 @@ void main() {
       app.checksResultKey,
       (text) => text.contains('Success!'),
       description: 'example checks to succeed',
+      failure: (text) => text.startsWith('Checks result: Failed:'),
     );
 
     await tester.tap(find.byKey(app.identifyButtonKey));
@@ -65,13 +66,18 @@ Future<void> _waitForText(
   Key key,
   bool Function(String text) matches, {
   required String description,
+  bool Function(String text)? failure,
 }) {
   return _waitFor(
     tester,
     () {
       final finder = find.byKey(key);
       if (finder.evaluate().isEmpty) return false;
-      return matches(tester.widget<Text>(finder).data ?? '');
+      final text = tester.widget<Text>(finder).data ?? '';
+      if (failure?.call(text) ?? false) {
+        fail('Failed waiting for $description: $text');
+      }
+      return matches(text);
     },
     description: description,
   );

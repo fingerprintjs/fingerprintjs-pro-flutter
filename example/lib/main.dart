@@ -55,6 +55,8 @@ class _MyAppState extends State<MyApp> {
   final String? _scriptUrlPattern = dotenv.env['SCRIPT_URL_PATTERN'];
   final bool _disableLocationCollection =
       dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
+  final bool _e2eSmokeTest =
+      dotenv.env['E2E_SMOKE_TEST']?.toLowerCase() == 'true';
 
   @override
   void initState() {
@@ -181,20 +183,25 @@ class _MyAppState extends State<MyApp> {
       _checksResult = 'Running';
     });
     try {
-      var checks = [
-        () async => FpjsProPlugin.getVisitorId(),
-        () async => FpjsProPlugin.getVisitorData(),
-        () async => FpjsProPlugin.getVisitorId(linkedId: 'checkId'),
-        () async => FpjsProPlugin.getVisitorData(linkedId: 'checkData'),
-        () async => FpjsProPlugin.getVisitorId(tags: tags),
-        () async => FpjsProPlugin.getVisitorData(tags: tags),
-        () async =>
-            FpjsProPlugin.getVisitorId(linkedId: 'checkIdWithTag', tags: tags),
-        () async => FpjsProPlugin.getVisitorData(
-            linkedId: 'checkDataWithTag', tags: tags),
-        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
-      ];
+      var checks = _e2eSmokeTest
+          ? [
+              () async => FpjsProPlugin.getVisitorId(),
+              () async => FpjsProPlugin.getVisitorData(),
+            ]
+          : [
+              () async => FpjsProPlugin.getVisitorId(),
+              () async => FpjsProPlugin.getVisitorData(),
+              () async => FpjsProPlugin.getVisitorId(linkedId: 'checkId'),
+              () async => FpjsProPlugin.getVisitorData(linkedId: 'checkData'),
+              () async => FpjsProPlugin.getVisitorId(tags: tags),
+              () async => FpjsProPlugin.getVisitorData(tags: tags),
+              () async => FpjsProPlugin.getVisitorId(
+                  linkedId: 'checkIdWithTag', tags: tags),
+              () async => FpjsProPlugin.getVisitorData(
+                  linkedId: 'checkDataWithTag', tags: tags),
+              () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
+              () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
+            ];
 
       for (var check in checks) {
         await check();

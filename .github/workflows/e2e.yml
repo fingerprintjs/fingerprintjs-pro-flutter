@@ -86,6 +86,7 @@ jobs:
           [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
           [[ -z "$SCRIPT_URL_PATTERN" ]] \
             || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
+          printf 'E2E_SMOKE_TEST=true\n' >> example/.env.local
       - name: Run Chrome smoke test
         working-directory: example
         run: |
@@ -129,6 +130,7 @@ jobs:
           [[ -z "$SCRIPT_URL_PATTERN" ]] \
             || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
           printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
+          printf 'E2E_SMOKE_TEST=true\n' >> example/.env.local
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
@@ -173,6 +175,7 @@ jobs:
           [[ -z "$SCRIPT_URL_PATTERN" ]] \
             || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
           printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
+          printf 'E2E_SMOKE_TEST=true\n' >> example/.env.local
       - name: Start iOS simulator
         uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5
         with:

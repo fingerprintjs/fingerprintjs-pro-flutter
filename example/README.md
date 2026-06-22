@@ -97,11 +97,14 @@ Native automation should also add the following setting to `.env.local`:
 
 ```bash
 DISABLE_LOCATION_COLLECTION=true
+E2E_SMOKE_TEST=true
 ```
 
 This prevents Android and iOS permission dialogs from blocking unattended
-tests. Leave the setting absent or set it to `false` for normal manual runs;
-location collection remains enabled by default.
+tests. `E2E_SMOKE_TEST` limits **Run tests!** to the core visitor ID and visitor
+data calls; normal manual runs retain the full linked ID, tag, and timeout
+checks. Leave these settings absent or set them to `false` for normal manual
+runs; location collection remains enabled by default.
 
 ### GitHub Actions secrets
 

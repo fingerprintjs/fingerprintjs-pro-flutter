@@ -35,6 +35,7 @@ Keep the app interaction close to the manual process:
 - expose explicit initializing, ready, and initialization-error states in the example app;
 - keep identification controls disabled until initialization succeeds, and have the integration test wait for the ready state before tapping them;
 - create one integration test that taps the same controls a maintainer taps manually;
+- use an explicit E2E mode that limits **Run tests!** to the core visitor ID and visitor data calls, while preserving the full check suite for manual runs;
 - wait for success/result text instead of asserting exact visitor IDs or exact response payloads;
 - avoid new test frameworks unless Flutter `integration_test` cannot cover a required interaction.
 
