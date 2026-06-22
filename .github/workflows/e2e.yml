@@ -2,12 +2,15 @@ name: E2E
 
 on:
   pull_request:
+  push:
+    branches-ignore:
+      - main
 
 permissions:
   contents: read
 
 concurrency:
-  group: e2e-${{ github.event.pull_request.number }}
+  group: e2e-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
