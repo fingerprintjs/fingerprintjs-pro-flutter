@@ -19,7 +19,18 @@ const tags = {
   'd': false
 };
 
-Future main() async {
+const initializationStatusKey = ValueKey('initialization-status');
+const runChecksButtonKey = ValueKey('run-checks-button');
+const checksResultKey = ValueKey('checks-result');
+const identifyButtonKey = ValueKey('identify-button');
+const deviceIdResultKey = ValueKey('device-id-result');
+const identifyExtendedButtonKey = ValueKey('identify-extended-button');
+const extendedResultDialogKey = ValueKey('extended-result-dialog');
+const extendedResultContentKey = ValueKey('extended-result-content');
+
+enum InitializationState { initializing, ready, error }
+
+Future<void> main() async {
   // Explicitly define which files to load to avoid
   // console warnings about not finding other possible .env files
   await dotenv.load(fileNames: ['.env', '.env.local']);
@@ -36,11 +47,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _deviceId = 'Unknown';
   String _checksResult = 'Not run';
+  InitializationState _initializationState = InitializationState.initializing;
   String? _initializationError;
   final String? _apiKey = dotenv.env['API_KEY'];
   final String? _region = dotenv.env['REGION'];
   final String? _endpoint = dotenv.env['ENDPOINT'];
   final String? _scriptUrlPattern = dotenv.env['SCRIPT_URL_PATTERN'];
+  final bool _disableLocationCollection =
+      dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 
   @override
   void initState() {
@@ -71,19 +85,24 @@ class _MyAppState extends State<MyApp> {
           endpoint: _endpoint,
           scriptUrlPattern: _scriptUrlPattern,
           region: _parseRegion(_region),
-          allowUseOfLocationData: true,
+          allowUseOfLocationData: !_disableLocationCollection,
           locationTimeoutMillisAndroid: 6000,
           extendedResponseFormat: true);
-    } catch (error) {
-      // print('Failed to initialize Fingerprint agent: $error');
+      if (!mounted) return;
       setState(() {
+        _initializationState = InitializationState.ready;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _initializationState = InitializationState.error;
         _initializationError = 'Failed to initialize Fingerprint agent: $error';
       });
     }
   }
 
   Future<void> requestLocationPermission() async {
-    if (kIsWeb) {
+    if (kIsWeb || _disableLocationCollection) {
       return;
     }
     LocationPermission permission = await Geolocator.checkPermission();
@@ -177,39 +196,40 @@ class _MyAppState extends State<MyApp> {
         () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
       ];
 
-      var timeoutChecks = [
-        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5)
-      ];
-
       for (var check in checks) {
         await check();
+        if (!mounted) return;
         setState(() {
           _checksResult += '.';
         });
       }
-      for (var check in timeoutChecks) {
-        try {
-          await check();
-          throw Exception('Expected timeout error');
-        } on FingerprintProError {
-          setState(() {
-            _checksResult += '!';
-          });
-        }
-      }
+      if (!mounted) return;
       setState(() {
         _checksResult = 'Success!';
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _checksResult = 'Failed: $e';
       });
     }
   }
 
+  String get _initializationStatus {
+    switch (_initializationState) {
+      case InitializationState.initializing:
+        return 'Initializing Fingerprint agent...';
+      case InitializationState.ready:
+        return 'Fingerprint agent ready';
+      case InitializationState.error:
+        return _initializationError!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isReady = _initializationState == InitializationState.ready;
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -218,14 +238,19 @@ class _MyAppState extends State<MyApp> {
         body: Center(
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          if (_initializationError != null) Text(_initializationError!),
+          Text(_initializationStatus, key: initializationStatusKey),
           ElevatedButton(
-              onPressed: () => _runChecks(), child: const Text('Run tests!')),
-          Text('Checks result: $_checksResult\n'),
+              key: runChecksButtonKey,
+              onPressed: isReady ? _runChecks : null,
+              child: const Text('Run tests!')),
+          Text('Checks result: $_checksResult\n', key: checksResultKey),
           ElevatedButton(
-              onPressed: () => _getDeviceId(), child: const Text('Identify!')),
-          Text('The device id is: $_deviceId\n'),
-          _ExtendedResultDialog(handleIdentificate: _getDeviceData)
+              key: identifyButtonKey,
+              onPressed: isReady ? _getDeviceId : null,
+              child: const Text('Identify!')),
+          Text('The device id is: $_deviceId\n', key: deviceIdResultKey),
+          _ExtendedResultDialog(
+              enabled: isReady, handleIdentificate: _getDeviceData)
         ])),
       ),
     );
@@ -233,41 +258,48 @@ class _MyAppState extends State<MyApp> {
 }
 
 class _ExtendedResultDialog extends StatelessWidget {
-  const _ExtendedResultDialog({Key? key, required this.handleIdentificate})
+  const _ExtendedResultDialog(
+      {Key? key, required this.enabled, required this.handleIdentificate})
       : super(key: key);
 
+  final bool enabled;
   final Future<String> Function() handleIdentificate;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () async {
-        final resultContext = context;
-        String identificationInfo;
-        try {
-          identificationInfo = await handleIdentificate();
-        } catch (e) {
-          identificationInfo = 'Identification error: $e';
-        }
-        if (resultContext.mounted) {
-          showDialog<String>(
-            context: resultContext,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('Extended result'),
-              content: FittedBox(
-                fit: BoxFit.contain,
-                child: Text(identificationInfo),
-              ),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, 'OK'),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
-      },
+      key: identifyExtendedButtonKey,
+      onPressed: enabled
+          ? () async {
+              final resultContext = context;
+              String identificationInfo;
+              try {
+                identificationInfo = await handleIdentificate();
+              } catch (e) {
+                identificationInfo = 'Identification error: $e';
+              }
+              if (resultContext.mounted) {
+                showDialog<String>(
+                  context: resultContext,
+                  builder: (BuildContext context) => AlertDialog(
+                    key: extendedResultDialogKey,
+                    title: const Text('Extended result'),
+                    content: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(identificationInfo,
+                          key: extendedResultContentKey),
+                    ),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, 'OK'),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            }
+          : null,
       child: const Text('Identify with extended result!'),
     );
   }

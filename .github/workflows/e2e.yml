@@ -1,0 +1,186 @@
+name: E2E
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  example-checks:
+    name: Example checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Install Flutter
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          flutter-version: 3.41.1
+          channel: stable
+      - name: Restore packages
+        working-directory: example
+        run: flutter pub get
+      - name: Create non-secret test environment
+        run: cp example/.env example/.env.local
+      - name: Analyze
+        working-directory: example
+        run: flutter analyze
+      - name: Run widget tests
+        working-directory: example
+        run: flutter test test
+
+  check-secrets:
+    name: Check E2E secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+    steps:
+      - id: check
+        name: Check API key
+        run: |
+          if [[ -n "$API_KEY" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Live E2E jobs will be skipped because API_KEY is unavailable."
+          fi
+
+  chrome:
+    name: Chrome
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Install Flutter
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          flutter-version: 3.41.1
+          channel: stable
+      - name: Restore packages
+        working-directory: example
+        run: flutter pub get
+      - name: Create E2E environment
+        run: |
+          printf 'API_KEY=%s\n' "$API_KEY" > example/.env.local
+          [[ -z "$REGION" ]] || printf 'REGION=%s\n' "$REGION" >> example/.env.local
+          [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
+          [[ -z "$SCRIPT_URL_PATTERN" ]] \
+            || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
+      - name: Run Chrome smoke test
+        working-directory: example
+        run: |
+          npx --yes @puppeteer/browsers@3.0.5 install chromedriver@stable \
+            --path "$RUNNER_TEMP/chromedriver"
+          CHROMEDRIVER="$(find "$RUNNER_TEMP/chromedriver" \
+            -type f -name chromedriver -perm -111 | head -1)"
+          test -n "$CHROMEDRIVER"
+          "$CHROMEDRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
+          CHROMEDRIVER_PID=$!
+          trap 'kill "$CHROMEDRIVER_PID" 2>/dev/null || true' EXIT
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/smoke_test.dart \
+            -d web-server
+
+  android:
+    name: Android emulator
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Install Flutter
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          flutter-version: 3.41.1
+          channel: stable
+      - name: Restore packages
+        working-directory: example
+        run: flutter pub get
+      - name: Create E2E environment
+        run: |
+          printf 'API_KEY=%s\n' "$API_KEY" > example/.env.local
+          [[ -z "$REGION" ]] || printf 'REGION=%s\n' "$REGION" >> example/.env.local
+          [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
+          [[ -z "$SCRIPT_URL_PATTERN" ]] \
+            || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
+          printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run Android smoke test
+        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          script: cd example && flutter test integration_test/smoke_test.dart -d emulator-5554
+
+  ios:
+    name: iOS simulator
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available == 'true'
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Install Flutter
+        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        with:
+          flutter-version: 3.41.1
+          channel: stable
+      - name: Restore packages
+        working-directory: example
+        run: flutter pub get
+      - name: Create E2E environment
+        run: |
+          printf 'API_KEY=%s\n' "$API_KEY" > example/.env.local
+          [[ -z "$REGION" ]] || printf 'REGION=%s\n' "$REGION" >> example/.env.local
+          [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
+          [[ -z "$SCRIPT_URL_PATTERN" ]] \
+            || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
+          printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
+      - name: Start iOS simulator
+        uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5
+        with:
+          model: iPhone 15
+      - name: Run iOS smoke test
+        working-directory: example
+        run: |
+          DEVICE_ID="$(xcrun simctl list devices booted \
+            | awk -F '[()]' '/iPhone/{print $2; exit}')"
+          test -n "$DEVICE_ID"
+          flutter test integration_test/smoke_test.dart -d "$DEVICE_ID"

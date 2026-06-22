@@ -20,6 +20,7 @@ The first iteration should validate that the Flutter plugin is wired correctly a
 Assertions should stay intentionally small and stable:
 
 - the example app starts successfully;
+- the plugin reaches an explicit initialized state before any identification controls become interactive;
 - **Run tests!** eventually changes the checks result to `Success!`;
 - **Identify!** eventually renders a non-empty device ID that is not `Unknown` and does not start with `Failed`;
 - **Identify with extended result!** opens the extended result dialog and shows a response containing expected top-level fields such as `visitorId` or `requestId`.
@@ -31,6 +32,8 @@ Use Flutter's official `integration_test` package against the existing `example`
 Keep the app interaction close to the manual process:
 
 - add stable widget keys to the existing buttons and result labels;
+- expose explicit initializing, ready, and initialization-error states in the example app;
+- keep identification controls disabled until initialization succeeds, and have the integration test wait for the ready state before tapping them;
 - create one integration test that taps the same controls a maintainer taps manually;
 - wait for success/result text instead of asserting exact visitor IDs or exact response payloads;
 - avoid new test frameworks unless Flutter `integration_test` cannot cover a required interaction.
@@ -49,15 +52,18 @@ The workflow should create `example/.env.local` from GitHub secrets before runni
 - `REGION`, if the test workspace is not in the default region;
 - `ENDPOINT` and `SCRIPT_URL_PATTERN`, only if required by the test workspace.
 
+Native E2E jobs must avoid blocking on operating-system permission dialogs. Add an example-app configuration flag that disables location collection for automated tests while preserving the current location-enabled behavior for normal manual runs. The Android and iOS CI jobs should set that flag in `.env.local`; permission-specific behavior remains a separate follow-up.
+
 Because the repository is public, secret-backed E2E jobs need an explicit policy for forked pull requests. If secrets are unavailable, the workflow should skip the live-service E2E jobs rather than fail unrelated external contributions.
 
 ## Recommended first PR contents
 
 1. Add `integration_test` to the example app.
-2. Add widget keys to the existing example app controls/results.
+2. Add widget keys and explicit initialization states to the existing example app controls/results, keeping controls disabled until initialization succeeds.
 3. Add one integration test for the manual smoke flow.
-4. Add a GitHub Actions workflow that runs the test on web, Android, and iOS for pull requests when secrets are available.
-5. Document the required secrets and local command for running the test manually.
+4. Add a test-only environment flag for disabling location collection, and use it in Android and iOS CI to avoid system permission dialogs.
+5. Add a GitHub Actions workflow that runs the test on web, Android, and iOS for pull requests when secrets are available.
+6. Document the required secrets, test-only location flag, and local command for running the test manually.
 
 ## Follow-ups
 
