@@ -1,8 +1,8 @@
 PODS:
-  - FingerprintPro (2.14.0)
+  - FingerprintPro (2.16.0)
   - Flutter (1.0.0)
   - fpjs_pro_plugin (3.3.2):
-    - FingerprintPro (< 2.15.0, >= 2.14.0)
+    - FingerprintPro (< 2.17.0, >= 2.16.0)
     - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
@@ -31,9 +31,9 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  FingerprintPro: 0316a80c096a09d64f29033417337b134fdf2fe0
+  FingerprintPro: d23a0640d3b2febf1d4e877cad3793b74e08e18c
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  fpjs_pro_plugin: d087024a16566b68b92b74d25a12611c57a92e38
+  fpjs_pro_plugin: 960a3bb2b2d68012de1edc8527141adedec6983a
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
 
