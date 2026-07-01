@@ -40,6 +40,11 @@ void main() {
             !deviceId.startsWith('Failed');
       },
       description: 'a device ID',
+      failure: (text) {
+        const prefix = 'The device id is: ';
+        final deviceId = text.trim().replaceFirst(prefix, '');
+        return text.startsWith(prefix) && deviceId.startsWith('Failed');
+      },
     );
 
     await tester.tap(find.byKey(app.identifyExtendedButtonKey));

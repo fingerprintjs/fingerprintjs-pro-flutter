@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+
+* On web, `initFpjs` now waits for the Fingerprint agent to load and surfaces initialization failures to callers.
+
 ## [4.10.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.9.0...v4.10.0) (2026-06-10)
 
 

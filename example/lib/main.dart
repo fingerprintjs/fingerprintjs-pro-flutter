@@ -202,6 +202,12 @@ class _MyAppState extends State<MyApp> {
               () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
               () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
             ];
+      var timeoutChecks = _e2eSmokeTest
+          ? []
+          : [
+              () async => FpjsProPlugin.getVisitorId(timeoutMs: 5),
+              () async => FpjsProPlugin.getVisitorData(timeoutMs: 5)
+            ];
 
       for (var check in checks) {
         await check();
@@ -209,6 +215,17 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           _checksResult += '.';
         });
+      }
+      for (var check in timeoutChecks) {
+        try {
+          await check();
+          throw Exception('Expected timeout error');
+        } on FingerprintProError {
+          if (!mounted) return;
+          setState(() {
+            _checksResult += '!';
+          });
+        }
       }
       if (!mounted) return;
       setState(() {
