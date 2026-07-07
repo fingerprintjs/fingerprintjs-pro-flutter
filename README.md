@@ -235,8 +235,8 @@ void doInit() async {
 ```
 
 ## Additional Resources
-- [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
-- [Server API](https://dev.fingerprint.com/reference/server-api)
+- [Fingerprint Pro documentation](https://docs.fingerprint.com)
+- [Server API](https://docs.fingerprint.com/reference/server-api)
 
 ## Support and feedback
 
