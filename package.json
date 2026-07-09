@@ -2,7 +2,7 @@
   "name": "fingerprintjs-pro-flutter",
   "version": "4.11.0",
   "scripts": {
-    "changeset:version": "changeset version",
+    "changeset:version": "changeset version && bash ./scripts/update_version.sh",
     "changeset:publish": "changeset publish"
   },
   "author": "FingerprintJS, Inc (https://fingerprint.com)",

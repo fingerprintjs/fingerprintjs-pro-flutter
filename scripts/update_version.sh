@@ -1,7 +1,8 @@
 #!/bin/bash
 
-echo "VERSION: $VERSION"
+VERSION=$(node -p "require('./package.json').version")
 
+echo "VERSION: $VERSION"
 
 sed -i "s/^version: .*/version: $VERSION/g" pubspec.yaml
 sed -i "s/s\.version          = '.*'/s.version          = '$VERSION'/g" ios/fpjs_pro_plugin.podspec
