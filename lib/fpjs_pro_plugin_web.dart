@@ -64,40 +64,35 @@ class FpjsProPluginWeb {
   static Future<void> initFpjs(MethodCall call) async {
     final options = FingerprintJSOptions(
       apiKey: call.arguments['apiToken'],
-      integrationInfo: <JSString>[
-        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web".toJS
-      ].toJS,
+      integrationInfo: [
+        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"
+      ] as JSArray<JSString>,
     );
     if (call.arguments['region'] != null) {
       options.region = call.arguments['region'];
     }
     if (call.arguments['endpoint'] != null) {
-      options.endpoint = <JSString>[
-        (call.arguments['endpoint'] as String).toJS,
-        ...((call.arguments['endpointFallbacks'] as List?) ?? [])
-            .map((e) => (e as String).toJS)
-      ].toJS;
+      options.endpoint = [
+        call.arguments['endpoint'],
+        ...(call.arguments['endpointFallbacks'] ?? [])
+      ] as JSArray<JSString>;
     }
     if (call.arguments['scriptUrlPattern'] != null) {
-      options.scriptUrlPattern = <JSString>[
-        (call.arguments['scriptUrlPattern'] as String).toJS,
-        ...((call.arguments['scriptUrlPatternFallbacks'] as List?) ?? [])
-            .map((e) => (e as String).toJS)
-      ].toJS;
+      options.scriptUrlPattern = [
+        call.arguments['scriptUrlPattern'],
+        ...(call.arguments['scriptUrlPatternFallbacks'] ?? [])
+      ] as JSArray<JSString>;
     }
     try {
       _fpPromise = FingerprintJS.load(options).toDart;
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
-      // Narrow to JSObject so `isA` resolves on the minimum supported SDK
-      // (Dart 3.8 defines `isA` on JSAny?, not Object). The `is JSObject`
-      // boxing check is the only way to discriminate JS from Dart errors here.
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (e is JSObject && e.isA<WebException>()) {
-        throw unwrapWebError(e as WebException);
+      if (e is WebException) {
+        throw unwrapWebError(e);
+      } else {
+        throw UnknownError(e.toString());
       }
-      throw UnknownError(e.toString());
     }
   }
 
@@ -121,14 +116,11 @@ class FpjsProPluginWeb {
           .toDart;
       return result.visitorId;
     } catch (e) {
-      // Narrow to JSObject so `isA` resolves on the minimum supported SDK
-      // (Dart 3.8 defines `isA` on JSAny?, not Object). The `is JSObject`
-      // boxing check is the only way to discriminate JS from Dart errors here.
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (e is JSObject && e.isA<WebException>()) {
-        throw unwrapWebError(e as WebException);
+      if (e is WebException) {
+        throw unwrapWebError(e);
+      } else {
+        throw UnknownError(e.toString());
       }
-      throw UnknownError(e.toString());
     }
   }
 
@@ -169,14 +161,11 @@ class FpjsProPluginWeb {
         typedResult.sealedResult ?? ''
       ];
     } catch (e) {
-      // Narrow to JSObject so `isA` resolves on the minimum supported SDK
-      // (Dart 3.8 defines `isA` on JSAny?, not Object). The `is JSObject`
-      // boxing check is the only way to discriminate JS from Dart errors here.
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (e is JSObject && e.isA<WebException>()) {
-        throw unwrapWebError(e as WebException);
+      if (e is WebException) {
+        throw unwrapWebError(e);
+      } else {
+        throw UnknownError(e.toString());
       }
-      throw UnknownError(e.toString());
     }
   }
 }

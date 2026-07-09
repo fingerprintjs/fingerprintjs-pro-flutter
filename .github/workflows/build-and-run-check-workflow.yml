@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ['3.32.0', '']
+        flutter-version: ['3.13.0', '']
     steps:
       - name: Checkout
         uses: actions/checkout@v7

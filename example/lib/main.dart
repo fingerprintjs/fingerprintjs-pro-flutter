@@ -27,7 +27,7 @@ Future main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -62,10 +62,12 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initFpjs() async {
     try {
-      if (_apiKey == null || _apiKey.isEmpty) {
+      if (_apiKey == null || _apiKey!.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      await FpjsProPlugin.initFpjs(_apiKey,
+      // Must use ! because field promotion only available in Dart >3.2
+      // https://dart.dev/tools/non-promotion-reasons#language-version
+      await FpjsProPlugin.initFpjs(_apiKey!,
           endpoint: _endpoint,
           scriptUrlPattern: _scriptUrlPattern,
           region: _parseRegion(_region),
@@ -231,7 +233,8 @@ class _MyAppState extends State<MyApp> {
 }
 
 class _ExtendedResultDialog extends StatelessWidget {
-  const _ExtendedResultDialog({required this.handleIdentificate});
+  const _ExtendedResultDialog({Key? key, required this.handleIdentificate})
+      : super(key: key);
 
   final Future<String> Function() handleIdentificate;
 
