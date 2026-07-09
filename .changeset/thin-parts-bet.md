@@ -2,4 +2,4 @@
 "fingerprintjs-pro-flutter": patch
 ---
 
-Test changeset
+Changeset for test release
