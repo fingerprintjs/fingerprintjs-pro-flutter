@@ -2,7 +2,7 @@
 
 /// JavaScript interop for the [FingerprintJS Pro JavaScript agent](https://docs.fingerprint.com/docs/js-agent)
 @JS('FingerprintJSFlutter')
-library fingerprint_js;
+library;
 
 import 'dart:js_interop';
 
@@ -207,9 +207,9 @@ extension type FingerprintJSOptions._(JSObject _) implements JSObject {
   /// A JS agent script URL pattern.
   ///
   /// The following substrings are replaced:
-  /// - <version> — the major version of JS agent;
-  /// - <apiKey> — the public key set via the `apiKey` option;
-  /// - <loaderVersion> — the version of this package;
+  /// - `<version>` — the major version of JS agent;
+  /// - `<apiKey>` — the public key set via the `apiKey` option;
+  /// - `<loaderVersion>` — the version of this package;
   external JSArray<JSString>? get scriptUrlPattern;
   external set scriptUrlPattern(JSArray<JSString>? scriptUrlPattern);
 

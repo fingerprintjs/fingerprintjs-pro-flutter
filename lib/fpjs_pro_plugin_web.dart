@@ -64,30 +64,36 @@ class FpjsProPluginWeb {
   static Future<void> initFpjs(MethodCall call) async {
     final options = FingerprintJSOptions(
       apiKey: call.arguments['apiToken'],
-      integrationInfo: [
-        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"
-      ] as JSArray<JSString>,
+      integrationInfo: <JSString>[
+        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web".toJS
+      ].toJS,
     );
     if (call.arguments['region'] != null) {
       options.region = call.arguments['region'];
     }
     if (call.arguments['endpoint'] != null) {
-      options.endpoint = [
-        call.arguments['endpoint'],
-        ...(call.arguments['endpointFallbacks'] ?? [])
-      ] as JSArray<JSString>;
+      options.endpoint = <JSString>[
+        (call.arguments['endpoint'] as String).toJS,
+        ...((call.arguments['endpointFallbacks'] as List?) ?? [])
+            .map((e) => (e as String).toJS)
+      ].toJS;
     }
     if (call.arguments['scriptUrlPattern'] != null) {
-      options.scriptUrlPattern = [
-        call.arguments['scriptUrlPattern'],
-        ...(call.arguments['scriptUrlPatternFallbacks'] ?? [])
-      ] as JSArray<JSString>;
+      options.scriptUrlPattern = <JSString>[
+        (call.arguments['scriptUrlPattern'] as String).toJS,
+        ...((call.arguments['scriptUrlPatternFallbacks'] as List?) ?? [])
+            .map((e) => (e as String).toJS)
+      ].toJS;
     }
     try {
       _fpPromise = FingerprintJS.load(options).toDart;
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
+      // The type-accurate check is `e.isA<WebException>()` (dart:js_interop),
+      // but `isA` requires Dart >=3.4.0 while this package supports >=3.3.0.
+      // The erased `is` check keeps us on the supported floor.
+      // ignore: invalid_runtime_check_with_js_interop_types
       if (e is WebException) {
         throw unwrapWebError(e);
       } else {
@@ -116,6 +122,10 @@ class FpjsProPluginWeb {
           .toDart;
       return result.visitorId;
     } catch (e) {
+      // The type-accurate check is `e.isA<WebException>()` (dart:js_interop),
+      // but `isA` requires Dart >=3.4.0 while this package supports >=3.3.0.
+      // The erased `is` check keeps us on the supported floor.
+      // ignore: invalid_runtime_check_with_js_interop_types
       if (e is WebException) {
         throw unwrapWebError(e);
       } else {
@@ -161,6 +171,10 @@ class FpjsProPluginWeb {
         typedResult.sealedResult ?? ''
       ];
     } catch (e) {
+      // The type-accurate check is `e.isA<WebException>()` (dart:js_interop),
+      // but `isA` requires Dart >=3.4.0 while this package supports >=3.3.0.
+      // The erased `is` check keeps us on the supported floor.
+      // ignore: invalid_runtime_check_with_js_interop_types
       if (e is WebException) {
         throw unwrapWebError(e);
       } else {
