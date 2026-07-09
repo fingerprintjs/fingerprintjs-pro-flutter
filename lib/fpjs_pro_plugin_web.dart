@@ -90,15 +90,10 @@ class FpjsProPluginWeb {
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
-      // The type-accurate check is `e.isA<WebException>()` (dart:js_interop),
-      // but `isA` requires Dart >=3.4.0 while this package supports >=3.3.0.
-      // The erased `is` check keeps us on the supported floor.
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (e is WebException) {
-        throw unwrapWebError(e);
-      } else {
-        throw UnknownError(e.toString());
+      if (e.isA<WebException>()) {
+        throw unwrapWebError(e as WebException);
       }
+      throw UnknownError(e.toString());
     }
   }
 
@@ -122,15 +117,10 @@ class FpjsProPluginWeb {
           .toDart;
       return result.visitorId;
     } catch (e) {
-      // The type-accurate check is `e.isA<WebException>()` (dart:js_interop),
-      // but `isA` requires Dart >=3.4.0 while this package supports >=3.3.0.
-      // The erased `is` check keeps us on the supported floor.
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (e is WebException) {
-        throw unwrapWebError(e);
-      } else {
-        throw UnknownError(e.toString());
+      if (e.isA<WebException>()) {
+        throw unwrapWebError(e as WebException);
       }
+      throw UnknownError(e.toString());
     }
   }
 
@@ -171,15 +161,10 @@ class FpjsProPluginWeb {
         typedResult.sealedResult ?? ''
       ];
     } catch (e) {
-      // The type-accurate check is `e.isA<WebException>()` (dart:js_interop),
-      // but `isA` requires Dart >=3.4.0 while this package supports >=3.3.0.
-      // The erased `is` check keeps us on the supported floor.
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (e is WebException) {
-        throw unwrapWebError(e);
-      } else {
-        throw UnknownError(e.toString());
+      if (e.isA<WebException>()) {
+        throw unwrapWebError(e as WebException);
       }
+      throw UnknownError(e.toString());
     }
   }
 }
