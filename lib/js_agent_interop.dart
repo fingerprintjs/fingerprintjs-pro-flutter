@@ -1,6 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
-/// JavaScript interop for the [FingerprintJS Pro JavaScript agent](https://dev.fingerprint.com/docs/js-agent)
+/// JavaScript interop for the [FingerprintJS Pro JavaScript agent](https://docs.fingerprint.com/docs/js-agent)
 @JS('FingerprintJSFlutter')
 library fingerprint_js;
 
@@ -38,7 +38,7 @@ extension type FingerprintJS._(JSObject _) implements JSObject {
       get ERROR_PROXY_INTEGRATION_SECRET_ENVIRONMENT_MISMATCH;
 }
 
-/// FingerprintJS Pro [JavaScript agent](https://dev.fingerprint.com/docs/js-agent)
+/// FingerprintJS Pro [JavaScript agent](https://docs.fingerprint.com/docs/js-agent)
 extension type FingerprintJSAgent._(JSObject _) implements JSObject {
   /// Gets the visitor identifier.
   /// When an error is emitted by the backend, it gets a `requestId` field, same as in successful result.
