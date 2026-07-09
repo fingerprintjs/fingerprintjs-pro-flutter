@@ -4,7 +4,7 @@ on:
 
 jobs:
   build-and-run-checks:
-    name: "Build and run checks (Flutter ${{ matrix.flutter-version || 'latest stable' }})"
+    name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
