@@ -4,8 +4,12 @@ on:
 
 jobs:
   build-and-run-checks:
-    name: 'Build and run checks'
+    name: "Build and run checks (Flutter ${{ matrix.flutter-version || 'latest stable' }})"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: ['3.13.0', '']
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -13,6 +17,7 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: 'stable'
+          flutter-version: ${{ matrix.flutter-version }}
       - name: Restore packages
         run: flutter pub get
       - name: Create .env.local
