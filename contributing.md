@@ -21,6 +21,6 @@ The `main` branch is locked for the push action. For proposing changes, use the 
 ## How to publish
 
 We use [changesets](https://github.com/changesets/changesets) for handling release notes. If there are relevant changes,
-please add them to changeset via `pnpm changeset`. You need to run `pnpm install` before doing so.
+please add a changeset via `pnpm exec changeset` (run `pnpm install` first).
 
 After the release is created, [publish.yaml](.github%2Fworkflows%2Fpublish.yaml) workflow is triggered that publishes the package to pub.dev 
