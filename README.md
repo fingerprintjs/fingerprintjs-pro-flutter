@@ -37,8 +37,8 @@ application. The plugin allows you to call the underlying native Fingerprint age
   - [License](#license)
 
 ## Requirements
-- Flutter 3.19 or higher
-- Dart 3.3 or higher
+- Flutter 3.32.0 or higher
+- Dart 3.8.0 or higher
 - Android 6.0 (API level 23+) or higher
 - iOS 13+/tvOS 15+, Swift 5.9 or higher (stable releases)
 
