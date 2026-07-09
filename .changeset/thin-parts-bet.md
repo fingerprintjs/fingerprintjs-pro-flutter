@@ -2,4 +2,4 @@
 "fingerprintjs-pro-flutter": patch
 ---
 
-Changeset for test release
+Migrate release automation to Changesets.
