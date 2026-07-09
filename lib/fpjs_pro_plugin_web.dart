@@ -90,7 +90,11 @@ class FpjsProPluginWeb {
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
-      if (e.isA<WebException>()) {
+      // Narrow to JSObject so `isA` resolves on the minimum supported SDK
+      // (Dart 3.8 defines `isA` on JSAny?, not Object). The `is JSObject`
+      // boxing check is the only way to discriminate JS from Dart errors here.
+      // ignore: invalid_runtime_check_with_js_interop_types
+      if (e is JSObject && e.isA<WebException>()) {
         throw unwrapWebError(e as WebException);
       }
       throw UnknownError(e.toString());
@@ -117,7 +121,11 @@ class FpjsProPluginWeb {
           .toDart;
       return result.visitorId;
     } catch (e) {
-      if (e.isA<WebException>()) {
+      // Narrow to JSObject so `isA` resolves on the minimum supported SDK
+      // (Dart 3.8 defines `isA` on JSAny?, not Object). The `is JSObject`
+      // boxing check is the only way to discriminate JS from Dart errors here.
+      // ignore: invalid_runtime_check_with_js_interop_types
+      if (e is JSObject && e.isA<WebException>()) {
         throw unwrapWebError(e as WebException);
       }
       throw UnknownError(e.toString());
@@ -161,7 +169,11 @@ class FpjsProPluginWeb {
         typedResult.sealedResult ?? ''
       ];
     } catch (e) {
-      if (e.isA<WebException>()) {
+      // Narrow to JSObject so `isA` resolves on the minimum supported SDK
+      // (Dart 3.8 defines `isA` on JSAny?, not Object). The `is JSObject`
+      // boxing check is the only way to discriminate JS from Dart errors here.
+      // ignore: invalid_runtime_check_with_js_interop_types
+      if (e is JSObject && e.isA<WebException>()) {
         throw unwrapWebError(e as WebException);
       }
       throw UnknownError(e.toString());
