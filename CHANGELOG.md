@@ -1,3 +1,5 @@
+# Fingerprint Flutter
+
 ## [4.11.0](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/compare/v4.10.0...v4.11.0) (2026-07-07)
 
 ### Features
