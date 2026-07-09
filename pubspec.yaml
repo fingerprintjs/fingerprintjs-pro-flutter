@@ -5,8 +5,8 @@ homepage: https://fingerprint.com
 repository: https://github.com/fingerprintjs/fingerprintjs-pro-flutter
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=3.19.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
