@@ -75,7 +75,7 @@ jobs:
 
       - name: Build example (ios)
         working-directory: example
-        run: flutter build ios
+        run: flutter build ios --release
 
   build-and-run-checks:
     name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
