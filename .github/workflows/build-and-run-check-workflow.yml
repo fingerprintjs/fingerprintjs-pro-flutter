@@ -48,7 +48,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: [ '3.25.0', '' ]
+        # Since iOS is using Swift Package Manager, the 3.24.0 is the earliest version that supports it
+        flutter-version: [ '3.24.0', '' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
