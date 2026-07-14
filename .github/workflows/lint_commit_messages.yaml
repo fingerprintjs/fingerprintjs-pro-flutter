@@ -10,8 +10,21 @@ jobs:
     name: Analyze Commit Messages
     uses: fingerprintjs/dx-team-toolkit/.github/workflows/analyze-commits.yml@v1
     with:
+      previewNotes: false
       setupLanguage: 'flutter'
       setupLanguageVersion: '3.x'
-      prepareCommand: 'sudo gem install -n /usr/local/bin cocoapods && echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties'
-      semanticReleasePlugins: |
-        @fingerprintjs/semantic-release-native-dependency-plugin@^1.2.1
+      prepareCommand: |
+        sudo gem install -n /usr/local/bin cocoapods
+        pod --version
+        echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties
+
+  preview-changeset:
+    name: Preview changeset
+    uses: fingerprintjs/dx-team-toolkit/.github/workflows/preview-changeset-release.yml@v1
+    with:
+      pr-title: ${{ github.event.pull_request.title }}
+      changeset-command: 'pnpm exec changeset'
+      prepare-command: |
+        sudo gem install -n /usr/local/bin cocoapods
+        pod --version
+        echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties

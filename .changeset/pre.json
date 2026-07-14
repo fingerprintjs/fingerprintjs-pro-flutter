@@ -1,0 +1,8 @@
+{
+  "mode": "pre",
+  "tag": "test",
+  "initialVersions": {
+    "fingerprintjs-pro-flutter": "4.11.0"
+  },
+  "changesets": []
+}

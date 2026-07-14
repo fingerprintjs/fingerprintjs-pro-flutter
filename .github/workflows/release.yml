@@ -11,14 +11,22 @@ jobs:
     uses: ./.github/workflows/build-and-run-check-workflow.yml
 
   release:
-    name: 'Prepare new version'
+    name: 'Release using changesets'
     needs: test
-    uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-server-sdk.yml@v1
+    uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-sdk-changesets.yml@v1
     with:
+      appId: ${{ vars.APP_ID }}
+      runnerAppId: ${{ vars.RUNNER_APP_ID }}
+      version-command: pnpm changeset:version
+      publish-command: pnpm changeset:publish
       language: flutter
       language-version: '3.x'
-      appId: ${{ vars.APP_ID }}
-      semantic-release-extra-plugins: '@fingerprintjs/semantic-release-native-dependency-plugin@^1.1.0'
-      prepare-command: 'echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties'
+      prepare-command: |
+        sudo gem install -n /usr/local/bin cocoapods
+        pod --version
+        echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties
+      # Required by Gradle
+      java-version: '17'
     secrets:
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+      RUNNER_APP_PRIVATE_KEY: ${{ secrets.RUNNER_APP_PRIVATE_KEY }}

@@ -20,15 +20,7 @@ The `main` branch is locked for the push action. For proposing changes, use the 
 
 ## How to publish
 
-The library is automatically released on every push to the main branch if there are relevant changes using [semantic-release](https://github.com/semantic-release/semantic-release) with following plugins:
-
-- [@semantic-release/commit-analyzer](https://github.com/semantic-release/commit-analyzer)
-- [@semantic-release/release-notes-generator](https://github.com/semantic-release/release-notes-generator)
-- [@semantic-release/changelog](https://github.com/semantic-release/changelog)
-- [@semantic-release/github](https://github.com/semantic-release/github)
-- [@semantic-release/exec](https://github.com/semantic-release/exec)
-
-The workflow must be approved by one of the maintainers, first.
-The release configuration can be found in [.releaserc](.releaserc) file.
+We use [changesets](https://github.com/changesets/changesets) for handling release notes. If there are relevant changes,
+please add a changeset via `pnpm exec changeset` (run `pnpm install` first).
 
 After the release is created, [publish.yaml](.github%2Fworkflows%2Fpublish.yaml) workflow is triggered that publishes the package to pub.dev 

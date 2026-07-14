@@ -1,0 +1,4 @@
+packages:
+  - '.'
+minimumReleaseAgeExclude:
+  - '@fingerprintjs/changesets-native-dependency-format@0.1.0'
