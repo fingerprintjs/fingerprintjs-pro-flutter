@@ -76,7 +76,7 @@ jobs:
 
       - name: Build example (ios)
         working-directory: example
-        run: flutter build ios --no-codesign
+        run: flutter build ios --simulator --no-codesign
 
   build-and-run-checks:
     name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
