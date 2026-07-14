@@ -43,7 +43,7 @@ jobs:
         run: flutter build apk
 
   build-examples-ios:
-    name: "Build examples (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    name: "Build examples for iOS (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: macos-latest
     strategy:
       fail-fast: false
