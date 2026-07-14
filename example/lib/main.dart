@@ -65,8 +65,6 @@ class _MyAppState extends State<MyApp> {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      // Must use ! because field promotion only available in Dart >3.2
-      // https://dart.dev/tools/non-promotion-reasons#language-version
       await FpjsProPlugin.initFpjs(_apiKey,
           endpoint: _endpoint,
           scriptUrlPattern: _scriptUrlPattern,
