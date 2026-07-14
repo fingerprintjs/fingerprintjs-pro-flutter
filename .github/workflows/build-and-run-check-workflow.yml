@@ -48,7 +48,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: [ '3.19.0', '' ]
+        # Starting from 3.24 it's possible to build iOS without codesigning
+        flutter-version: [ '3.24.0', '' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -75,7 +76,7 @@ jobs:
 
       - name: Build example (ios)
         working-directory: example
-        run: flutter build ios --release
+        run: flutter build ios --release --no-codesign
 
   build-and-run-checks:
     name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
