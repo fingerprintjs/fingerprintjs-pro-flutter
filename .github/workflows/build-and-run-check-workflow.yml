@@ -3,6 +3,80 @@ on:
   workflow_call:
 
 jobs:
+  build-examples:
+    name: "Build examples (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: [ '3.19.0', '' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: 'stable'
+          flutter-version: ${{ matrix['flutter-version'] }}
+
+      - name: Restore example packages
+        working-directory: example
+        run: flutter pub get
+
+      - name: Restore packages
+        run: flutter pub get
+
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Build example (web)
+        working-directory: example
+        run: flutter build web
+
+      - name: Build example (android)
+        working-directory: example
+        run: flutter build apk
+
+  build-examples-ios:
+    name: "Build examples (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: [ '3.19.0', '' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: 'stable'
+          flutter-version: ${{ matrix['flutter-version'] }}
+
+      - name: Restore example packages
+        working-directory: example
+        run: flutter pub get
+
+      - name: Restore packages
+        run: flutter pub get
+
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Build example (android)
+        working-directory: example
+        run: flutter build ios
+
   build-and-run-checks:
     name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
@@ -13,17 +87,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: 'stable'
           flutter-version: ${{ matrix['flutter-version'] }}
+
       - name: Restore packages
         run: flutter pub get
+
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
         shell: bash
+
       - name: Analyze
         run: flutter analyze
+
       - name: Run tests
         run: flutter test
