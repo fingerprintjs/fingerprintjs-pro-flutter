@@ -44,12 +44,8 @@ jobs:
   # neither of which exists in older Flutter engines, so older versions can't even compile the example.
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
   build-examples-ios:
-    name: "Build examples for iOS (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    name: "Build examples for iOS"
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        flutter-version: [ '' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -58,7 +54,6 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: 'stable'
-          flutter-version: ${{ matrix['flutter-version'] }}
 
       - name: Restore packages
         run: flutter pub get
