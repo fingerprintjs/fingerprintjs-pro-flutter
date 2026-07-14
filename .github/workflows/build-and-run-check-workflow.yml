@@ -42,14 +42,18 @@ jobs:
         working-directory: example
         run: flutter build apk
 
+  # iOS runs only on the latest stable Flutter, unlike the other jobs which also test an older floor.
+  # The example's ios/ project is generated scaffolding that `flutter` keeps migrating to its newest
+  # template; currently Swift Package Manager and the FlutterImplicitEngineDelegate AppDelegate API,
+  # neither of which exists in older Flutter engines, so older versions can't even compile the example.
+  # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
   build-examples-ios:
     name: "Build examples for iOS (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-        # Since Flutter on iOS is using Swift Package Manager, the 3.24.0 is the earliest version that supports it
-        flutter-version: [ '3.24.0', '' ]
+        flutter-version: [ '' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
