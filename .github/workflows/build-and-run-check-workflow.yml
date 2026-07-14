@@ -4,7 +4,7 @@ on:
 
 jobs:
   build-examples:
-    name: "Build examples (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    name: "Build examples for Web + Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
