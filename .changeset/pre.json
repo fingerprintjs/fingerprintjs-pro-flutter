@@ -4,5 +4,8 @@
   "initialVersions": {
     "fingerprintjs-pro-flutter": "4.11.0"
   },
-  "changesets": []
+  "changesets": [
+    "major-needles-doubt",
+    "thin-parts-bet"
+  ]
 }
