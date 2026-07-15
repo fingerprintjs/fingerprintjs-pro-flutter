@@ -3,22 +3,98 @@ on:
   workflow_call:
 
 jobs:
-  build-and-run-checks:
-    name: 'Build and run checks'
+  build-examples:
+    name: "Build examples for Web + Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: [ '3.19.0', '' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: 'stable'
+          flutter-version: ${{ matrix['flutter-version'] }}
+
       - name: Restore packages
         run: flutter pub get
+
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
         shell: bash
+
       - name: Analyze
         run: flutter analyze
+
+      - name: Build example (web)
+        working-directory: example
+        run: flutter build web
+
+      - name: Build example (android)
+        working-directory: example
+        run: flutter build apk
+
+  # iOS runs only on the latest stable Flutter, unlike the other jobs which also test an older floor.
+  # The example's ios/ project is generated scaffolding that `flutter` keeps migrating to its newest
+  # template; currently Swift Package Manager and the FlutterImplicitEngineDelegate AppDelegate API,
+  # neither of which exists in older Flutter engines, so older versions can't even compile the example.
+  # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
+  build-examples-ios:
+    name: "Build examples for iOS"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: 'stable'
+
+      - name: Restore packages
+        run: flutter pub get
+
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Build example (ios)
+        working-directory: example
+        run: flutter build ios --no-codesign
+
+  build-and-run-checks:
+    name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: ['3.19.0', '']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: 'stable'
+          flutter-version: ${{ matrix['flutter-version'] }}
+
+      - name: Restore packages
+        run: flutter pub get
+
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+
+      - name: Analyze
+        run: flutter analyze
+
       - name: Run tests
         run: flutter test
