@@ -1,5 +1,16 @@
 # Fingerprint Flutter
 
+## 4.12.0-test.1
+
+### Patch Changes
+
+- Update publish workflow to run whenever release is published ([6ad50e4](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/6ad50e437b76ed88077aa224a8335556eb582d6d))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+- Fingerprint Android SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+
 ## 4.12.0-test.0
 
 ### Minor Changes
