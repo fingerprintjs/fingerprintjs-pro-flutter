@@ -1,5 +1,16 @@
 # Fingerprint Flutter
 
+## 4.12.0-test.3
+
+### Patch Changes
+
+- Restore old tag format ([020568c](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/020568c93b98a9927e6f7c6c644413badc56e46b))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+- Fingerprint Android SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+
 ## 4.12.0-test.2
 
 ### Patch Changes
