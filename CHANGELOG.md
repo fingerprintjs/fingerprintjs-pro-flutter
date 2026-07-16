@@ -1,5 +1,16 @@
 # Fingerprint Flutter
 
+## 4.12.0-test.2
+
+### Patch Changes
+
+- Restore tag trigger in publish workflow ([c165404](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/c1654044059d02959fae48b81617f26407c2f114))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+- Fingerprint Android SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+
 ## 4.12.0-test.1
 
 ### Patch Changes
