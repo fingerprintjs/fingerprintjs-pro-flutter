@@ -5,10 +5,6 @@
     "fingerprintjs-pro-flutter": "4.11.0"
   },
   "changesets": [
-    "fancy-days-dig",
-    "gentle-eagles-attend",
-    "major-needles-doubt",
-    "six-corners-change",
-    "thin-parts-bet"
+    "major-needles-doubt"
   ]
 }
