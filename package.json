@@ -1,6 +1,6 @@
 {
   "name": "fingerprintjs-pro-flutter",
-  "version": "4.12.0-test.3",
+  "version": "4.12.0",
   "private": true,
   "scripts": {
     "changeset:version": "changeset version && bash ./scripts/update_version.sh",
