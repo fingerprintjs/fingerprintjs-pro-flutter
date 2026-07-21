@@ -1,5 +1,17 @@
 # Fingerprint Flutter
 
+## 4.12.0
+
+### Minor Changes
+
+- Bump Flutter SDK floor to `3.19.0`.
+  This is a non-breaking change, as the Dart SDK floor (`3.3.0`) requires at least Flutter SDK `3.19.0`. ([9ca1412](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/9ca14123e5f9f03919d6fd1dae7dc230f31725f5))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+- Fingerprint Android SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+
 ## 4.12.0-test.3
 
 ### Patch Changes
