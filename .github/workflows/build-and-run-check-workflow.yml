@@ -78,8 +78,17 @@ jobs:
         working-directory: fpjs_pro_plugin/example
         run: flutter build ios --no-codesign
 
+      # Flutter docs: disabling SwiftPM still leaves package refs in the Xcode
+      # project. xcodebuild then resolves Package.swift → ../FlutterFramework,
+      # which only exists during a SwiftPM build.
+      # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager
       - name: Disable Swift Package Manager
         run: flutter config --no-enable-swift-package-manager
+
+      - name: Restore example iOS project
+        run: |
+          git checkout -- example/ios
+          git clean -fd example/ios
 
       - name: Build example (iOS, CocoaPods)
         working-directory: fpjs_pro_plugin/example
