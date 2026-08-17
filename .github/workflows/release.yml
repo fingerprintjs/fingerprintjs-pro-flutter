@@ -21,10 +21,11 @@ jobs:
       publish-command: pnpm changeset:publish
       language: flutter
       language-version: '3.x'
-      # CocoaPods is required to generate release notes, not just to build. The changesets changelog
-      # plugin reads the supported FingerprintPro range out of ios/fpjs_pro_plugin.podspec, and since
-      # that is a Ruby podspec it shells out to `pod ipc spec` to evaluate it. Without `pod` on the
-      # runner it fails with "Pods not found in your system". Do not drop this.
+      # This job runs on Linux and never builds iOS — CocoaPods is here purely to generate release
+      # notes. The changesets changelog plugin reads the supported FingerprintPro range out of
+      # ios/fpjs_pro_plugin.podspec, and since that is a Ruby podspec it shells out to `pod ipc spec`
+      # to evaluate it. Without `pod` on the runner it fails with "Pods not found in your system".
+      # Do not drop this.
       prepare-command: |
         sudo gem install -n /usr/local/bin cocoapods
         pod --version
