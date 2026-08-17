@@ -2,12 +2,12 @@ import Flutter
 import UIKit
 import FingerprintPro
 
-public class SwiftFpjsProPlugin: NSObject, FlutterPlugin {
+public class FpjsProPlugin: NSObject, FlutterPlugin {
     var fpjsClient: FingerprintClientProviding?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "fpjs_pro_plugin", binaryMessenger: registrar.messenger())
-        let instance = SwiftFpjsProPlugin()
+        let instance = FpjsProPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 

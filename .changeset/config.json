@@ -5,7 +5,7 @@
     {
       "repo": "fingerprintjs/fingerprintjs-pro-flutter",
       "androidPath": "android",
-      "iosPodspecPath": "ios/fpjs_pro_plugin.podspec.json",
+      "iosPodspecPath": "ios/fpjs_pro_plugin.podspec",
       "packageName": "fingerprintjs-pro-flutter"
     }
   ],

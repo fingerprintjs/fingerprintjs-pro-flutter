@@ -65,9 +65,18 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Build example (ios)
+      - name: Build example (iOS, Swift Package Manager)
         working-directory: example
         run: flutter build ios --no-codesign
+
+      - name: Disable Swift Package Manager
+        run: flutter config --no-enable-swift-package-manager
+
+      - name: Build example (iOS, CocoaPods)
+        working-directory: example
+        run: |
+          flutter clean
+          flutter build ios --no-codesign
 
   build-and-run-checks:
     name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
