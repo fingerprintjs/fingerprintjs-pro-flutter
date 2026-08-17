@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'FingerprintJS, Inc' => 'support@fingerprint.com' }
   s.source           = { :path => '.' }
-  s.source_files     = 'fpjs_pro_plugin/Sources/fpjs_pro_plugin/**/*'
+  s.source_files     = 'fpjs_pro_plugin/Sources/fpjs_pro_plugin/**/*.swift'
   s.dependency 'Flutter'
   s.dependency 'FingerprintPro', ">= #{fingerprint_pro_lower}", "< #{fingerprint_pro_upper}"
   s.platform         = :ios, '13.0'
