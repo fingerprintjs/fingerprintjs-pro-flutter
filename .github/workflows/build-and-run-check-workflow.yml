@@ -43,13 +43,12 @@ jobs:
   # template; currently Swift Package Manager and the FlutterImplicitEngineDelegate AppDelegate API,
   # neither of which exists in older Flutter engines, so older versions can't even compile the example.
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
-  # Checkout into fpjs_pro_plugin/: Flutter’s SwiftPM path override uses the Dart
-  # package name as identity; the repo folder must match or resolution fails.
-  # https://github.com/flutter/flutter/issues/186881
-  # actions/checkout defaults to fingerprintjs-pro-flutter.
   build-examples-ios:
     name: "Build examples for iOS"
     runs-on: macos-latest
+    # Flutter's SwiftPM path override uses the Dart package name as identity
+    # (https://github.com/flutter/flutter/issues/186881). actions/checkout
+    # defaults to fingerprintjs-pro-flutter but the the repo folder must match the package name.
     defaults:
       run:
         working-directory: fpjs_pro_plugin
@@ -77,14 +76,14 @@ jobs:
       - name: Build example (iOS, Swift Package Manager)
         working-directory: fpjs_pro_plugin/example
         run: flutter build ios --no-codesign
-
-      # Flutter docs: disabling SwiftPM still leaves package refs in the Xcode
-      # project. xcodebuild then resolves Package.swift → ../FlutterFramework,
-      # which only exists during a SwiftPM build.
-      # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager
+        
+        # Disable Swift Package Manager to see if CocoaPods can build the example iOS project too
+        # (https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager).
       - name: Disable Swift Package Manager
         run: flutter config --no-enable-swift-package-manager
 
+      # Disabling SwiftPM still leaves SwiftPM references in the Xcode project
+      # We need to restore the example iOS project to a state where CocoaPods can build it
       - name: Restore example iOS project
         run: |
           git checkout -- example/ios
