@@ -43,12 +43,20 @@ jobs:
   # template; currently Swift Package Manager and the FlutterImplicitEngineDelegate AppDelegate API,
   # neither of which exists in older Flutter engines, so older versions can't even compile the example.
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
+  # Checkout into fpjs_pro_plugin/: SwiftPM identity is the repo folder name, which must
+  # match the Dart package. actions/checkout defaults to fingerprintjs-pro-flutter.
+  # https://github.com/flutter/flutter/issues/186881
   build-examples-ios:
     name: "Build examples for iOS"
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: fpjs_pro_plugin
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          path: fpjs_pro_plugin
 
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
@@ -66,14 +74,14 @@ jobs:
         run: flutter analyze
 
       - name: Build example (iOS, Swift Package Manager)
-        working-directory: example
+        working-directory: fpjs_pro_plugin/example
         run: flutter build ios --no-codesign
 
       - name: Disable Swift Package Manager
         run: flutter config --no-enable-swift-package-manager
 
       - name: Build example (iOS, CocoaPods)
-        working-directory: example
+        working-directory: fpjs_pro_plugin/example
         run: |
           flutter clean
           flutter build ios --no-codesign
