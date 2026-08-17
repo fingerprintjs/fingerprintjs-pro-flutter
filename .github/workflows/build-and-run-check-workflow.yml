@@ -43,11 +43,9 @@ jobs:
   # template; currently Swift Package Manager and the FlutterImplicitEngineDelegate AppDelegate API,
   # neither of which exists in older Flutter engines, so older versions can't even compile the example.
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
-  # Checkout into fpjs_pro_plugin/: SwiftPM identifies a local package by the last
-  # path component of its directory (not Package.swift's name). Flutter then
-  # overrides using the Dart package name, so they must match.
-  # WWDC 2019: https://developer.apple.com/videos/play/wwdc2019/410/?time=548
-  # Flutter: https://github.com/flutter/flutter/issues/186881
+  # Checkout into fpjs_pro_plugin/: Flutter’s SwiftPM path override uses the Dart
+  # package name as identity; the repo folder must match or resolution fails.
+  # https://github.com/flutter/flutter/issues/186881
   # actions/checkout defaults to fingerprintjs-pro-flutter.
   build-examples-ios:
     name: "Build examples for iOS"
