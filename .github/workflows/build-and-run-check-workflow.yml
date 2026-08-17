@@ -117,14 +117,6 @@ jobs:
             exit 1
           fi
 
-      # `flutter config` writes to the user-level config rather than the checkout, so leaving Swift
-      # Package Manager off would affect whatever runs next on the same machine. Harmless on an
-      # ephemeral GitHub runner, not harmless on a self-hosted one. `always()` so a failed build
-      # above still restores it.
-      - name: Re-enable Swift Package Manager
-        if: always()
-        run: flutter config --enable-swift-package-manager
-
   build-and-run-checks:
     name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
