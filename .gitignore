@@ -21,6 +21,9 @@ node_modules
 # is commented out by default.
 .vscode/
 
+# Local scratch (plans, notes)
+.local/
+
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
 /pubspec.lock

@@ -10,6 +10,10 @@ Before starting work on the repository please configure the environment and emul
 
 In the `example` folder you can find the demo application. Read the [instruction](https://docs.flutter.dev/get-started/test-drive?tab=androidstudio) on how to start the example app.
 
+To build the iOS example with Swift Package Manager, clone this repo into a folder named `fpjs_pro_plugin` (the Dart package name). Flutter uses that folder name as the SwiftPM package identity ([flutter#186881](https://github.com/flutter/flutter/issues/186881)). A clone named `fingerprintjs-pro-flutter` will fail. pub.dev installs are unaffected.
+
+This is temporary. Drop this note and the CI `path:` workaround once [flutter#188647](https://github.com/flutter/flutter/pull/188647) reaches stable.
+
 ## Testing
 
 For running tests just call `flutter test`.

@@ -49,6 +49,8 @@ We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/relea
 - [Fingerprint iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
 - [Fingerprint Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
 
+iOS supports Swift Package Manager and CocoaPods. Flutter 3.44+ uses Swift Package Manager by default.
+
 ## How to install
 
 Add `fpjs_pro_plugin` to the `pubspec.yaml` file in your Flutter app:

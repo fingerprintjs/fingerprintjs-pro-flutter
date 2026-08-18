@@ -21,6 +21,7 @@ jobs:
       publish-command: pnpm changeset:publish
       language: flutter
       language-version: '3.x'
+      # Changelog generation reads the iOS podspec version via CocoaPods.
       prepare-command: |
         sudo gem install -n /usr/local/bin cocoapods
         pod --version
