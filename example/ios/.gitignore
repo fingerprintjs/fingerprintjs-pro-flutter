@@ -31,6 +31,10 @@ Runner/GeneratedPluginRegistrant.*
 .swiftpm/
 **/xcshareddata/swiftpm/
 
+# Whether the plugin appears here depends on which package manager built the example, so it changes
+# on every switch between Swift Package Manager and CocoaPods. It pins nothing we ship.
+Podfile.lock
+
 # Exceptions to above rules.
 !default.mode1v3
 !default.mode2v3
