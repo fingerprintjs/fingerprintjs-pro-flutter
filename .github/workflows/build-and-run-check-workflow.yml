@@ -46,11 +46,9 @@ jobs:
   build-examples-ios:
     name: "Build examples for iOS"
     runs-on: macos-latest
-    # Flutter's SwiftPM path override uses the Dart package name as identity
-    # (https://github.com/flutter/flutter/issues/186881). actions/checkout
-    # defaults to fingerprintjs-pro-flutter but the repo folder must match the package name.
-    # TODO: drop the `path:` below and this `defaults:` block once flutter#188647 reaches stable.
-    # It is merged to master and fixes flutter#186881, so the checkout can go back to the default.
+    # Checkout as `fpjs_pro_plugin`: Flutter SwiftPM identifies path-overridden plugins by folder name
+    # (https://github.com/flutter/flutter/issues/186881).
+    # TODO: drop `path:` and this `defaults:` block once flutter#188647 reaches stable.
     defaults:
       run:
         working-directory: fpjs_pro_plugin
@@ -75,11 +73,9 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      # CocoaPods runs first on purpose. Flutter migrates a CocoaPods-shaped Xcode project forward to
-      # Swift Package Manager on its own, but nothing migrates it back, so the committed project has
-      # to be the CocoaPods one. Building in this order means each build starts from a state its
-      # package manager accepts, and no step has to reset the project in between.
-      # (https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager)
+      # CocoaPods first. Flutter migrates CocoaPods projects to SwiftPM, but not back, so the
+      # committed project stays CocoaPods-shaped and this order needs no reset in between.
+      # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager
       - name: Disable Swift Package Manager
         run: flutter config --no-enable-swift-package-manager
 
@@ -104,8 +100,7 @@ jobs:
           flutter clean
           flutter build ios --no-codesign
 
-      # `flutter build ios` succeeds whether or not SwiftPM picked the plugin up, so assert that it did.
-      # Without this, a regression that stops Flutter from finding Package.swift leaves the job green.
+      # `flutter build ios` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
       - name: Verify Swift Package Manager was used
         run: |
           manifest=example/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift

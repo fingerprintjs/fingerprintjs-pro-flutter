@@ -1,6 +1,5 @@
-# Package.swift is the single source of truth for the FingerprintPro version range, mirroring
-# android/fingerprint.gradle on the Android side. `.upToNextMinor(from: "X.Y.Z")` there means
-# >= X.Y.Z and < X.(Y+1).0, which is what CocoaPods gets told below.
+# FingerprintPro version range comes from Package.swift (same idea as android/fingerprint.gradle).
+# `.upToNextMinor(from: "X.Y.Z")` means >= X.Y.Z and < X.(Y+1).0.
 fingerprint_pro_lower = File.read(File.join(__dir__, 'fpjs_pro_plugin', 'Package.swift'))[/\.upToNextMinor\(from: "([\d.]+)"\)/, 1]
 raise 'Could not read the FingerprintPro version range from Package.swift' if fingerprint_pro_lower.nil?
 major, minor, = fingerprint_pro_lower.split('.').map(&:to_i)

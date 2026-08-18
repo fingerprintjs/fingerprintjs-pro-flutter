@@ -1,5 +1,4 @@
 // swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
@@ -11,10 +10,9 @@ let package = Package(
     products: [
         .library(name: "fpjs-pro-plugin", targets: ["fpjs_pro_plugin"])
     ],
-    // No FlutterFramework dependency on purpose. Flutter's current plugin template declares one, but
-    // the package it points at is only generated from Flutter 3.41 onwards, which would break SwiftPM
-    // builds on 3.24-3.40. Flutter's own first-party plugins still omit it, so the Flutter framework
-    // comes from the build settings the tool injects instead.
+    // No FlutterFramework dependency. The plugin template adds one, but that package is only
+    // generated from Flutter 3.41, which would break 3.24-3.40. Flutter injects the framework
+    // via build settings. First-party Flutter plugins omit it too.
     dependencies: [
         .package(url: "https://github.com/fingerprintjs/fingerprintjs-pro-ios", .upToNextMinor(from: "2.17.0"))
     ],
