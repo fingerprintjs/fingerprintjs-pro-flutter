@@ -24,6 +24,8 @@ jobs:
     with:
       pr-title: ${{ github.event.pull_request.title }}
       changeset-command: 'pnpm exec changeset'
+      setupLanguage: 'flutter'
+      setupLanguageVersion: '3.x'
       prepare-command: |
         sudo gem install -n /usr/local/bin cocoapods
         pod --version
