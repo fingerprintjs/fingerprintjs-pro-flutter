@@ -1,5 +1,16 @@
 # Fingerprint Flutter
 
+## 4.13.0
+
+### Minor Changes
+
+- Add Swift Package Manager support for iOS. CocoaPods remains supported. FingerprintPro stays `>= 2.17.0 < 2.18.0`. ([c73394c](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/c73394c16a0634c3f1080821ab4c740aa283ec5d))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+- Fingerprint Android SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+
 ## 4.13.0-test.0
 
 ### Minor Changes
