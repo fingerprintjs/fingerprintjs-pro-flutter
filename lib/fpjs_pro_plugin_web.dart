@@ -64,24 +64,23 @@ class FpjsProPluginWeb {
   static Future<void> initFpjs(MethodCall call) async {
     final options = FingerprintJSOptions(
       apiKey: call.arguments['apiToken'],
-      integrationInfo: [
-        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"
-      ] as JSArray<JSString>,
+      integrationInfo: _toJSStringArray(
+          ["fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"]),
     );
     if (call.arguments['region'] != null) {
       options.region = call.arguments['region'];
     }
     if (call.arguments['endpoint'] != null) {
-      options.endpoint = [
+      options.endpoint = _toJSStringArray([
         call.arguments['endpoint'],
-        ...(call.arguments['endpointFallbacks'] ?? [])
-      ] as JSArray<JSString>;
+        ...List<String>.from(call.arguments['endpointFallbacks'] ?? [])
+      ]);
     }
     if (call.arguments['scriptUrlPattern'] != null) {
-      options.scriptUrlPattern = [
+      options.scriptUrlPattern = _toJSStringArray([
         call.arguments['scriptUrlPattern'],
-        ...(call.arguments['scriptUrlPatternFallbacks'] ?? [])
-      ] as JSArray<JSString>;
+        ...List<String>.from(call.arguments['scriptUrlPatternFallbacks'] ?? [])
+      ]);
     }
     try {
       _fpPromise = FingerprintJS.load(options).toDart;
@@ -157,6 +156,9 @@ class FpjsProPluginWeb {
     }
   }
 }
+
+JSArray<JSString> _toJSStringArray(List<String> values) =>
+    values.map((value) => value.toJS).toList().toJS;
 
 // `isA<WebException>()` needs Dart >=3.4; this package supports >=3.3.
 FingerprintProError _wrapJsAgentError(Object error) {
