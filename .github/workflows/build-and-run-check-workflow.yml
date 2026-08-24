@@ -31,8 +31,14 @@ jobs:
         run: flutter analyze
 
       - name: Build example (web)
+        run: bash scripts/check_wasm_js_interop.sh
+
+      # WASM compilation needs Flutter 3.22+. The 3.19.0 matrix entry is the
+      # plugin floor and does not support --wasm.
+      - name: Build example (web WASM)
+        if: matrix['flutter-version'] != '3.19.0'
         working-directory: example
-        run: flutter build web
+        run: flutter build web --wasm
 
       - name: Build example (android)
         working-directory: example
