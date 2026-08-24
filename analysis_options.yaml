@@ -1,4 +1,15 @@
 include: package:flutter_lints/flutter.yaml
 
+# Dart↔JS `is`/`as` checks differ on dart2js vs dart2wasm and crash Flutter WASM.
+# https://dart.dev/tools/linter-rules/invalid_runtime_check_with_js_interop_types
+# https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/137
+linter:
+  rules:
+    invalid_runtime_check_with_js_interop_types: true
+
+analyzer:
+  errors:
+    invalid_runtime_check_with_js_interop_types: error
+
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
