@@ -7,7 +7,7 @@ fingerprint_pro_upper = "#{major}.#{minor + 1}.0"
 
 Pod::Spec.new do |s|
   s.name             = 'fpjs_pro_plugin'
-  s.version          = '4.13.0'
+  s.version          = '4.13.1'
   s.summary          = 'Flutter plugin for FingerprintJS Pro.'
   s.description      = 'Flutter plugin for FingerprintJS Pro.'
   s.homepage         = 'https://github.com/fingerprintjs/fingerprintjs-pro-flutter'
