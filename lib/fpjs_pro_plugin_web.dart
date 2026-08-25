@@ -88,11 +88,7 @@ class FpjsProPluginWeb {
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
-      if (e is WebException) {
-        throw unwrapWebError(e);
-      } else {
-        throw UnknownError(e.toString());
-      }
+      throw _wrapJsAgentError(e);
     }
   }
 
@@ -116,11 +112,7 @@ class FpjsProPluginWeb {
           .toDart;
       return result.visitorId;
     } catch (e) {
-      if (e is WebException) {
-        throw unwrapWebError(e);
-      } else {
-        throw UnknownError(e.toString());
-      }
+      throw _wrapJsAgentError(e);
     }
   }
 
@@ -161,13 +153,18 @@ class FpjsProPluginWeb {
         typedResult.sealedResult ?? ''
       ];
     } catch (e) {
-      if (e is WebException) {
-        throw unwrapWebError(e);
-      } else {
-        throw UnknownError(e.toString());
-      }
+      throw _wrapJsAgentError(e);
     }
   }
+}
+
+// `isA<WebException>()` needs Dart >=3.4; this package supports >=3.3.
+FingerprintProError _wrapJsAgentError(Object error) {
+  // ignore: invalid_runtime_check_with_js_interop_types
+  if (error is WebException) {
+    return unwrapWebError(error);
+  }
+  return UnknownError(error.toString());
 }
 
 /// Casts [tags](https://docs.fingerprint.com/docs/quick-start-guide#tagging-your-requests) from Dart Object to JavaScript Object
