@@ -8,7 +8,7 @@ jobs:
   test:
     name: 'Build and check code before release'
     if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
-    uses: ./.github/workflows/build-and-run-check-workflow.yml
+    uses: ./.github/workflows/ci.yml
 
   release:
     name: 'Release using changesets'
