@@ -1,18 +1,16 @@
 name: ci
-# PRs only (same-repo and forks). A `push` trigger also runs on branch updates and
-# duplicates every same-repo PR. `workflow_call` is for the release workflow.
 on:
   pull_request:
   workflow_call:
 
 jobs:
-  build-examples-web:
-    name: "Build examples for Web (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+  build-and-run-checks:
+    name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: [ '3.19.0', '' ]
+        flutter-version: ["3.19.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -20,7 +18,37 @@ jobs:
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          channel: 'stable'
+          channel: "stable"
+          flutter-version: ${{ matrix['flutter-version'] }}
+
+      - name: Restore packages
+        run: flutter pub get
+
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  build-examples-web:
+    name: "Build examples for Web (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: ["3.19.0", ""]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: "stable"
           flutter-version: ${{ matrix['flutter-version'] }}
 
       - name: Restore packages
@@ -50,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: [ '3.19.0', '' ]
+        flutter-version: ["3.19.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -58,7 +86,7 @@ jobs:
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          channel: 'stable'
+          channel: "stable"
           flutter-version: ${{ matrix['flutter-version'] }}
 
       - name: Restore packages
@@ -98,7 +126,7 @@ jobs:
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          channel: 'stable'
+          channel: "stable"
 
       - name: Restore packages
         run: flutter pub get
@@ -146,33 +174,3 @@ jobs:
             cat "$manifest"
             exit 1
           fi
-
-  build-and-run-checks:
-    name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        flutter-version: ['3.19.0', '']
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install and set Flutter version
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
-        with:
-          channel: 'stable'
-          flutter-version: ${{ matrix['flutter-version'] }}
-
-      - name: Restore packages
-        run: flutter pub get
-
-      - name: Create .env.local
-        run: cp ./example/.env ./example/.env.local
-        shell: bash
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
