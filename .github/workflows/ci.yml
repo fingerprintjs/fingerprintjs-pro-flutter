@@ -4,8 +4,8 @@ on:
   workflow_call:
 
 jobs:
-  build-and-run-checks:
-    name: "Build and run checks (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+  analyze-and-test:
+    name: "Analyze and test (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,7 +36,7 @@ jobs:
 
   build-examples-web:
     name: "Build examples for Web (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
-    needs: build-and-run-checks
+    needs: analyze-and-test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -75,7 +75,7 @@ jobs:
 
   build-examples-android:
     name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
-    needs: build-and-run-checks
+    needs: analyze-and-test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -112,7 +112,7 @@ jobs:
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
   build-examples-ios:
     name: "Build examples for iOS (Flutter latest stable)"
-    needs: build-and-run-checks
+    needs: analyze-and-test
     runs-on: macos-latest
     # Checkout as `fpjs_pro_plugin`: Flutter SwiftPM identifies path-overridden plugins by folder name
     # (https://github.com/flutter/flutter/issues/186881).
