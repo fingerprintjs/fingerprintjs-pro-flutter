@@ -34,6 +34,13 @@ jobs:
         working-directory: example
         run: flutter build web
 
+      # WASM compilation needs Flutter 3.22+. The 3.19.0 matrix entry is the
+      # plugin floor and does not support --wasm.
+      - name: Build example (web WASM)
+        if: matrix['flutter-version'] != '3.19.0'
+        working-directory: example
+        run: flutter build web --wasm
+
       - name: Build example (android)
         working-directory: example
         run: flutter build apk
