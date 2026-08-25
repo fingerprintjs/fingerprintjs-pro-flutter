@@ -1,9 +1,8 @@
 name: ci
+# PRs only (same-repo and forks). A `push` trigger also runs on branch updates and
+# duplicates every same-repo PR.
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - main
 jobs:
   test:
     name: Test
