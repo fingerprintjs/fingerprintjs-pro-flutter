@@ -3,8 +3,8 @@ on:
   workflow_call:
 
 jobs:
-  build-examples:
-    name: "Build examples for Web + Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+  build-examples-web:
+    name: "Build examples for Web (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -40,6 +40,33 @@ jobs:
         if: matrix['flutter-version'] != '3.19.0'
         working-directory: example
         run: flutter build web --wasm
+
+  build-examples-android:
+    name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-version: [ '3.19.0', '' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: 'stable'
+          flutter-version: ${{ matrix['flutter-version'] }}
+
+      - name: Restore packages
+        run: flutter pub get
+
+      - name: Create .env.local
+        run: cp ./example/.env ./example/.env.local
+        shell: bash
+
+      - name: Analyze
+        run: flutter analyze
 
       - name: Build example (android)
         working-directory: example
