@@ -9,6 +9,9 @@ linter:
 
 analyzer:
   errors:
+    # Lint shipped in Dart 3.5. Flutter 3.19 / Dart 3.3 does not know it.
+    undefined_lint: ignore
+    unrecognized_error_code: ignore
     invalid_runtime_check_with_js_interop_types: error
 
 # Additional information about this file can be found at
