@@ -1,5 +1,16 @@
 # Fingerprint Flutter
 
+## 4.13.1
+
+### Patch Changes
+
+- Fix a Flutter web WASM crash when initializing the agent (`List<String>` is not a `JSArray`). Convert Dart string lists with `.toJS` before passing them to the JS agent. ([fc5e475](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/commit/fc5e475ab0bb44d3447248fc58527c17b80ef9cc))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+- Fingerprint Android SDK Version Range: **`>= 2.17.0 and < 2.18.0`**
+
 ## 4.13.0
 
 ### Minor Changes
