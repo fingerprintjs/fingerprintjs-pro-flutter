@@ -37,16 +37,16 @@ application. The plugin allows you to call the underlying native Fingerprint age
   - [License](#license)
 
 ## Requirements
-- Flutter 3.19.0 or higher
-- Dart 3.3.0 or higher
-- Android 6.0 (API level 23+) or higher
-- iOS 13+/tvOS 15+, Swift 5.9 or higher (stable releases)
+- Flutter 3.44.0 or higher
+- Dart 3.12.0 or higher
+- Android 7.0 (API level 24+) or higher
+- iOS 15+/tvOS 15+, Xcode 16+, Swift 6 or higher (stable releases)
 
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
 ## Dependencies
 - [Fingerprint JavaScript agent](https://www.npmjs.com/package/@fingerprintjs/fingerprintjs-pro)
-- [Fingerprint iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
+- [Fingerprint iOS](https://github.com/fingerprintjs/fingerprint-ios)
 - [Fingerprint Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
 
 iOS supports Swift Package Manager and CocoaPods. Flutter 3.44+ uses Swift Package Manager by default.
