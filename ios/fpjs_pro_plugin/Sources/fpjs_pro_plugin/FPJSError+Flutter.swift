@@ -1,9 +1,9 @@
 import Foundation
-import FingerprintPro
+@preconcurrency import Fingerprint
 
-extension FPJSError {
+extension FPError {
     var flutterFields: (String, String) {
-        let description = self.localizedDescription
+        let description = self.description
         switch self {
         case .invalidURL:
             return ("InvalidURL", description)
@@ -11,7 +11,7 @@ extension FPJSError {
             return ("InvalidURLParams", description)
         case .apiError(let apiError):
             let code = apiError.flutterCode("apiError")
-            let message = apiError.message ?? description
+            let message = apiError.errorDetails?.message ?? description
             return (code, message)
         case .networkError(let networkError):
             return ("NetworkError", networkError.localizedDescription)
@@ -31,13 +31,10 @@ extension FPJSError {
 
 extension APIError {
     func flutterCode(_ defaultName: String) -> String {
-        let name = self.error?.code?.rawValue ?? defaultName
+        let name = self.errorDetails?.code?.rawValue ?? defaultName
         return name.firstUppercased
     }
 
-    var message: String? {
-        return self.error?.message
-    }
 }
 
 extension StringProtocol {

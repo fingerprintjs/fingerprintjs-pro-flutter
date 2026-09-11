@@ -2,6 +2,8 @@
 
 /// JavaScript interop for the [FingerprintJS Pro JavaScript agent](https://docs.fingerprint.com/docs/js-agent)
 @JS('FingerprintJSFlutter')
+// The library directive carries the JavaScript namespace for this interop file.
+// ignore: unnecessary_library_name
 library fingerprint_js;
 
 import 'dart:js_interop';
