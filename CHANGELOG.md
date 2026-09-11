@@ -1,5 +1,13 @@
 # Fingerprint Flutter
 
+## 5.0.0
+
+### Major Changes
+
+- Raise the Flutter and Dart minimum versions to 3.44.0 and 3.12.0.
+- Upgrade the Android and iOS native agents to v4.
+- Raise Android support to API 24 and iOS support to iOS 15/tvOS 15 with Xcode 16 and Swift 6.
+
 ## 4.13.1
 
 ### Patch Changes

@@ -6,7 +6,7 @@ plugins {
 apply from: 'fingerprint.gradle'
 
 group 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
-version '4.13.1'
+version '5.0.0'
 
 rootProject.allprojects {
     repositories {
@@ -18,15 +18,15 @@ rootProject.allprojects {
 }
 
 android {
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 
     sourceSets {
@@ -34,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
     }
 
     if (project.android.hasProperty("namespace")) {
@@ -43,5 +43,5 @@ android {
 }
 
 dependencies {
-    implementation "com.fingerprint.android:pro:$fingerprint_native_sdk_version"
+    implementation "com.fingerprint.android:sdk:$fingerprint_native_sdk_version"
 }

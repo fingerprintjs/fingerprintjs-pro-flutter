@@ -1,12 +1,12 @@
 name: fpjs_pro_plugin
 description: Flutter plugin that can be used in an application to call the native FingerprintJS Pro libraries and identify devices.
-version: 4.13.1
+version: 5.0.0
 homepage: https://fingerprint.com
 repository: https://github.com/fingerprintjs/fingerprintjs-pro-flutter
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=3.19.0"
+  sdk: ">=3.12.0 <4.0.0"
+  flutter: ">=3.44.0"
 
 dependencies:
   flutter:
@@ -17,7 +17,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.1
+  flutter_lints: ^6.0.0
+  pigeon: 28.1.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
