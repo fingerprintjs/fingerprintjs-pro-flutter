@@ -50,7 +50,8 @@ Two follow-ups:
 
 - Android error codes come from `error.javaClass.simpleName`. R8 renames
   classes, so codes are correct in debug and wrong in minified release
-  builds. Restore an explicit mapping or add a keep rule.
+  builds. PR 4 owns an explicit mapping or keep rule and proves it with an
+  assertion on an actual error code in a minified release build.
 - Tuple index 0 is named `requestId` and carries `eventId`. Index 1 is named
   `confidenceScore` and carries `suspectScore`. PR 4 removes the tuple.
 
@@ -143,7 +144,9 @@ mapping on Android and iOS, unknown error codes, and a minified Android build.
 Before generating bindings, add and review an error matrix for every known
 Android, iOS, and web raw code: `FingerprintErrorCode`, message behavior, and
 whether it carries `eventId`. Preserve unmapped codes as `unknown`; native v4
-sources are authoritative.
+sources are authoritative. Include only errors a client SDK can emit; exclude
+Server API-only errors, as the
+[React Native SDK does](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/commit/1fcc272c943e362a12fe1c0f21429a5f47c22e81).
 
 Rewrite `FingerprintWeb` for the v4 start/get API in this same PR. Add web
 options (`urlHashing`, `storageKeyPrefix`, `cacheHit`, and sealed
@@ -192,6 +195,10 @@ After the stable `fingerprint_flutter` release is live and verified, mark
 supported migration mechanism: the old package remains available, receives a
 DISCONTINUED badge, leaves search results, and can name its replacement. See
 [Publishing packages](https://dart.dev/tools/pub/publishing#discontinue-a-package).
+
+Open question — old-package policy: before release, decide whether
+`fpjs_pro_plugin` gets a final 4.13.x migration-notice release and/or further
+maintenance or security fixes. This does not change the discontinuation step.
 
 ## PR 7. Release 5.0.0
 
