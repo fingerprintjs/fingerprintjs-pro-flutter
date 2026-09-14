@@ -112,13 +112,13 @@ add an adapter for the old static API or response types.
 - `AndroidOptions`, `IosOptions`, and `WebOptions` contain platform settings;
   shared settings and the single ordered `endpoints` list stay at top level.
   All timeouts use `Duration`.
-- `tags` remains a root `Map<String, Object?>?`, the current public shape and
-  the only shape Android v4 accepts. Values may be recursively JSON-compatible
-  strings, numbers, booleans, maps with string keys, or lists; reject nulls,
-  non-JSON Dart objects, non-string keys, root scalars/lists, and payloads over
-  16 KiB once JSON-encoded at the Dart boundary. This preserves nested
-  metadata without promising scalar tags that React Native cannot carry on
-  native.
+- `tags` accepts a string, number, boolean, or root map. Map values may be
+  recursively JSON-compatible strings, numbers, booleans, maps with string
+  keys, or lists. Reject nulls, non-JSON Dart objects, non-string keys, root
+  lists, and payloads over 16 KiB once JSON-encoded at the Dart boundary.
+  Normalize a scalar to `{'tag': value}` before Pigeon, because Android and
+  iOS receive a map; web forwards the scalar to the agent. This matches React
+  Native's cross-platform adapter while preserving nested metadata.
 - `final class FingerprintError implements Exception` has
   `FingerprintErrorCode code`, `String rawCode`, `String? message`, and
   `String? eventId`.
@@ -146,7 +146,8 @@ both native platforms send an empty string, which Dart normalizes to `null`.
 CI runs Pigeon and fails if it changes tracked generated files. Tests cover
 two differently configured `Fingerprint` instances, the full result and error
 mapping on Android and iOS, valid nested tags and invalid tag rejection on all
-platforms, unknown error codes, and a minified Android build.
+platforms, scalar-tag normalization on native and direct forwarding on web,
+unknown error codes, and a minified Android build.
 
 Before generating bindings, add and review an error matrix for every known
 Android, iOS, and web raw code: `FingerprintErrorCode`, message behavior, and
