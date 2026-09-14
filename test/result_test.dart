@@ -28,6 +28,12 @@ void main() {
       expect(responseInstance.toJson(), extendedJsonMock);
     });
 
+    test('Check native v4 snake case visitor id', () {
+      final responseInstance = FingerprintJSProResponse.fromJson(
+          {"visitor_id": 'AcxioeQKffpXF8iGQK3P'}, requestId, confidence, '');
+      expect(responseInstance.visitorId, 'AcxioeQKffpXF8iGQK3P');
+    });
+
     test('Check failed scenario with silly data', () {
       jsonMock.remove("visitorId");
       expect(
