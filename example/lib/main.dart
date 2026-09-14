@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
           region: _parseRegion(_region),
           allowUseOfLocationData: true,
           locationTimeoutMillisAndroid: 6000,
-          extendedResponseFormat: true);
+          extendedResponseFormat: false);
     } catch (error) {
       // print('Failed to initialize Fingerprint agent: $error');
       setState(() {

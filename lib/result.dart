@@ -26,7 +26,7 @@ class FingerprintJSProResponse {
   /// that can be returned by Android or iOS agent, or can be a serialization result
   FingerprintJSProResponse.fromJson(Map<String, dynamic> json, this.requestId,
       num confidence, this.sealedResult)
-      : visitorId = json['visitorId'],
+      : visitorId = json['visitorId'] ?? json['visitor_id'],
         confidenceScore = ConfidenceScore(confidence);
 
   /// Serialize instance to JSON Object

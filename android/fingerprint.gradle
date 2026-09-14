@@ -1,8 +1,10 @@
-ext.fingerprint_native_sdk_version = "[2.17.0, 2.18.0)"
+// v4 has a new Maven coordinate and a breaking public API. Keep this exact so
+// Flutter releases remain reproducible rather than silently taking a future
+// native-agent major version.
+ext.fingerprint_native_sdk_version = "4.0.0"
 
 task printFingerprintNativeSDKVersion {
     doLast {
         println "${fingerprint_native_sdk_version}"
     }
 }
-

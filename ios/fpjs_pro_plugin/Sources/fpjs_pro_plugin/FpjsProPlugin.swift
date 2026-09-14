@@ -1,8 +1,16 @@
 import Flutter
 import UIKit
-import FingerprintPro
+@preconcurrency import Fingerprint
 
-public class FpjsProPlugin: NSObject, FlutterPlugin {
+private final class FlutterResultCallback: @unchecked Sendable {
+    let result: FlutterResult
+
+    init(_ result: @escaping FlutterResult) {
+        self.result = result
+    }
+}
+
+public final class FpjsProPlugin: NSObject, FlutterPlugin, @unchecked Sendable {
     var fpjsClient: FingerprintClientProviding?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -20,11 +28,10 @@ public class FpjsProPlugin: NSObject, FlutterPlugin {
         if (call.method == "init") {
             if let token = args["apiToken"] as? String {
                 let region = parseRegion(passedRegion: args["region"] as? String, endpoint: args["endpoint"] as? String, endpointFallbacks: args["endpointFallbacks"] as? [String] ?? [])
-                let extendedResponseFormat = args["extendedResponseFormat"] as? Bool ?? false
                 let pluginVersion = args["pluginVersion"] as? String ?? "unknown"
                 let allowUseOfLocationData = args["allowUseOfLocationData"] as? Bool ?? false
 
-                initFpjs(token: token, region: region, extendedResponseFormat: extendedResponseFormat, pluginVersion: pluginVersion, allowUseOfLocationData: allowUseOfLocationData)
+                initFpjs(token: token, region: region, pluginVersion: pluginVersion, allowUseOfLocationData: allowUseOfLocationData)
                 result("Successfully initialized FingerprintJS Pro Client")
             } else {
                 result(FlutterError.init(code: "errorApiToken", message: "missing API Token", details: nil))
@@ -75,14 +82,13 @@ public class FpjsProPlugin: NSObject, FlutterPlugin {
         return region
     }
 
-    private func initFpjs(token: String, region: Region, extendedResponseFormat: Bool, pluginVersion: String, allowUseOfLocationData: Bool) {
+    private func initFpjs(token: String, region: Region, pluginVersion: String, allowUseOfLocationData: Bool) {
         let configuration = Configuration(
             apiKey: token,
             region: region,
             integrationInfo: [("fingerprint-pro-flutter", pluginVersion)],
-            extendedResponseFormat: extendedResponseFormat,
             allowUseOfLocationData: allowUseOfLocationData)
-        fpjsClient = FingerprintProFactory.getInstance(configuration)
+        fpjsClient = FingerprintFactory.getInstance(configuration)
     }
 
     private func getVisitorId(_ metadata: Metadata?, _ result: @escaping FlutterResult, _ timeout: Double? = nil) {
@@ -91,12 +97,13 @@ public class FpjsProPlugin: NSObject, FlutterPlugin {
             return
         }
 
-        let completionHandler: FingerprintPro.VisitorIdBlock = { visitorIdResult in
+        let callback = FlutterResultCallback(result)
+        let completionHandler: VisitorIdBlock = { visitorIdResult in
             switch visitorIdResult {
             case .success(let visitorId):
-                result(visitorId)
+                callback.result(visitorId)
             case .failure(let error):
-                self.processNativeLibraryError(error, result: result)
+                self.processNativeLibraryError(error, result: callback.result)
             }
         }
 
@@ -113,17 +120,19 @@ public class FpjsProPlugin: NSObject, FlutterPlugin {
             return
         }
 
-        let completionHandler: FingerprintPro.VisitorIdResponseBlock = { visitorIdResponseResult in
+        let callback = FlutterResultCallback(result)
+        let completionHandler: VisitorIdResponseBlock = { visitorIdResponseResult in
             switch visitorIdResponseResult {
             case .success(let visitorDataResponse):
-                result([
-                    visitorDataResponse.requestId,
-                    visitorDataResponse.confidence,
+                let payload: [Any] = [
+                    visitorDataResponse.eventId,
+                    visitorDataResponse.suspectScore ?? NSNull(),
                     visitorDataResponse.asJSON(),
-                    visitorDataResponse.sealedResult
-                ])
+                    visitorDataResponse.sealedResult ?? NSNull()
+                ]
+                callback.result(payload)
             case .failure(let error):
-                self.processNativeLibraryError(error, result: result)
+                self.processNativeLibraryError(error, result: callback.result)
             }
         }
 
@@ -134,7 +143,7 @@ public class FpjsProPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    private func processNativeLibraryError(_ error: FPJSError, result: @escaping FlutterResult) {
+    private func processNativeLibraryError(_ error: FPError, result: @escaping FlutterResult) {
         let (code, description) = error.flutterFields
         result(FlutterError(code: code, message: description, details: nil))
     }

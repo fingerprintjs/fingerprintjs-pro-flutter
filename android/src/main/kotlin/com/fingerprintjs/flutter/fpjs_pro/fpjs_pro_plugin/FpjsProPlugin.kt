@@ -2,33 +2,10 @@ package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
 import androidx.annotation.NonNull
-import com.fingerprintjs.android.fpjs_pro.Configuration
-import com.fingerprintjs.android.fpjs_pro.FingerprintJS
-import com.fingerprintjs.android.fpjs_pro.FingerprintJSFactory
-import com.fingerprintjs.android.fpjs_pro.FingerprintJSProResponse
-import com.fingerprintjs.android.fpjs_pro.Error
-import com.fingerprintjs.android.fpjs_pro.ApiKeyRequired
-import com.fingerprintjs.android.fpjs_pro.ApiKeyNotFound
-import com.fingerprintjs.android.fpjs_pro.ApiKeyExpired
-import com.fingerprintjs.android.fpjs_pro.RequestCannotBeParsed
-import com.fingerprintjs.android.fpjs_pro.Failed
-import com.fingerprintjs.android.fpjs_pro.RequestTimeout
-import com.fingerprintjs.android.fpjs_pro.TooManyRequest
-import com.fingerprintjs.android.fpjs_pro.OriginNotAvailable
-import com.fingerprintjs.android.fpjs_pro.HeaderRestricted
-import com.fingerprintjs.android.fpjs_pro.NotAvailableForCrawlBots
-import com.fingerprintjs.android.fpjs_pro.NotAvailableWithoutUA
-import com.fingerprintjs.android.fpjs_pro.WrongRegion
-import com.fingerprintjs.android.fpjs_pro.SubscriptionNotActive
-import com.fingerprintjs.android.fpjs_pro.UnsupportedVersion
-import com.fingerprintjs.android.fpjs_pro.InstallationMethodRestricted
-import com.fingerprintjs.android.fpjs_pro.ResponseCannotBeParsed
-import com.fingerprintjs.android.fpjs_pro.NetworkError
-import com.fingerprintjs.android.fpjs_pro.ClientTimeout
-import com.fingerprintjs.android.fpjs_pro.UnknownError
-import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationHeaders
-import com.fingerprintjs.android.fpjs_pro.InvalidProxyIntegrationSecret
-import com.fingerprintjs.android.fpjs_pro.ProxyIntegrationSecretEnvironmentMismatch
+import com.fingerprint.android.Configuration
+import com.fingerprint.android.Error
+import com.fingerprint.android.Fingerprint
+import com.fingerprint.android.FingerprintFactory
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -44,7 +21,7 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
   private lateinit var applicationContext : Context
-  private lateinit var fpjsClient : FingerprintJS
+  private lateinit var fpjsClient : Fingerprint
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "fpjs_pro_plugin")
@@ -65,7 +42,6 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
           val endpoint = call.argument<String>("endpoint")
           val endpointFallbacks = call.argument<List<String>?>("endpointFallbacks")
           val region = regionString?.let { parseRegion(it) }
-          val extendedResponseFormat = call.argument<Boolean>("extendedResponseFormat") ?: false
           val pluginVersion = call.argument<String>("pluginVersion") ?: "unknown"
 
           val allowUseOfLocationData = call.argument<Boolean>("allowUseOfLocationData") ?: false
@@ -77,7 +53,6 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
               region,
               endpoint,
               endpointFallbacks,
-              extendedResponseFormat,
               pluginVersion,
               allowUseOfLocationData,
               locationTimeoutMillis.toLong()
@@ -119,17 +94,15 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
         region: Configuration.Region?,
         endpoint: String?,
         endpointFallbacks: List<String>?,
-        extendedResponseFormat: Boolean,
         pluginVersion: String,
         allowUseOfLocationData: Boolean,
         locationTimeoutMillis: Long
     ) {
-    val factory = FingerprintJSFactory(applicationContext)
+    val factory = FingerprintFactory(applicationContext)
     val configuration = Configuration(
       apiToken,
       region ?: Configuration.Region.US,
       endpoint ?: region?.endpointUrl ?: Configuration.Region.US.endpointUrl,
-      extendedResponseFormat,
       endpointFallbacks ?: emptyList(),
       listOf(Pair("fingerprint-pro-flutter", pluginVersion)),
       allowUseOfLocationData,
@@ -176,14 +149,14 @@ class FpjsProPlugin: FlutterPlugin, MethodCallHandler {
         timeoutMillis,
         tags,
         linkedId,
-        listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson, result.sealedResult ?: ""))},
+        listener = {result -> listener(listOf(result.eventId, result.suspectScore ?: 0, result.asJson, result.sealedResult ?: ""))},
         errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
       )
     } else {
       fpjsClient.getVisitorId(
         tags,
         linkedId,
-        listener = {result -> listener(listOf(result.requestId, result.confidenceScore.score, result.asJson, result.sealedResult ?: ""))},
+        listener = {result -> listener(listOf(result.eventId, result.suspectScore ?: 0, result.asJson, result.sealedResult ?: ""))},
         errorListener = { error -> errorListener(getErrorCode(error), error.description.toString())}
       )
     }
@@ -204,29 +177,5 @@ const val GET_VISITOR_ID = "getVisitorId"
 const val GET_VISITOR_DATA = "getVisitorData"
 
 private fun getErrorCode(error: Error): String {
-  val errorType = when(error) {
-    is ApiKeyRequired -> "ApiKeyRequired"
-    is ApiKeyNotFound ->  "ApiKeyNotFound"
-    is ApiKeyExpired -> "ApiKeyExpired"
-    is RequestCannotBeParsed -> "RequestCannotBeParsed"
-    is Failed -> "Failed"
-    is RequestTimeout -> "RequestTimeout"
-    is TooManyRequest -> "TooManyRequest"
-    is OriginNotAvailable -> "OriginNotAvailable"
-    is HeaderRestricted -> "HeaderRestricted"
-    is NotAvailableForCrawlBots -> "NotAvailableForCrawlBots"
-    is NotAvailableWithoutUA -> "NotAvailableWithoutUA"
-    is WrongRegion -> "WrongRegion"
-    is SubscriptionNotActive -> "SubscriptionNotActive"
-    is UnsupportedVersion -> "UnsupportedVersion"
-    is InstallationMethodRestricted -> "InstallationMethodRestricted"
-    is ResponseCannotBeParsed -> "ResponseCannotBeParsed"
-    is NetworkError -> "NetworkError"
-    is ClientTimeout -> "ClientTimeout"
-    is InvalidProxyIntegrationHeaders -> "InvalidProxyIntegrationHeaders"
-    is InvalidProxyIntegrationSecret -> "InvalidProxyIntegrationSecret"
-    is ProxyIntegrationSecretEnvironmentMismatch -> "ProxyIntegrationSecretEnvironmentMismatch"
-    else -> "UnknownError"
-  }
-  return errorType
+  return error.javaClass.simpleName.ifBlank { "UnknownError" }
 }
