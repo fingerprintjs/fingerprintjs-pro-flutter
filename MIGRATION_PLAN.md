@@ -105,8 +105,10 @@ add an adapter for the old static API or response types.
   platform configuration in its constructor and exposes
   `get({tags, linkedId, timeout})`.
 - `FingerprintResult` has `String eventId`, `String visitorId`,
-  `int? suspectScore`, and `String? sealedResult`. `suspectScore` is nullable
-  because the iOS v4 SDK declares it as `Int?`.
+  `int? suspectScore`, `String? sealedResult`, and web-only `bool? cacheHit`.
+  `suspectScore` is nullable because the iOS v4 SDK declares it as `Int?`.
+  Normalize a missing Zero Trust `visitorId` to `''`, preserving the non-null
+  result shape used by React Native.
 - `AndroidOptions`, `IosOptions`, and `WebOptions` contain platform settings;
   shared settings and the single ordered `endpoints` list stay at top level.
   All timeouts use `Duration`.
@@ -135,7 +137,7 @@ independent.
 
 Also fix: `ipAddress` and `osName` accept two key spellings
 (`json['ip'] ?? json['ipAddress']`); `sealedResult` is typed `String?` but
-both platforms send an empty string.
+both native platforms send an empty string, which Dart normalizes to `null`.
 
 CI runs Pigeon and fails if it changes tracked generated files. Tests cover
 two differently configured `Fingerprint` instances, the full result and error
@@ -148,10 +150,17 @@ sources are authoritative. Include only errors a client SDK can emit; exclude
 Server API-only errors, as the
 [React Native SDK does](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/commit/1fcc272c943e362a12fe1c0f21429a5f47c22e81).
 
-Rewrite `FingerprintWeb` for the v4 start/get API in this same PR. Add web
-options (`urlHashing`, `storageKeyPrefix`, `cacheHit`, and sealed
-`CacheDuration` presets) and remove `extendedResult` and `scriptUrlPattern`.
-The mocked-agent browser test verifies start, get, options, result conversion,
+Rewrite `FingerprintWeb` for the v4 start/get API in this same PR. Add
+`urlHashing`, `storageKeyPrefix`, and an optional `cache` configuration with
+required storage (`sessionStorage`, `localStorage`, or `agent`), a duration
+(`optimize-cost`, `aggressive`, or custom `Duration` up to 12 hours), and an
+optional key prefix. Map the agent's `cache_hit` result to `cacheHit`; it is
+not a start option. Do not add `remoteControlDetection`: it is absent from the
+current [React Native v4 web contract](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/blob/1fcc272c943e362a12fe1c0f21429a5f47c22e81/sdk/src/types.ts).
+Remove `extendedResult` and `scriptUrlPattern`.
+
+The mocked-agent browser test verifies start, get, cache configuration and
+result conversion (including cache hit and a missing Zero Trust visitor ID),
 and errors. No PR may expose the new public API with a v3 web implementation.
 
 [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386) and
