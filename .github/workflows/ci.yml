@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.19.0", ""]
+        flutter-version: ["3.44.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.19.0", ""]
+        flutter-version: ["3.44.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -66,10 +66,7 @@ jobs:
         working-directory: example
         run: flutter build web
 
-      # WASM compilation needs Flutter 3.22+. The 3.19.0 matrix entry is the
-      # plugin floor and does not support --wasm.
       - name: Build example (web WASM)
-        if: matrix['flutter-version'] != '3.19.0'
         working-directory: example
         run: flutter build web --wasm
 
@@ -80,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.19.0", ""]
+        flutter-version: ["3.44.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -153,8 +150,8 @@ jobs:
 
       - name: Verify CocoaPods was used
         run: |
-          if [ ! -d example/ios/Pods/FingerprintPro ]; then
-            echo "example/ios/Pods/FingerprintPro is missing, CocoaPods did not install the native SDK."
+          if [ ! -d example/ios/Pods/Fingerprint-iOS ]; then
+            echo "example/ios/Pods/Fingerprint-iOS is missing, CocoaPods did not install the native SDK."
             ls example/ios/Pods 2>/dev/null || echo "example/ios/Pods does not exist."
             exit 1
           fi
