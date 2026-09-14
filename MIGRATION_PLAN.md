@@ -112,9 +112,13 @@ add an adapter for the old static API or response types.
 - `AndroidOptions`, `IosOptions`, and `WebOptions` contain platform settings;
   shared settings and the single ordered `endpoints` list stay at top level.
   All timeouts use `Duration`.
-- `tags` remains `Map<String, Object?>?`, the current public shape and the
-  metadata-object shape in the proposal. Reject scalar and list values at the
-  Dart boundary rather than silently giving platforms different semantics.
+- `tags` remains a root `Map<String, Object?>?`, the current public shape and
+  the only shape Android v4 accepts. Values may be recursively JSON-compatible
+  strings, numbers, booleans, maps with string keys, or lists; reject nulls,
+  non-JSON Dart objects, non-string keys, root scalars/lists, and payloads over
+  16 KiB once JSON-encoded at the Dart boundary. This preserves nested
+  metadata without promising scalar tags that React Native cannot carry on
+  native.
 - `final class FingerprintError implements Exception` has
   `FingerprintErrorCode code`, `String rawCode`, `String? message`, and
   `String? eventId`.
@@ -141,7 +145,8 @@ both native platforms send an empty string, which Dart normalizes to `null`.
 
 CI runs Pigeon and fails if it changes tracked generated files. Tests cover
 two differently configured `Fingerprint` instances, the full result and error
-mapping on Android and iOS, unknown error codes, and a minified Android build.
+mapping on Android and iOS, valid nested tags and invalid tag rejection on all
+platforms, unknown error codes, and a minified Android build.
 
 Before generating bindings, add and review an error matrix for every known
 Android, iOS, and web raw code: `FingerprintErrorCode`, message behavior, and
