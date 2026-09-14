@@ -11,15 +11,15 @@ let package = Package(
     products: [
         .library(name: "fpjs-pro-plugin", targets: ["fpjs_pro_plugin"])
     ],
-    // Flutter injects its framework through the generated build settings; first-party plugins
-    // also omit a package dependency on it.
     dependencies: [
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
         .package(url: "https://github.com/fingerprintjs/fingerprint-ios", .upToNextMajor(from: "4.0.0"))
     ],
     targets: [
         .target(
             name: "fpjs_pro_plugin",
             dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "Fingerprint", package: "fingerprint-ios")
             ]
         )
