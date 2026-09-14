@@ -3,7 +3,7 @@ import Foundation
 
 extension FPError {
     var flutterFields: (String, String) {
-        let description = self.description
+        let description = self.localizedDescription
         switch self {
         case .invalidURL:
             return ("InvalidURL", description)
@@ -11,7 +11,7 @@ extension FPError {
             return ("InvalidURLParams", description)
         case .apiError(let apiError):
             let code = apiError.flutterCode("apiError")
-            let message = apiError.errorDetails?.message ?? description
+            let message = apiError.message ?? description
             return (code, message)
         case .networkError(let networkError):
             return ("NetworkError", networkError.localizedDescription)
@@ -35,6 +35,9 @@ extension APIError {
         return name.firstUppercased
     }
 
+    var message: String? {
+        return self.errorDetails?.message
+    }
 }
 
 extension StringProtocol {
