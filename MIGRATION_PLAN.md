@@ -19,7 +19,7 @@ Defer only unrelated or speculative work, not known breakage such as
 
 | # | PR | Tickets | Status |
 |---|---|---|---|
-| 1 | Requirements and native agent deps ([#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147)) | [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401) | Open, CI green |
+| 1 | Requirements and native agent deps ([#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147)) | [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401) | Merged |
 | 2 | Built-in Kotlin and AGP 9 compatibility | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117) | To do |
 | 3 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
 | 4 | Complete v4 API: Pigeon and web | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319), [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
@@ -36,7 +36,7 @@ the public contract and Pigeon error payload, not a later cleanup.
 ## PR 1. Requirements and native agent deps
 
 [#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147),
-open, CI green. [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401).
+merged. [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401).
 
 Set Flutter 3.44, Dart 3.12, Android API 24, iOS/tvOS 15, Xcode 16, and Swift
 6. Use Android v4 `4.0.0`, iOS `Fingerprint-iOS`/`fingerprint-ios`, and

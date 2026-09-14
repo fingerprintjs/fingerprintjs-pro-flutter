@@ -1,7 +1,7 @@
 import Foundation
-import FingerprintPro
+@preconcurrency import Fingerprint
 
-extension FPJSError {
+extension FPError {
     var flutterFields: (String, String) {
         let description = self.localizedDescription
         switch self {
@@ -31,12 +31,12 @@ extension FPJSError {
 
 extension APIError {
     func flutterCode(_ defaultName: String) -> String {
-        let name = self.error?.code?.rawValue ?? defaultName
+        let name = self.errorDetails?.code?.rawValue ?? defaultName
         return name.firstUppercased
     }
 
     var message: String? {
-        return self.error?.message
+        return self.errorDetails?.message
     }
 }
 
