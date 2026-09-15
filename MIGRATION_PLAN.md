@@ -24,7 +24,7 @@ Defer only unrelated or speculative work, not known breakage such as
 | 3 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
 | 4 | Complete v4 API: Pigeon and web | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319), [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
 | 5 | Rename repo and package | [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400) | To do |
-| 6 | Docs, migration guide, example app | none | To do |
+| 6 | Docs and migration guide | none | To do |
 | 7 | Release 5.0.0 | none | To do |
 
 [INTER-2321](https://fingerprintjs.atlassian.net/browse/INTER-2321) (Swift
@@ -50,8 +50,17 @@ Two follow-ups:
 
 - Android error codes come from `error.javaClass.simpleName`. R8 renames
   classes, so codes are correct in debug and wrong in minified release
-  builds. PR 4 owns an explicit mapping or keep rule and proves it with an
-  assertion on an actual error code in a minified release build.
+  builds. Confirmed against the shipped artifact: `sdk-4.0.0.aar`'s consumer
+  `proguard.txt` names only 11 of the ~37 `com.fingerprint.android.*` error
+  classes, and its `-keeppackagenames` rule preserves packages, not class
+  names. `ApiKeyRequired`, `Failed`, `WrongRegion`, `RequestTimeout`, and
+  `NetworkError` are among the unkept ones. PR 4 replaces the reflection with
+  an exhaustive `when (error) { is ApiKeyRequired -> ... }` mapping, as the
+  [React Native SDK does](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/blob/acac23e/sdk/android/src/main/java/com/fingerprintjs/reactnative/RNFingerprintjsProModule.kt).
+  Type checks are obfuscation-safe by construction; a keep rule shipped from
+  this plugin would leak into every consumer build, so it is not the remedy.
+  `rawCode` must come from the same mapping, not from `simpleName`. Prove it
+  with an assertion on an actual error code in a minified release build.
 - Tuple index 0 is named `requestId` and carries `eventId`. Index 1 is named
   `confidenceScore` and carries `suspectScore`. PR 4 removes the tuple.
 
@@ -107,21 +116,32 @@ add an adapter for the old static API or response types.
 - `FingerprintResult` has `String eventId`, `String visitorId`,
   `int? suspectScore`, `String? sealedResult`, and web-only `bool? cacheHit`.
   `suspectScore` is nullable because the iOS v4 SDK declares it as `Int?`.
+  This is a deliberate divergence from React Native, which reports a `-1`
+  sentinel; Dart has no reason to encode absence as a magic number.
   Normalize a missing Zero Trust `visitorId` to `''`, preserving the non-null
   result shape used by React Native.
 - `AndroidOptions`, `IosOptions`, and `WebOptions` contain platform settings;
   shared settings and the single ordered `endpoints` list stay at top level.
   All timeouts use `Duration`.
-- `tags` accepts a string, number, boolean, or root map. Map values may be
-  recursively JSON-compatible strings, numbers, booleans, maps with string
-  keys, or lists. Reject nulls, non-JSON Dart objects, non-string keys, root
-  lists, and payloads over 16 KiB once JSON-encoded at the Dart boundary.
-  Normalize a scalar to `{'tag': value}` before Pigeon, because Android and
-  iOS receive a map; web forwards the scalar to the agent. This matches React
-  Native's cross-platform adapter while preserving nested metadata.
+- `tags` accepts a string, number, boolean, list, or map, recursively
+  JSON-compatible. Match React Native's adapter exactly: anything that is not
+  a root map — scalars and root lists alike — is wrapped as `{'tag': value}`
+  before Pigeon, because Android and iOS receive a map. Web forwards the
+  value to the agent unwrapped. Reject only what cannot cross the boundary at
+  all: non-JSON Dart objects and non-string map keys.
+
+  Do not enforce a client-side size cap. The documented 16 KB tag limit is a
+  server-side product limit, not an SDK invariant; React Native does not
+  check it, and the API already reports oversized payloads as
+  `payload_too_large`, which the error model maps. Duplicating the limit in
+  Dart would reject payloads the server accepts whenever the limit changes.
+  Document it in the API reference instead. See
+  [Tagging information](https://docs.fingerprint.com/docs/tagging-information).
 - `final class FingerprintError implements Exception` has
   `FingerprintErrorCode code`, `String rawCode`, `String? message`, and
-  `String? eventId`.
+  `String? eventId`. Android's `Error.eventId` carries the literal `"Unknown"`
+  sentinel when the failure never reached the server; normalize that, and an
+  empty string, to `null` so `eventId` means what it says.
 
 `implements Exception` is deliberate. `Exception` is a marker interface and
 the Dart documentation uses `implements Exception` for application-specific
@@ -135,19 +155,56 @@ positional tuple, `FingerprintJSProResponse`, the extended response types,
 `ConfidenceScore`, `IpLocation`, `StSeenAt`, and `extendedResponseFormat` in
 the same PR. This is the only point at which those public types disappear.
 
-Stateless per call: every get message includes the full config, native keeps
-no client between calls. Two Dart clients with different configs stay
-independent.
+### Stateless messages, memoized native clients
+
+These are two separate decisions and the plan keeps only the first as an
+invariant.
+
+Every get message includes the full config. Nothing in the Pigeon contract
+refers to a previously established native client, so two Dart clients with
+different configs stay independent and no `init`/`get` ordering can fail.
+
+Native does not construct a client per call. Each platform holds a
+`Map<configKey, NativeClient>` keyed by a stable hash of the resolved config
+and creates a client on first use. Same config, same warm client; different
+config, different client. This preserves the independence invariant without a
+client-handle or disposal protocol: Dart finalizers are not guaranteed to
+run, so handing out native client IDs would create a lifetime we cannot
+reliably close.
+
+The reuse matters for correctness, not only latency. The iOS SDK documents
+that with `allowUseOfLocationData` enabled you should initialize the client as
+early as possible and keep the same instance for the app's lifetime, for
+location precision. A per-call client would restart location acquisition on
+every call and pay `locationTimeoutMillis` each time. The Android SDK's docs
+make no equivalent statement either way, and its artifact is obfuscated, so
+its warm-up cost is not determinable from the outside.
+
+PR 4 therefore proves reuse rather than assuming it: assert the same native
+client instance serves repeated calls with an unchanged config, and that a
+second call does not repeat first-call initialization. Confirm the Android
+client's warm-state behavior with the native SDK team before relying on any
+stronger claim.
 
 Also fix: `ipAddress` and `osName` accept two key spellings
 (`json['ip'] ?? json['ipAddress']`); `sealedResult` is typed `String?` but
 both native platforms send an empty string, which Dart normalizes to `null`.
 
+The example app moves to the new API in this PR. This is not documentation
+work that can wait for PR 6: CI builds the example on Android, iOS and web on
+every PR, and `example/lib/main.dart` uses `extendedResponseFormat` and the
+static `FpjsProPlugin.getVisitorId`/`getVisitorData` calls that this PR
+deletes. Leaving it behind breaks CI for three PRs. The example is also the
+only end-to-end proof that the rewritten API is usable on a real device
+against a real endpoint, so it is an acceptance criterion for the rewrite, not
+a follow-up. PR 5 updates its package name and import; PR 6 documents it.
+
 CI runs Pigeon and fails if it changes tracked generated files. Tests cover
-two differently configured `Fingerprint` instances, the full result and error
-mapping on Android and iOS, valid nested tags and invalid tag rejection on all
-platforms, scalar-tag normalization on native and direct forwarding on web,
-unknown error codes, and a minified Android build.
+two differently configured `Fingerprint` instances, native client reuse across
+repeated calls with one config, the full result and error mapping on Android
+and iOS, valid nested tags and rejection of non-JSON values on all platforms,
+scalar- and list-tag wrapping on native and direct forwarding on web, unknown
+error codes, and a minified Android build.
 
 Before generating bindings, add and review an error matrix for every known
 Android, iOS, and web raw code: `FingerprintErrorCode`, message behavior, and
@@ -198,9 +255,11 @@ status`, version `fingerprint_flutter` to `5.0.0-alpha.0` on `test`, and run
 Do this before any prerelease. A new pub name is a new package, so an alpha
 must be installable as `fingerprint_flutter`, not the retired name.
 
-## PR 6. Docs, migration guide, example app
+## PR 6. Docs and migration guide
 
-No ticket. The web asset path is a numbered migration step, not a footnote.
+No ticket. The example app already runs on the new API (PR 4) under the new
+package name (PR 5); this PR documents that path rather than performing it.
+The web asset path is a numbered migration step, not a footnote.
 Document every renamed import, the static-to-instance conversion, removed
 extended response fields, error-model change, and updated platform floors.
 
@@ -234,9 +293,10 @@ CI builds the example app on Android, iOS and web every time. Beyond that:
   with latest Flutter plus built-in Kotlin enabled.
 - PR 3: tests pass after replacing `FingerprintPlatform.instance`.
 - PR 4: no positional tuple or v3 web implementation remains; generated code,
-  API, error matrix, two-client independence, minified Android errors, and
-  mocked web-agent behavior are covered.
+  API, error matrix, two-client independence, native client reuse, minified
+  Android errors, and mocked web-agent behavior are covered. The example app
+  builds and identifies on Android, iOS and web using only the new API.
 - PR 5: Changesets produces `fingerprint_flutter 5.0.0-alpha.0` and pub dry
-  run succeeds.
-- PR 6: the migration guide is tested by updating the example to use only the
-  new package name and public API.
+  run succeeds; the example resolves the renamed package.
+- PR 6: the migration guide is walked end to end against the migrated example,
+  and every step it names matches what the example actually does.
