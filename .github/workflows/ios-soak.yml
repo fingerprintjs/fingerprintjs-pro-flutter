@@ -1,7 +1,8 @@
 # Temporary. Round 1 validated the fix for flutter#181771 (no hangs in 12 runs) and exposed a
 # second flake: the iOS simulator turns accessibility on at an unpredictable moment, and when it
-# lands mid-test the framework's end-of-test handle check fails. This round instruments the
-# transition and probes two candidate mitigations. Delete this workflow with its branch.
+# lands mid-test the framework's end-of-test handle check fails (flutter#153850). Round 2 showed
+# no environment lever orders accessibility against the start of the test. This round confirms the
+# driver-level tolerance instead. Delete this workflow with its branch.
 name: iOS soak
 
 on:
@@ -14,15 +15,14 @@ permissions:
 
 jobs:
   ios:
-    name: "iOS ${{ matrix.variant }} ${{ matrix.run }}"
+    name: "iOS ${{ matrix.run }}"
     runs-on: macos-15
     timeout-minutes: 25
     strategy:
       fail-fast: false
       max-parallel: 5
       matrix:
-        variant: [plain, simdefault, presemantics]
-        run: [1, 2, 3, 4]
+        run: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     env:
       API_KEY: ${{ secrets.API_KEY }}
       REGION: ${{ secrets.REGION }}
@@ -52,31 +52,16 @@ jobs:
         with:
           model: iPhone 16
           wait_for_boot: true
-      # Candidate mitigation: have accessibility already on before the app launches, so the
-      # framework records the platform's semantics handle before the test starts rather than
-      # gaining one midway through it.
-      - name: Force simulator accessibility on
-        if: matrix.variant == 'simdefault'
-        env:
-          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
-        run: |
-          xcrun simctl spawn "$SIMULATOR_UDID" defaults write com.apple.Accessibility \
-            ApplicationAccessibilityEnabled -bool true
-          xcrun simctl spawn "$SIMULATOR_UDID" defaults read com.apple.Accessibility || true
       - name: Build smoke test app
         working-directory: fpjs_pro_plugin/example
-        run: |
-          flutter build ios --simulator \
-            --target=integration_test/smoke_test.dart \
-            --dart-define=SOAK_VARIANT=${{ matrix.variant }}
+        run: flutter build ios --simulator --target=integration_test/smoke_test.dart
       - name: Run smoke test
         timeout-minutes: 15
         working-directory: fpjs_pro_plugin/example
         env:
           SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
         run: ../.github/scripts/drive_ios_simulator.sh "$SIMULATOR_UDID"
-      # Unconditional: the passing runs are the ones that say whether accessibility came on
-      # before the test or never came on at all.
+      # Unconditional, so a tolerated run can be told apart from one that never raced.
       - name: Dump simulator diagnostics
         if: always() && steps.simulator.outputs.udid != ''
         env:
