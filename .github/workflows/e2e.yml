@@ -149,20 +149,26 @@ jobs:
       REGION: ${{ secrets.REGION }}
       ENDPOINT: ${{ secrets.ENDPOINT }}
       SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    # Checkout as `fpjs_pro_plugin`: Flutter SwiftPM identifies path-overridden plugins by folder name
+    # (https://github.com/flutter/flutter/issues/186881). Without this the build falls back to CocoaPods.
+    # TODO: drop `path:` and this `defaults:` block once flutter#188647 reaches stable.
+    defaults:
+      run:
+        working-directory: fpjs_pro_plugin
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Install and set Flutter version
+        with:
+          path: fpjs_pro_plugin
+      # iOS runs on latest stable only, unlike the other jobs which also pin the 3.44.0 floor.
+      # Pinned to 3.44.0 the example compiles but never starts on the simulator, so `flutter test`
+      # waits for a connection until the job times out. The other jobs cover the floor.
+      - name: Install Flutter latest stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          flutter-version: 3.44.0
           channel: stable
-      # The example is checked out under its repository name, not `fpjs_pro_plugin`, so SwiftPM
-      # cannot resolve the path-overridden plugin (flutter#186881). Build through CocoaPods instead.
-      - name: Disable Swift Package Manager
-        run: flutter config --no-enable-swift-package-manager
       - name: Restore packages
-        working-directory: example
+        working-directory: fpjs_pro_plugin/example
         run: flutter pub get
       - name: Create E2E environment
         run: |
@@ -179,5 +185,14 @@ jobs:
           model: iPhone 16
           wait_for_boot: true
       - name: Run iOS smoke test
-        working-directory: example
+        working-directory: fpjs_pro_plugin/example
         run: flutter test integration_test/smoke_test.dart -d "${{ steps.simulator.outputs.udid }}"
+      # `flutter test` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
+      - name: Verify Swift Package Manager was used
+        run: |
+          manifest=example/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift
+          if ! grep -q 'fpjs_pro_plugin' "$manifest"; then
+            echo "$manifest does not depend on fpjs_pro_plugin, SwiftPM did not pick the plugin up."
+            cat "$manifest"
+            exit 1
+          fi
