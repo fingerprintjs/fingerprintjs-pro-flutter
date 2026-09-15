@@ -13,8 +13,9 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  testWidgets('disables controls when initialization fails',
-      (WidgetTester tester) async {
+  testWidgets('disables controls when initialization fails', (
+    WidgetTester tester,
+  ) async {
     dotenv.testLoad(envFilesAsStrings: const ['']);
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
@@ -25,11 +26,12 @@ void main() {
     );
     expect(_button(tester, runChecksButtonKey).onPressed, isNull);
     expect(_button(tester, identifyButtonKey).onPressed, isNull);
-    expect(_button(tester, identifyExtendedButtonKey).onPressed, isNull);
+    expect(_button(tester, visitorDataButtonKey).onPressed, isNull);
   });
 
-  testWidgets('enables controls when initialization succeeds',
-      (WidgetTester tester) async {
+  testWidgets('enables controls when initialization succeeds', (
+    WidgetTester tester,
+  ) async {
     final calls = _mockSuccessfulInitialization(channel);
     dotenv.testLoad(envFilesAsStrings: const ['API_KEY=test-api-key']);
 
@@ -40,15 +42,18 @@ void main() {
     expect(calls.single.arguments['allowUseOfLocationData'], isTrue);
     expect(_button(tester, runChecksButtonKey).onPressed, isNotNull);
     expect(_button(tester, identifyButtonKey).onPressed, isNotNull);
-    expect(_button(tester, identifyExtendedButtonKey).onPressed, isNotNull);
+    expect(_button(tester, visitorDataButtonKey).onPressed, isNotNull);
   });
 
-  testWidgets('can disable location collection for native automation',
-      (WidgetTester tester) async {
+  testWidgets('can disable location collection for native automation', (
+    WidgetTester tester,
+  ) async {
     final calls = _mockSuccessfulInitialization(channel);
-    dotenv.testLoad(envFilesAsStrings: const [
-      'API_KEY=test-api-key\nDISABLE_LOCATION_COLLECTION=true',
-    ]);
+    dotenv.testLoad(
+      envFilesAsStrings: const [
+        'API_KEY=test-api-key\nDISABLE_LOCATION_COLLECTION=true',
+      ],
+    );
 
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
@@ -66,8 +71,8 @@ List<MethodCall> _mockSuccessfulInitialization(MethodChannel channel) {
   final calls = <MethodCall>[];
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(channel, (call) async {
-    calls.add(call);
-    return null;
-  });
+        calls.add(call);
+        return null;
+      });
   return calls;
 }

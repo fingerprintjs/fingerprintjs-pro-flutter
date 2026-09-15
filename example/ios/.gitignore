@@ -27,6 +27,13 @@ Flutter/flutter_export_environment.sh
 ServiceDefinitions.json
 Runner/GeneratedPluginRegistrant.*
 
+.build/
+.swiftpm/
+**/xcshareddata/swiftpm/
+
+# Not a shipped pin. Changes when switching the example between SwiftPM and CocoaPods.
+Podfile.lock
+
 # Exceptions to above rules.
 !default.mode1v3
 !default.mode2v3
