@@ -50,6 +50,13 @@ flutter build ios --simulator --target=integration_test/smoke_test.dart
 ../.github/scripts/drive_ios_simulator.sh <simulator udid>
 ```
 
+When accessibility turns on while a test is running, the framework's end-of-test
+check reports a `SemanticsHandle` that the test never took
+([flutter#153850](https://github.com/flutter/flutter/issues/153850)). CI
+simulators do this in roughly a third of runs, so
+`example/test_driver/integration_test.dart` treats that one assertion, and only
+it, as a pass.
+
 Chrome also requires a matching
 [ChromeDriver](https://developer.chrome.com/docs/chromedriver) on `PATH`. Start
 it in one terminal:
