@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -48,25 +46,23 @@ void main() {
         return text.startsWith(prefix) && deviceId.startsWith('Failed');
       },
     );
-    final deviceIdText = tester
-        .widget<Text>(find.byKey(app.deviceIdResultKey))
-        .data
-        .toString();
-    final deviceId = deviceIdText.replaceFirst('The device id is: ', '').trim();
 
-    await tester.tap(find.byKey(app.visitorDataButtonKey));
+    await tester.tap(find.byKey(app.identifyExtendedButtonKey));
     await _waitFor(
       tester,
-      () => find.byKey(app.visitorDataDialogKey).evaluate().isNotEmpty,
-      description: 'visitor data dialog',
+      () => find.byKey(app.extendedResultDialogKey).evaluate().isNotEmpty,
+      description: 'extended result dialog',
     );
 
     final result = tester
-        .widget<Text>(find.byKey(app.visitorDataContentKey))
+        .widget<Text>(find.byKey(app.extendedResultContentKey))
         .data
         .toString();
-    final visitorData = jsonDecode(result) as Map<String, dynamic>;
-    expect(visitorData['visitorId'], deviceId);
+    expect(
+      result.contains('"visitorId"') || result.contains('"requestId"'),
+      isTrue,
+      reason: 'Extended result should contain visitorId or requestId: $result',
+    );
   }, timeout: const Timeout(Duration(minutes: 5)));
 }
 
@@ -77,15 +73,19 @@ Future<void> _waitForText(
   required String description,
   bool Function(String text)? failure,
 }) {
-  return _waitFor(tester, () {
-    final finder = find.byKey(key);
-    if (finder.evaluate().isEmpty) return false;
-    final text = tester.widget<Text>(finder).data ?? '';
-    if (failure?.call(text) ?? false) {
-      fail('Failed waiting for $description: $text');
-    }
-    return matches(text);
-  }, description: description);
+  return _waitFor(
+    tester,
+    () {
+      final finder = find.byKey(key);
+      if (finder.evaluate().isEmpty) return false;
+      final text = tester.widget<Text>(finder).data ?? '';
+      if (failure?.call(text) ?? false) {
+        fail('Failed waiting for $description: $text');
+      }
+      return matches(text);
+    },
+    description: description,
+  );
 }
 
 Future<void> _waitFor(

@@ -10,20 +10,8 @@ jobs:
     name: Analyze Commit Messages
     uses: fingerprintjs/dx-team-toolkit/.github/workflows/analyze-commits.yml@v1
     with:
-      previewNotes: false
-
-  preview-changeset:
-    name: Preview changeset
-    # Fork PRs get a read-only token, so the preview comment 403s.
-    # https://docs.github.com/en/actions/tutorials/authenticate-with-github_token#permissions-for-the-github_token
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    uses: fingerprintjs/dx-team-toolkit/.github/workflows/preview-changeset-release.yml@v1
-    with:
-      pr-title: ${{ github.event.pull_request.title }}
-      changeset-command: 'pnpm exec changeset'
       setupLanguage: 'flutter'
       setupLanguageVersion: '3.x'
-      prepare-command: |
-        sudo gem install -n /usr/local/bin cocoapods
-        pod --version
-        echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties
+      prepareCommand: 'sudo gem install -n /usr/local/bin cocoapods && echo "flutter.sdk=$FLUTTER_ROOT" > $GITHUB_WORKSPACE/android/local.properties'
+      semanticReleasePlugins: |
+        @fingerprintjs/semantic-release-native-dependency-plugin@^1.2.1

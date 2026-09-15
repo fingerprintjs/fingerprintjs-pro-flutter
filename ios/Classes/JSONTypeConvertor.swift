@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@preconcurrency import Fingerprint
+import FingerprintPro
 
 class JSONTypeConvertor {
     static func convertDictionaryToJSONTypeConvertible(_ dict: [String: Any]) -> [String: JSONTypeConvertible] {

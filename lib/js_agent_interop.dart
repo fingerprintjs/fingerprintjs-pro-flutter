@@ -1,9 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
-/// JavaScript interop for the [FingerprintJS Pro JavaScript agent](https://docs.fingerprint.com/docs/js-agent)
+/// JavaScript interop for the [FingerprintJS Pro JavaScript agent](https://dev.fingerprint.com/docs/js-agent)
 @JS('FingerprintJSFlutter')
-// The library directive carries the JavaScript namespace for this interop file.
-// ignore: unnecessary_library_name
 library fingerprint_js;
 
 import 'dart:js_interop';
@@ -40,7 +38,7 @@ extension type FingerprintJS._(JSObject _) implements JSObject {
       get ERROR_PROXY_INTEGRATION_SECRET_ENVIRONMENT_MISMATCH;
 }
 
-/// FingerprintJS Pro [JavaScript agent](https://docs.fingerprint.com/docs/js-agent)
+/// FingerprintJS Pro [JavaScript agent](https://dev.fingerprint.com/docs/js-agent)
 extension type FingerprintJSAgent._(JSObject _) implements JSObject {
   /// Gets the visitor identifier.
   /// When an error is emitted by the backend, it gets a `requestId` field, same as in successful result.
@@ -209,9 +207,9 @@ extension type FingerprintJSOptions._(JSObject _) implements JSObject {
   /// A JS agent script URL pattern.
   ///
   /// The following substrings are replaced:
-  /// - &lt;version&gt; — the major version of JS agent;
-  /// - &lt;apiKey&gt; — the public key set via the `apiKey` option;
-  /// - &lt;loaderVersion&gt; — the version of this package;
+  /// - <version> — the major version of JS agent;
+  /// - <apiKey> — the public key set via the `apiKey` option;
+  /// - <loaderVersion> — the version of this package;
   external JSArray<JSString>? get scriptUrlPattern;
   external set scriptUrlPattern(JSArray<JSString>? scriptUrlPattern);
 
