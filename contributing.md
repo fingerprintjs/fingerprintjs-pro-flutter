@@ -36,10 +36,19 @@ flutter drive \
   -d emulator-5554
 ```
 
-`flutter test integration_test/smoke_test.dart` also works and is quicker, but
-on an iOS simulator it intermittently never launches the app and then waits
-forever ([flutter#153433](https://github.com/flutter/flutter/issues/153433)),
-so CI uses `flutter drive` everywhere.
+`flutter test integration_test/smoke_test.dart` also works and is quicker.
+
+On an iOS simulator both commands intermittently miss the app's VM service URL
+in the simulator log and wait forever, with no output after "Xcode build done"
+([flutter#181771](https://github.com/flutter/flutter/issues/181771)). Retrying
+usually works locally. CI sidesteps the race by building the app, launching it
+on a fixed port and pointing `flutter drive --use-existing-app` at it; see
+`.github/scripts/drive_ios_simulator.sh` if you want the same locally:
+
+```bash
+flutter build ios --simulator --target=integration_test/smoke_test.dart
+../.github/scripts/drive_ios_simulator.sh <simulator udid>
+```
 
 Chrome also requires a matching
 [ChromeDriver](https://developer.chrome.com/docs/chromedriver) on `PATH`. Start

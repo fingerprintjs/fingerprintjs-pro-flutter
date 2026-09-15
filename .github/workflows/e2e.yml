@@ -120,10 +120,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: fpjs_pro_plugin
-      # iOS runs on latest stable only, unlike the other jobs which pin the 3.44.0 floor. Pinned to
-      # 3.44.0 the example compiled but never started on the simulator and the job timed out. Latest
-      # stable has hung the same way once, so treat the version as unproven rather than the cause.
-      # `ci.yml` covers the floor for iOS builds.
+      # iOS runs on latest stable only, unlike the other jobs which pin the 3.44.0 floor. The pin was
+      # dropped while chasing the hang described at the smoke-test step, which turned out to affect
+      # both versions. Restoring it is a separate change. `ci.yml` covers the floor for iOS builds.
       - name: Install Flutter latest stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
@@ -140,14 +139,24 @@ jobs:
         with:
           model: iPhone 16
           wait_for_boot: true
-      # `flutter test` intermittently never launches the app on an iOS simulator and then waits
-      # forever, with no output after "Xcode build done" (flutter#153433). `flutter drive` is the
-      # documented workaround, and it is what the other two jobs use.
+      # Built separately so the log shows how long the build, the launch and the test each took.
+      - name: Build smoke test app
+        working-directory: fpjs_pro_plugin/example
+        run: flutter build ios --simulator --target=integration_test/smoke_test.dart
+      # Both `flutter test` and `flutter drive` intermittently miss the app's VM service URL in the
+      # simulator log and wait forever, with no output after "Xcode build done" (flutter#181771).
+      # The script launches the app on a known URL instead, so the tool never has to find it.
       - name: Run smoke test
         timeout-minutes: 15
         working-directory: fpjs_pro_plugin/example
+        env:
+          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
+        run: ../.github/scripts/drive_ios_simulator.sh "$SIMULATOR_UDID"
+      - name: Dump simulator diagnostics
+        if: failure() && steps.simulator.outputs.udid != ''
+        env:
+          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
         run: |
-          flutter drive \
-            --driver=test_driver/integration_test.dart \
-            --target=integration_test/smoke_test.dart \
-            -d "${{ steps.simulator.outputs.udid }}"
+          xcrun simctl spawn "$SIMULATOR_UDID" log show --last 20m --style compact \
+            --predicate 'processImagePath ENDSWITH "Runner"' | tail -n 200
+          ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null || true
