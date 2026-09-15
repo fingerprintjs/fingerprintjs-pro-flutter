@@ -1,4 +1,4 @@
-name: E2E
+name: E2E smoke test
 
 on:
   pull_request:
@@ -10,55 +10,14 @@ concurrency:
   group: e2e-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-# The secret-backed jobs run in the `e2e` environment so the identification key is reachable
-# only from them, not from every workflow in the repository.
+# Every job runs the live flow against the real service, so each one needs the identification
+# key. GitHub withholds secrets from pull requests opened from a fork, so those are skipped.
+# The key lives in the `e2e` environment, reachable only from these jobs.
 jobs:
-  example-tests:
-    name: Example widget tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Install and set Flutter version
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
-        with:
-          flutter-version: 3.44.0
-          channel: stable
-      - name: Restore packages
-        working-directory: example
-        run: flutter pub get
-      - name: Create non-secret test environment
-        run: cp example/.env example/.env.local
-      - name: Run widget tests
-        working-directory: example
-        run: flutter test test
-
-  check-secrets:
-    name: Check E2E secrets
-    runs-on: ubuntu-latest
+  web:
+    name: Web
+    if: github.event.pull_request.head.repo.full_name == github.repository
     environment: e2e
-    timeout-minutes: 5
-    outputs:
-      available: ${{ steps.check.outputs.available }}
-    env:
-      API_KEY: ${{ secrets.API_KEY }}
-    steps:
-      - id: check
-        name: Check API key
-        run: |
-          if [[ -n "$API_KEY" ]]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "Live E2E jobs will be skipped because API_KEY is unavailable."
-          fi
-
-  chrome:
-    name: Chrome
-    needs: check-secrets
-    environment: e2e
-    if: needs.check-secrets.outputs.available == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -77,14 +36,9 @@ jobs:
       - name: Restore packages
         working-directory: example
         run: flutter pub get
-      - name: Create E2E environment
-        run: |
-          printf 'API_KEY=%s\n' "$API_KEY" > example/.env.local
-          [[ -z "$REGION" ]] || printf 'REGION=%s\n' "$REGION" >> example/.env.local
-          [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
-          [[ -z "$SCRIPT_URL_PATTERN" ]] \
-            || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
-      - name: Run Chrome smoke test
+      - name: Write .env.local
+        run: ./.github/scripts/write_e2e_env.sh
+      - name: Run smoke test
         working-directory: example
         run: |
           CHROMEDRIVER="$CHROMEWEBDRIVER/chromedriver"
@@ -92,23 +46,16 @@ jobs:
           "$CHROMEDRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
           CHROMEDRIVER_PID=$!
           trap 'kill "$CHROMEDRIVER_PID" 2>/dev/null || true' EXIT
-          # One retry: the flow makes a dozen live identification calls, so a single
-          # transient network error should not fail the run. Two failures in a row is real.
-          for attempt in 1 2; do
-            flutter drive \
-              --driver=test_driver/integration_test.dart \
-              --target=integration_test/smoke_test.dart \
-              --web-port=3000 \
-              -d web-server && exit 0
-            echo "::warning::Chrome smoke test attempt $attempt failed"
-          done
-          exit 1
+          ../.github/scripts/retry.sh flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/smoke_test.dart \
+            --web-port=3000 \
+            -d web-server
 
   android:
-    name: Android emulator
-    needs: check-secrets
+    name: Android
+    if: github.event.pull_request.head.repo.full_name == github.repository
     environment: e2e
-    if: needs.check-secrets.outputs.available == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -127,40 +74,27 @@ jobs:
       - name: Restore packages
         working-directory: example
         run: flutter pub get
-      - name: Create E2E environment
-        run: |
-          printf 'API_KEY=%s\n' "$API_KEY" > example/.env.local
-          [[ -z "$REGION" ]] || printf 'REGION=%s\n' "$REGION" >> example/.env.local
-          [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
-          [[ -z "$SCRIPT_URL_PATTERN" ]] \
-            || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
-          printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
+      - name: Write .env.local
+        run: DISABLE_LOCATION_COLLECTION=true ./.github/scripts/write_e2e_env.sh
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Run Android smoke test
+      - name: Run smoke test
         uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          # One retry, as in the Chrome job.
-          script: |
-            cd example
-            for attempt in 1 2; do
-              flutter test integration_test/smoke_test.dart -d emulator-5554 && exit 0
-              echo "::warning::Android smoke test attempt $attempt failed"
-            done
-            exit 1
+          working-directory: example
+          script: ../.github/scripts/retry.sh flutter test integration_test/smoke_test.dart -d emulator-5554
 
   ios:
-    name: iOS simulator
-    needs: check-secrets
+    name: iOS
+    if: github.event.pull_request.head.repo.full_name == github.repository
     environment: e2e
-    if: needs.check-secrets.outputs.available == 'true'
     runs-on: macos-15
     timeout-minutes: 30
     env:
@@ -179,9 +113,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: fpjs_pro_plugin
-      # iOS runs on latest stable only, unlike the other jobs which also pin the 3.44.0 floor.
+      # iOS runs on latest stable only, unlike the other jobs which pin the 3.44.0 floor.
       # Pinned to 3.44.0 the example compiles but never starts on the simulator, so `flutter test`
-      # waits for a connection until the job times out. The other jobs cover the floor.
+      # waits for a connection until the job times out. `ci.yml` covers the floor.
       - name: Install Flutter latest stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
@@ -189,30 +123,19 @@ jobs:
       - name: Restore packages
         working-directory: fpjs_pro_plugin/example
         run: flutter pub get
-      - name: Create E2E environment
-        run: |
-          printf 'API_KEY=%s\n' "$API_KEY" > example/.env.local
-          [[ -z "$REGION" ]] || printf 'REGION=%s\n' "$REGION" >> example/.env.local
-          [[ -z "$ENDPOINT" ]] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> example/.env.local
-          [[ -z "$SCRIPT_URL_PATTERN" ]] \
-            || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> example/.env.local
-          printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
+      - name: Write .env.local
+        run: DISABLE_LOCATION_COLLECTION=true ./.github/scripts/write_e2e_env.sh
       - name: Start iOS simulator
         id: simulator
         uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5
         with:
           model: iPhone 16
           wait_for_boot: true
-      - name: Run iOS smoke test
+      - name: Run smoke test
         working-directory: fpjs_pro_plugin/example
-        # One retry, as in the Chrome job.
         run: |
-          for attempt in 1 2; do
-            flutter test integration_test/smoke_test.dart \
-              -d "${{ steps.simulator.outputs.udid }}" && exit 0
-            echo "::warning::iOS smoke test attempt $attempt failed"
-          done
-          exit 1
+          ../.github/scripts/retry.sh flutter test integration_test/smoke_test.dart \
+            -d "${{ steps.simulator.outputs.udid }}"
       # `flutter test` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
       - name: Verify Swift Package Manager was used
         run: |

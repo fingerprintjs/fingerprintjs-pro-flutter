@@ -66,15 +66,15 @@ collection remains enabled by default.
 
 ### GitHub Actions secrets
 
-The pull request E2E workflow reads these repository secrets:
+The E2E smoke test workflow reads these secrets from the `e2e` environment:
 
 - `API_KEY` (required)
 - `REGION` (optional; defaults to `us`)
 - `ENDPOINT` (optional)
 - `SCRIPT_URL_PATTERN` (optional)
 
-If `API_KEY` is unavailable, including on pull requests from forks, the
-secret-backed Chrome, Android, and iOS jobs are skipped.
+GitHub withholds secrets from pull requests opened from a fork, so the Web,
+Android and iOS jobs are skipped there.
 
 ## Developing process
 
