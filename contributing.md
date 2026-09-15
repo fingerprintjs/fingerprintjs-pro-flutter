@@ -18,6 +18,67 @@ This is temporary. Drop this note and the CI `path:` workaround once [flutter#18
 
 For running tests just call `flutter test`.
 
+### Integration smoke test
+
+The smoke test follows the manual example flow: it waits for the Fingerprint
+agent to be ready, runs the built-in checks, identifies a visitor, and verifies
+that visitor data is available.
+
+First create `example/.env.local` as described in the
+[example README](example/README.md), and start the target emulator or simulator
+when testing a native platform. Then from the `example` folder run one of:
+
+```bash
+# Android (replace with the ID from `flutter devices`)
+flutter test integration_test/smoke_test.dart -d emulator-5554
+
+# iOS (replace with the simulator ID from `flutter devices`)
+flutter test integration_test/smoke_test.dart -d <ios-simulator-id>
+```
+
+Chrome also requires a matching
+[ChromeDriver](https://developer.chrome.com/docs/chromedriver) on `PATH`. Start
+it in one terminal:
+
+```bash
+chromedriver --port=4444
+```
+
+Then run the web smoke test in another:
+
+```bash
+flutter drive \
+  --driver=test_driver/integration_test.dart \
+  --target=integration_test/smoke_test.dart \
+  --web-port=3000 \
+  -d chrome
+```
+
+Native automation should also add the following setting to `.env.local`:
+
+```bash
+DISABLE_LOCATION_COLLECTION=true
+E2E_SMOKE_TEST=true
+```
+
+This prevents Android and iOS permission dialogs from blocking unattended
+tests. `E2E_SMOKE_TEST` limits **Run tests!** to the core visitor ID and visitor
+data calls; normal manual runs retain the full linked ID, tag, and timeout
+checks. Leave these settings absent or set them to `false` for normal manual
+runs; location collection remains enabled by default.
+
+### GitHub Actions secrets
+
+The pull request E2E workflow reads these repository secrets:
+
+- `API_KEY` (required)
+- `REGION` (optional; defaults to `us`)
+- `ENDPOINT` (optional)
+- `SCRIPT_URL_PATTERN` (optional)
+
+If `API_KEY` is unavailable, including on pull requests from forks, the
+secret-backed Chrome, Android, and iOS jobs are skipped.
+
 ## Developing process
 
 The `main` branch is locked for the push action. For proposing changes, use the standard [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) approach. It's recommended to discuss fixes or new functionality in the [Issues](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues), first.

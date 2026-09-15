@@ -154,10 +154,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Install Flutter latest stable
+      - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
+          flutter-version: 3.44.0
           channel: stable
+      # The example is checked out under its repository name, not `fpjs_pro_plugin`, so SwiftPM
+      # cannot resolve the path-overridden plugin (flutter#186881). Build through CocoaPods instead.
       - name: Disable Swift Package Manager
         run: flutter config --no-enable-swift-package-manager
       - name: Restore packages
