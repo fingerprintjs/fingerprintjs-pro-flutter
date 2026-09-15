@@ -1,15 +1,40 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:fpjs_pro_plugin_example/main.dart' as app;
 
+// Soak instrumentation. `SOAK_VARIANT` selects which candidate mitigation for the
+// mid-test semantics handle is under test:
+//   plain        - control, no mitigation
+//   simdefault   - accessibility forced on in the simulator before launch (see workflow)
+//   presemantics - the app takes a semantics handle before the test starts
+const soakVariant = String.fromEnvironment('SOAK_VARIANT', defaultValue: 'plain');
+
+String _semantics() {
+  final platform = WidgetsBinding.instance.platformDispatcher.semanticsEnabled;
+  final binding = SemanticsBinding.instance;
+  return 'platform=$platform framework=${binding.semanticsEnabled} '
+      'handles=${binding.debugOutstandingSemanticsHandles}';
+}
+
+void _probe(String label) => debugPrint('SEMPROBE $label ${_semantics()}');
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  _probe('after-binding-init');
+  if (soakVariant == 'presemantics') {
+    // Never disposed on purpose: the point is to hold semantics on for the whole
+    // process, so the platform cannot flip it on midway through the test.
+    SemanticsBinding.instance.ensureSemantics();
+    _probe('after-ensure-semantics');
+  }
 
   testWidgets('runs the example app smoke flow', (WidgetTester tester) async {
+    _probe('test-start');
     await app.main();
     await tester.pumpAndSettle();
 
@@ -55,6 +80,7 @@ void main() {
         .toString();
     final visitorData = jsonDecode(result) as Map<String, dynamic>;
     expect(visitorData['visitorId'], deviceId);
+    _probe('test-end');
   }, timeout: const Timeout(Duration(minutes: 5)));
 }
 
@@ -82,7 +108,13 @@ Future<void> _waitFor(
   required String description,
 }) async {
   final deadline = DateTime.now().add(const Duration(seconds: 90));
+  var lastSemantics = _semantics();
   while (!condition()) {
+    final semantics = _semantics();
+    if (semantics != lastSemantics) {
+      debugPrint('SEMPROBE changed-during-wait($description) $semantics');
+      lastSemantics = semantics;
+    }
     if (DateTime.now().isAfter(deadline)) {
       fail('Timed out waiting for $description');
     }
