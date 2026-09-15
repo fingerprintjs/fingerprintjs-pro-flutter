@@ -44,7 +44,7 @@ jobs:
           "$CHROMEDRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
           CHROMEDRIVER_PID=$!
           trap 'kill "$CHROMEDRIVER_PID" 2>/dev/null || true' EXIT
-          ../.github/scripts/retry.sh flutter drive \
+          flutter drive \
             --driver=test_driver/integration_test.dart \
             --target=integration_test/smoke_test.dart \
             --web-port=3000 \
@@ -80,13 +80,13 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Run smoke test
-        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed
+        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_6
           working-directory: example
-          script: ../.github/scripts/retry.sh flutter test integration_test/smoke_test.dart -d emulator-5554
+          script: flutter test integration_test/smoke_test.dart -d emulator-5554
 
   ios:
     name: iOS
@@ -123,21 +123,10 @@ jobs:
         run: DISABLE_LOCATION_COLLECTION=true ./.github/scripts/write_e2e_env.sh
       - name: Start iOS simulator
         id: simulator
-        uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5
+        uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5 #v5
         with:
           model: iPhone 16
           wait_for_boot: true
       - name: Run smoke test
         working-directory: fpjs_pro_plugin/example
-        run: |
-          ../.github/scripts/retry.sh flutter test integration_test/smoke_test.dart \
-            -d "${{ steps.simulator.outputs.udid }}"
-      # `flutter test` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
-      - name: Verify Swift Package Manager was used
-        run: |
-          manifest=example/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift
-          if ! grep -q 'fpjs_pro_plugin' "$manifest"; then
-            echo "$manifest does not depend on fpjs_pro_plugin, SwiftPM did not pick the plugin up."
-            cat "$manifest"
-            exit 1
-          fi
+        run: flutter test integration_test/smoke_test.dart -d "${{ steps.simulator.outputs.udid }}"

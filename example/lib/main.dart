@@ -184,12 +184,6 @@ class _MyAppState extends State<MyApp> {
     return identificationInfo;
   }
 
-  /// Firing the checks back to back makes iOS reuse a connection the server has
-  /// already closed, so the call after the burst fails with
-  /// `NetworkError: The network connection was lost`. Leave a gap between them.
-  Future<void> _spaceOutChecks() =>
-      Future.delayed(const Duration(milliseconds: 500));
-
   Future<void> _runChecks() async {
     await requestLocationPermission();
     setState(() {
@@ -218,14 +212,9 @@ class _MyAppState extends State<MyApp> {
         () async => FpjsProPlugin.getVisitorData(timeoutMs: 5),
       ];
 
-      for (var check in checks) {
-        await check();
-        if (!mounted) return;
-        setState(() {
-          _checksResult += '.';
-        });
-        await _spaceOutChecks();
-      }
+      // The timeout checks cancel a request mid-flight. On iOS the call right after
+      // such a cancellation fails with "NetworkError: The network connection was
+      // lost", so run them first and leave the plain checks last.
       for (var check in timeoutChecks) {
         try {
           await check();
@@ -236,7 +225,13 @@ class _MyAppState extends State<MyApp> {
             _checksResult += '!';
           });
         }
-        await _spaceOutChecks();
+      }
+      for (var check in checks) {
+        await check();
+        if (!mounted) return;
+        setState(() {
+          _checksResult += '.';
+        });
       }
       if (!mounted) return;
       setState(() {
@@ -278,13 +273,15 @@ class _MyAppState extends State<MyApp> {
                 onPressed: isReady ? _runChecks : null,
                 child: const Text('Run tests!'),
               ),
-              Text('Checks result: $_checksResult\n', key: checksResultKey),
+              const Text('Checks result:'),
+              Text(_checksResult, key: checksResultKey),
               ElevatedButton(
                 key: identifyButtonKey,
                 onPressed: isReady ? _getDeviceId : null,
                 child: const Text('Identify!'),
               ),
-              Text('The device id is: $_deviceId\n', key: deviceIdResultKey),
+              const Text('The device id is:'),
+              Text(_deviceId, key: deviceIdResultKey),
               _VisitorDataDialog(
                 enabled: isReady,
                 loadVisitorData: _getDeviceData,

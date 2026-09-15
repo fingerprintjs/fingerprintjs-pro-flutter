@@ -24,35 +24,22 @@ void main() {
     await _waitForText(
       tester,
       app.checksResultKey,
-      (text) => text.contains('Success!'),
+      (text) => text == 'Success!',
       description: 'example checks to succeed',
-      failure: (text) => text.startsWith('Checks result: Failed:'),
+      failure: (text) => text.startsWith('Failed:'),
     );
 
     await tester.tap(find.byKey(app.identifyButtonKey));
     await _waitForText(
       tester,
       app.deviceIdResultKey,
-      (text) {
-        const prefix = 'The device id is: ';
-        final deviceId = text.trim().replaceFirst(prefix, '');
-        return text.startsWith(prefix) &&
-            deviceId.isNotEmpty &&
-            deviceId != 'Unknown' &&
-            !deviceId.startsWith('Failed');
-      },
+      (text) => text.isNotEmpty && text != 'Unknown',
       description: 'a device ID',
-      failure: (text) {
-        const prefix = 'The device id is: ';
-        final deviceId = text.trim().replaceFirst(prefix, '');
-        return text.startsWith(prefix) && deviceId.startsWith('Failed');
-      },
+      failure: (text) => text.startsWith('Failed'),
     );
-    final deviceIdText = tester
+    final deviceId = tester
         .widget<Text>(find.byKey(app.deviceIdResultKey))
-        .data
-        .toString();
-    final deviceId = deviceIdText.replaceFirst('The device id is: ', '').trim();
+        .data!;
 
     await tester.tap(find.byKey(app.visitorDataButtonKey));
     await _waitFor(

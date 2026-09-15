@@ -4,6 +4,10 @@
 # dialog would otherwise block an unattended run.
 set -eu
 
+# GitHub sets a missing secret to the empty string, which would otherwise reach the app
+# as an empty key and fail much later, in the middle of the smoke flow.
+[ -n "$API_KEY" ] || { echo "API_KEY is empty"; exit 1; }
+
 target=example/.env.local
 
 printf 'API_KEY=%s\n' "$API_KEY" > "$target"
