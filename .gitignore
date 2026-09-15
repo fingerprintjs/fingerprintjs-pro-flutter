@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+node_modules
 
 # IntelliJ related
 *.iml
@@ -19,6 +20,9 @@
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 .vscode/
+
+# Local scratch (plans, notes)
+.local/
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.

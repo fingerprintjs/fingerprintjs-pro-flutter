@@ -37,17 +37,19 @@ application. The plugin allows you to call the underlying native Fingerprint age
   - [License](#license)
 
 ## Requirements
-- Flutter 3.13 or higher
-- Dart 3.3 or higher
-- Android 6.0 (API level 23+) or higher
-- iOS 13+/tvOS 15+, Swift 5.9 or higher (stable releases)
+- Flutter 3.44.0 or higher
+- Dart 3.12.0 or higher
+- Android 7.0 (API level 24+) or higher
+- iOS 15+/tvOS 15+, Xcode 16+, Swift 6 or higher (stable releases)
 
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
 ## Dependencies
 - [Fingerprint JavaScript agent](https://www.npmjs.com/package/@fingerprintjs/fingerprintjs-pro)
-- [Fingerprint iOS](https://github.com/fingerprintjs/fingerprintjs-pro-ios)
+- [Fingerprint iOS](https://github.com/fingerprintjs/fingerprint-ios)
 - [Fingerprint Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
+
+iOS supports Swift Package Manager and CocoaPods. Flutter 3.44+ uses Swift Package Manager by default.
 
 ## How to install
 
@@ -58,7 +60,7 @@ dependencies:
   flutter:
     sdk: flutter
   ...
-  fpjs_pro_plugin: ^4.10.0
+  fpjs_pro_plugin: ^4.13.1
 ```
 
 Run `flutter pub get` to download and install the package.
@@ -85,7 +87,7 @@ To identify visitors, you need to [sign up for a Fingerprint account](https://da
 
 Initialize the Fingerprint Flutter plugin inside a [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html), for example, in the `initState` method. 
 
-Use the [Public API key](https://dev.fingerprint.com/docs/quick-start-guide#2-get-your-api-key) and [region](https://dev.fingerprint.com/docs/regions) of your Fingerprint workspace (US region is used by default).
+Use the [Public API key](https://docs.fingerprint.com/docs/quick-start-guide#2-get-your-api-key) and [region](https://docs.fingerprint.com/docs/regions) of your Fingerprint workspace (US region is used by default).
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -118,7 +120,7 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
-To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://dev.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers) for more information.
+To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers) for more information.
 
 To use a proxy integration, you can configure `endpoint`, `scriptUrlPattern`, and their fallbacks.
 
@@ -179,7 +181,7 @@ void doInit() async {
 
 ### Linking and tagging information
 
-The `visitorId` provided by Fingerprint Identification is especially useful when combined with information you already know about your users, for example, account IDs, order IDs, etc. To learn more about various applications of the `linkedId` and `tag`, see [Linking and tagging information](https://dev.fingerprint.com/docs/tagging-information).
+The `visitorId` provided by Fingerprint Identification is especially useful when combined with information you already know about your users, for example, account IDs, order IDs, etc. To learn more about various applications of the `linkedId` and `tag`, see [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
 
 ```dart
 void identify() async {
@@ -213,8 +215,8 @@ void identify() async {
 ### Proximity Detection
 
 Proximity detection is a complementary, location-based signal available only on mobile platforms.
-More info you can find in [Android SDK documentation](https://dev.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) or in
-[iOS SDK documentation](https://dev.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection).
+More info you can find in [Android SDK documentation](https://docs.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) or in
+[iOS SDK documentation](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection).
 
 The Fingerprint SDK will only collect location data if the `allowUseOfLocationData` option is set to `true`.
 
@@ -235,8 +237,8 @@ void doInit() async {
 ```
 
 ## Additional Resources
-- [Fingerprint Pro documentation](https://dev.fingerprint.com/docs)
-- [Server API](https://dev.fingerprint.com/reference/server-api)
+- [Fingerprint Pro documentation](https://docs.fingerprint.com)
+- [Server API](https://docs.fingerprint.com/reference/server-api)
 
 ## Support and feedback
 

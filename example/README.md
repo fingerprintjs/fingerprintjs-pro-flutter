@@ -63,7 +63,7 @@ For running the project in iOS or Android, you will need to have a physical devi
 
 The smoke test follows the manual example flow: it waits for the Fingerprint
 agent to be ready, runs the built-in checks, identifies a visitor, and verifies
-that an extended result is available.
+that visitor data is available.
 
 First create `.env.local` as described above and start the target emulator or
 simulator when testing a native platform. Then run one of:
@@ -90,6 +90,7 @@ Then run the web smoke test in another:
 flutter drive \
   --driver=test_driver/integration_test.dart \
   --target=integration_test/smoke_test.dart \
+  --web-port=3000 \
   -d chrome
 ```
 

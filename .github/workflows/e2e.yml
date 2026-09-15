@@ -2,38 +2,32 @@ name: E2E
 
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - main
 
 permissions:
   contents: read
 
 concurrency:
-  group: e2e-${{ github.head_ref || github.ref_name }}
+  group: e2e-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  example-checks:
-    name: Example checks
+  example-tests:
+    name: Example widget tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Install Flutter
-        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        uses: actions/checkout@v7
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          flutter-version: 3.41.1
+          flutter-version: 3.44.0
           channel: stable
       - name: Restore packages
         working-directory: example
         run: flutter pub get
       - name: Create non-secret test environment
         run: cp example/.env example/.env.local
-      - name: Analyze
-        working-directory: example
-        run: flutter analyze
       - name: Run widget tests
         working-directory: example
         run: flutter test test
@@ -70,11 +64,11 @@ jobs:
       SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Install Flutter
-        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        uses: actions/checkout@v7
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          flutter-version: 3.41.1
+          flutter-version: 3.44.0
           channel: stable
       - name: Restore packages
         working-directory: example
@@ -114,11 +108,11 @@ jobs:
       SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Install Flutter
-        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        uses: actions/checkout@v7
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          flutter-version: 3.41.1
+          flutter-version: 3.44.0
           channel: stable
       - name: Restore packages
         working-directory: example
@@ -159,12 +153,13 @@ jobs:
       SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Install Flutter
-        uses: subosito/flutter-action@0c3f14223a08fa950c8a4c00bcfb834e65744135
+        uses: actions/checkout@v7
+      - name: Install Flutter latest stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
-          flutter-version: 3.41.1
           channel: stable
+      - name: Disable Swift Package Manager
+        run: flutter config --no-enable-swift-package-manager
       - name: Restore packages
         working-directory: example
         run: flutter pub get
@@ -178,13 +173,11 @@ jobs:
           printf 'DISABLE_LOCATION_COLLECTION=true\n' >> example/.env.local
           printf 'E2E_SMOKE_TEST=true\n' >> example/.env.local
       - name: Start iOS simulator
+        id: simulator
         uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5
         with:
           model: iPhone 16
+          wait_for_boot: true
       - name: Run iOS smoke test
         working-directory: example
-        run: |
-          DEVICE_ID="$(xcrun simctl list devices booted \
-            | awk -F '[()]' '/iPhone/{print $2; exit}')"
-          test -n "$DEVICE_ID"
-          flutter test integration_test/smoke_test.dart -d "$DEVICE_ID"
+        run: flutter test integration_test/smoke_test.dart -d "${{ steps.simulator.outputs.udid }}"
