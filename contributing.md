@@ -66,7 +66,7 @@ collection remains enabled by default.
 
 ### GitHub Actions secrets
 
-The E2E smoke test workflow reads these secrets from the `e2e` environment:
+The E2E smoke test workflow reads these repository secrets:
 
 - `API_KEY` (required)
 - `REGION` (optional; defaults to `us`)

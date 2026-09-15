@@ -12,12 +12,10 @@ concurrency:
 
 # Every job runs the live flow against the real service, so each one needs the identification
 # key. GitHub withholds secrets from pull requests opened from a fork, so those are skipped.
-# The key lives in the `e2e` environment, reachable only from these jobs.
 jobs:
   web:
     name: Web
     if: github.event.pull_request.head.repo.full_name == github.repository
-    environment: e2e
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -55,7 +53,6 @@ jobs:
   android:
     name: Android
     if: github.event.pull_request.head.repo.full_name == github.repository
-    environment: e2e
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -94,7 +91,6 @@ jobs:
   ios:
     name: iOS
     if: github.event.pull_request.head.repo.full_name == github.repository
-    environment: e2e
     runs-on: macos-15
     timeout-minutes: 30
     env:
