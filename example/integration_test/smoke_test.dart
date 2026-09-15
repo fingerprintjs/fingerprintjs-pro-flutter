@@ -18,6 +18,7 @@ void main() {
       app.initializationStatusKey,
       (text) => text == 'Fingerprint agent ready',
       description: 'Fingerprint agent to initialize',
+      failure: (text) => text.startsWith('Failed to initialize'),
     );
 
     await tester.tap(find.byKey(app.runChecksButtonKey));
