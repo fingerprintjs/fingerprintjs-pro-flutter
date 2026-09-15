@@ -97,7 +97,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           working-directory: example
-          script: flutter test integration_test/smoke_test.dart -d emulator-5554
+          script: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/smoke_test.dart -d emulator-5554
 
   ios:
     name: iOS
@@ -140,6 +140,14 @@ jobs:
         with:
           model: iPhone 16
           wait_for_boot: true
+      # `flutter test` intermittently never launches the app on an iOS simulator and then waits
+      # forever, with no output after "Xcode build done" (flutter#153433). `flutter drive` is the
+      # documented workaround, and it is what the other two jobs use.
       - name: Run smoke test
+        timeout-minutes: 15
         working-directory: fpjs_pro_plugin/example
-        run: flutter test integration_test/smoke_test.dart -d "${{ steps.simulator.outputs.udid }}"
+        run: |
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/smoke_test.dart \
+            -d "${{ steps.simulator.outputs.udid }}"

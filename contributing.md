@@ -29,12 +29,17 @@ First create `example/.env.local` as described in the
 when testing a native platform. Then from the `example` folder run one of:
 
 ```bash
-# Android (replace with the ID from `flutter devices`)
-flutter test integration_test/smoke_test.dart -d emulator-5554
-
-# iOS (replace with the simulator ID from `flutter devices`)
-flutter test integration_test/smoke_test.dart -d <ios-simulator-id>
+# replace the device with the ID from `flutter devices`
+flutter drive \
+  --driver=test_driver/integration_test.dart \
+  --target=integration_test/smoke_test.dart \
+  -d emulator-5554
 ```
+
+`flutter test integration_test/smoke_test.dart` also works and is quicker, but
+on an iOS simulator it intermittently never launches the app and then waits
+forever ([flutter#153433](https://github.com/flutter/flutter/issues/153433)),
+so CI uses `flutter drive` everywhere.
 
 Chrome also requires a matching
 [ChromeDriver](https://developer.chrome.com/docs/chromedriver) on `PATH`. Start
