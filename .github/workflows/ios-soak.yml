@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 25
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 4
       matrix:
         run: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     env:
