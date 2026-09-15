@@ -1,0 +1,162 @@
+name: E2E smoke test
+
+on:
+  pull_request:
+    paths:
+      - lib/**
+      - web/**
+      - android/**
+      - ios/**
+      - example/**
+      - pubspec.yaml
+      - .github/workflows/e2e.yml
+      - .github/scripts/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# Every job runs the live flow against the real service, so each one needs the identification
+# key. GitHub withholds secrets from pull requests opened from a fork, so those are skipped.
+jobs:
+  web:
+    name: Web
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+      - name: Restore packages
+        working-directory: example
+        run: flutter pub get
+      - name: Write .env.local
+        run: ./.github/scripts/write_e2e_env.sh
+      - name: Run smoke test
+        working-directory: example
+        run: |
+          CHROMEDRIVER="$CHROMEWEBDRIVER/chromedriver"
+          test -x "$CHROMEDRIVER"
+          "$CHROMEDRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
+          CHROMEDRIVER_PID=$!
+          trap 'kill "$CHROMEDRIVER_PID" 2>/dev/null || true' EXIT
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/smoke_test.dart \
+            --web-port=3000 \
+            -d web-server
+
+  android:
+    name: Android
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+      - name: Restore packages
+        working-directory: example
+        run: flutter pub get
+      - name: Write .env.local
+        run: DISABLE_LOCATION_COLLECTION=true ./.github/scripts/write_e2e_env.sh
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run smoke test
+        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          working-directory: example
+          script: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/smoke_test.dart -d emulator-5554
+
+  ios:
+    name: iOS
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+    # Checkout as `fpjs_pro_plugin`: Flutter SwiftPM identifies path-overridden plugins by folder name
+    # (https://github.com/flutter/flutter/issues/186881). Without this the build falls back to CocoaPods.
+    # TODO: drop `path:` and this `defaults:` block once flutter#188647 reaches stable.
+    defaults:
+      run:
+        working-directory: fpjs_pro_plugin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          path: fpjs_pro_plugin
+      # iOS runs on latest stable only, unlike the other jobs which pin the 3.44.0 floor. The pin was
+      # dropped while chasing the hang described at the smoke-test step, which turned out to affect
+      # both versions. Restoring it is a separate change. `ci.yml` covers the floor for iOS builds.
+      - name: Install Flutter latest stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
+        with:
+          channel: stable
+          cache: true
+      - name: Restore packages
+        working-directory: fpjs_pro_plugin/example
+        run: flutter pub get
+      - name: Write .env.local
+        run: DISABLE_LOCATION_COLLECTION=true ./.github/scripts/write_e2e_env.sh
+      - name: Start iOS simulator
+        id: simulator
+        uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5 #v5
+        with:
+          model: iPhone 16
+          wait_for_boot: true
+      # Built separately so the log shows how long the build, the launch and the test each took.
+      - name: Build smoke test app
+        working-directory: fpjs_pro_plugin/example
+        run: flutter build ios --simulator --target=integration_test/smoke_test.dart
+      # Both `flutter test` and `flutter drive` intermittently miss the app's VM service URL in the
+      # simulator log and wait forever, with no output after "Xcode build done" (flutter#181771).
+      # The script launches the app on a known URL instead, so the tool never has to find it.
+      - name: Run smoke test
+        timeout-minutes: 15
+        working-directory: fpjs_pro_plugin/example
+        env:
+          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
+        run: ../.github/scripts/drive_ios_simulator.sh "$SIMULATOR_UDID"
+      - name: Dump simulator diagnostics
+        if: failure() && steps.simulator.outputs.udid != ''
+        env:
+          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
+        run: |
+          xcrun simctl spawn "$SIMULATOR_UDID" log show --last 20m --style compact \
+            --predicate 'processImagePath ENDSWITH "Runner"' | tail -n 200
+          ls -la ~/Library/Logs/DiagnosticReports 2>/dev/null || true
