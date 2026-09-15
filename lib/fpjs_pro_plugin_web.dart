@@ -38,19 +38,18 @@ class FpjsProPluginWeb {
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'init':
-        return initFpjs(call);
+        initFpjs(call);
+        return;
       case 'getVisitorId':
         return getVisitorId(
-          linkedId: call.arguments['linkedId'],
-          tags: getTags(call.arguments['tags']),
-          timeoutMs: call.arguments['timeoutMs'],
-        );
+            linkedId: call.arguments['linkedId'],
+            tags: getTags(call.arguments['tags']),
+            timeoutMs: call.arguments['timeoutMs']);
       case 'getVisitorData':
         return getVisitorData(
-          linkedId: call.arguments['linkedId'],
-          tags: getTags(call.arguments['tags']),
-          timeoutMs: call.arguments['timeoutMs'],
-        );
+            linkedId: call.arguments['linkedId'],
+            tags: getTags(call.arguments['tags']),
+            timeoutMs: call.arguments['timeoutMs']);
       default:
         throw PlatformException(
           code: 'Unimplemented',
@@ -65,9 +64,8 @@ class FpjsProPluginWeb {
   static Future<void> initFpjs(MethodCall call) async {
     final options = FingerprintJSOptions(
       apiKey: call.arguments['apiToken'],
-      integrationInfo: _toJSStringArray([
-        "fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web",
-      ]),
+      integrationInfo: _toJSStringArray(
+          ["fingerprint-pro-flutter/${call.arguments['pluginVersion']}/web"]),
     );
     if (call.arguments['region'] != null) {
       options.region = call.arguments['region'];
@@ -75,19 +73,17 @@ class FpjsProPluginWeb {
     if (call.arguments['endpoint'] != null) {
       options.endpoint = _toJSStringArray([
         call.arguments['endpoint'],
-        ...List<String>.from(call.arguments['endpointFallbacks'] ?? []),
+        ...List<String>.from(call.arguments['endpointFallbacks'] ?? [])
       ]);
     }
     if (call.arguments['scriptUrlPattern'] != null) {
       options.scriptUrlPattern = _toJSStringArray([
         call.arguments['scriptUrlPattern'],
-        ...List<String>.from(call.arguments['scriptUrlPatternFallbacks'] ?? []),
+        ...List<String>.from(call.arguments['scriptUrlPatternFallbacks'] ?? [])
       ]);
     }
     try {
-      final fpPromise = FingerprintJS.load(options).toDart;
-      await fpPromise;
-      _fpPromise = fpPromise;
+      _fpPromise = FingerprintJS.load(options).toDart;
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
@@ -100,27 +96,18 @@ class FpjsProPluginWeb {
   /// Support [linkedId](https://docs.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [timeoutMs](https://docs.fingerprint.com/reference/get-function#timeout)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<String?> getVisitorId({
-    JSObject? tags,
-    String? linkedId,
-    int? timeoutMs,
-  }) async {
+  static Future<String?> getVisitorId(
+      {JSObject? tags, String? linkedId, int? timeoutMs}) async {
     if (!_isInitialized) {
       throw Exception(
-        'You need to initialize the FPJS Client first by calling the "initFpjs" method',
-      );
+          'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
 
     try {
       FingerprintJSAgent fp = await (_fpPromise as Future<FingerprintJSAgent>);
       var result = await fp
-          .get(
-            FingerprintJSGetOptions(
-              linkedId: linkedId,
-              tag: tags,
-              timeout: timeoutMs,
-            ),
-          )
+          .get(FingerprintJSGetOptions(
+              linkedId: linkedId, tag: tags, timeout: timeoutMs))
           .toDart;
       return result.visitorId;
     } catch (e) {
@@ -133,32 +120,26 @@ class FpjsProPluginWeb {
   /// Support [linkedId](https://docs.fingerprint.com/docs/quick-start-guide#tagging-your-requests)
   /// Support [timeoutMs](https://docs.fingerprint.com/reference/get-function#timeout)
   /// Throws a [FingerprintProError] if identification request fails for any reason
-  static Future<List<Object>> getVisitorData({
-    JSObject? tags,
-    String? linkedId,
-    int? timeoutMs,
-  }) async {
+  static Future<List<Object>> getVisitorData(
+      {JSObject? tags, String? linkedId, int? timeoutMs}) async {
     if (!_isInitialized) {
       throw Exception(
-        'You need to initialize the FPJS Client first by calling the "initFpjs" method',
-      );
+          'You need to initialize the FPJS Client first by calling the "initFpjs" method');
     }
     try {
       FingerprintJSAgent fp = await (_fpPromise as Future<FingerprintJSAgent>);
       final getOptions = FingerprintJSGetOptions(
-        linkedId: linkedId,
-        tag: tags,
-        timeout: timeoutMs,
-        extendedResult: _isExtendedResult,
-      );
+          linkedId: linkedId,
+          tag: tags,
+          timeout: timeoutMs,
+          extendedResult: _isExtendedResult);
       final IdentificationResult result = await fp.get(getOptions).toDart;
 
       FingerprintJSProResponse typedResult;
 
       if (_isExtendedResult) {
         typedResult = FingerprintJSProExtendedResponseWeb.fromJsObject(
-          result as IdentificationExtendedResult,
-        );
+            result as IdentificationExtendedResult);
       } else {
         typedResult = FingerprintJSProResponseWeb.fromJsObject(result);
       }
@@ -168,7 +149,7 @@ class FpjsProPluginWeb {
         typedResult.requestId,
         typedResult.confidenceScore.score,
         serializedResult,
-        typedResult.sealedResult ?? '',
+        typedResult.sealedResult ?? ''
       ];
     } catch (e) {
       throw _wrapJsAgentError(e);

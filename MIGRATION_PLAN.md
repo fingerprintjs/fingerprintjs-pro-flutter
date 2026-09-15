@@ -3,7 +3,7 @@
 Epic [INTER-2212](https://fingerprintjs.atlassian.net/browse/INTER-2212).
 Tickets do not map one to one onto PRs.
 
-Every v5 PR targets `v5`. PR 8 merges `v5` into `main`. Nothing ships from
+Every v5 PR targets `v5`. PR 7 merges `v5` into `main`. Nothing ships from
 `main` in between: the native v4 upgrade renames `requestId` to `eventId`,
 which breaks the shared Dart response type.
 
@@ -20,18 +20,17 @@ Defer only unrelated or speculative work, not known breakage such as
 | # | PR | Tickets | Status |
 |---|---|---|---|
 | 1 | Requirements and native agent deps ([#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147)) | [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401) | Merged |
-| 2 | Cross-platform E2E smoke test ([#115](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/115)) | none | Open |
-| 3 | Built-in Kotlin and AGP 9 compatibility | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117) | To do |
-| 4 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
-| 5 | Complete v4 API: Pigeon and web | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319), [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
-| 6 | Rename repo and package | [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400) | To do |
-| 7 | Docs, migration guide, example app | none | To do |
-| 8 | Release 5.0.0 | none | To do |
+| 2 | Built-in Kotlin and AGP 9 compatibility | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117) | To do |
+| 3 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
+| 4 | Complete v4 API: Pigeon and web | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319), [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
+| 5 | Rename repo and package | [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400) | To do |
+| 6 | Docs, migration guide, example app | none | To do |
+| 7 | Release 5.0.0 | none | To do |
 
 [INTER-2321](https://fingerprintjs.atlassian.net/browse/INTER-2321) (Swift
 Package Manager) shipped in 4.13.0.
 
-PRs 2, 7, and 8 have no ticket. The error model belongs in PR 5: it is part of
+PRs 6 and 7 have no ticket. The error model belongs in PR 4: it is part of
 the public contract and Pigeon error payload, not a later cleanup.
 
 ## PR 1. Requirements and native agent deps
@@ -42,7 +41,7 @@ merged. [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401).
 Set Flutter 3.44, Dart 3.12, Android API 24, iOS/tvOS 15, Xcode 16, and Swift
 6. Use Android v4 `4.0.0`, iOS `Fingerprint-iOS`/`fingerprint-ios`, and
 Pigeon 28.1.0. The initial Android build baseline is AGP 8.13.2, Gradle 8.13,
-Kotlin 2.3.20, Java 11, and compileSdk 36; PR 3 upgrades its build toolchain.
+Kotlin 2.3.20, Java 11, and compileSdk 36; PR 2 upgrades its build toolchain.
 
 Kotlin 2.3.20 compiles without `-Xskip-metadata-version-check`. React Native
 needed that flag for the same Android SDK. This was the largest open risk.
@@ -51,26 +50,12 @@ Two follow-ups:
 
 - Android error codes come from `error.javaClass.simpleName`. R8 renames
   classes, so codes are correct in debug and wrong in minified release
-  builds. PR 5 owns an explicit mapping or keep rule and proves it with an
+  builds. PR 4 owns an explicit mapping or keep rule and proves it with an
   assertion on an actual error code in a minified release build.
 - Tuple index 0 is named `requestId` and carries `eventId`. Index 1 is named
-  `confidenceScore` and carries `suspectScore`. PR 5 removes the tuple.
+  `confidenceScore` and carries `suspectScore`. PR 4 removes the tuple.
 
-## PR 2. Cross-platform E2E smoke test
-
-[#115](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/115),
-open, no ticket.
-
-Add one PR-time smoke test against the example app on Chrome, an Android
-emulator, and an iOS simulator. It waits for initialization, runs the example
-checks, gets a visitor ID, and verifies visitor data. Keep assertions limited
-to stable behavior so later migration PRs can replace the API wiring without
-redesigning the flow.
-
-Skip live jobs when repository secrets are unavailable. Native jobs disable
-location collection so permission dialogs cannot block unattended runs.
-
-## PR 3. Built-in Kotlin and AGP 9 compatibility
+## PR 2. Built-in Kotlin and AGP 9 compatibility
 
 [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), GitHub
 issue [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117).
@@ -91,7 +76,7 @@ CI proves both supported paths: Flutter 3.44 with AGP 9 and
 `android.builtInKotlin=true`. Flutter documents that enabling built-in Kotlin
 in an example requires Flutter 3.47+, while the 3.44 path remains supported.
 
-## PR 4. Platform interface
+## PR 3. Platform interface
 
 [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), partial.
 
@@ -104,7 +89,7 @@ plugin answers it in the same process. Tests switch to replacing
 
 Before Pigeon, so the generated code sits inside `MethodChannelFingerprint`.
 
-## PR 5. Complete v4 API: Pigeon and web
+## PR 4. Complete v4 API: Pigeon and web
 
 [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320),
 [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396),
@@ -191,7 +176,7 @@ and errors. No PR may expose the new public API with a v3 web implementation.
 outside the epic, are assigned to Ilya, and cover React Native too. No link
 connects the pairs. Close or link before starting.
 
-## PR 6. Rename repo and package
+## PR 5. Rename repo and package
 
 [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400).
 
@@ -213,7 +198,7 @@ status`, version `fingerprint_flutter` to `5.0.0-alpha.0` on `test`, and run
 Do this before any prerelease. A new pub name is a new package, so an alpha
 must be installable as `fingerprint_flutter`, not the retired name.
 
-## PR 7. Docs, migration guide, example app
+## PR 6. Docs, migration guide, example app
 
 No ticket. The web asset path is a numbered migration step, not a footnote.
 Document every renamed import, the static-to-instance conversion, removed
@@ -230,14 +215,14 @@ Open question — old-package policy: before release, decide whether
 `fpjs_pro_plugin` gets a final 4.13.x migration-notice release and/or further
 maintenance or security fixes. This does not change the discontinuation step.
 
-## PR 8. Release 5.0.0
+## PR 7. Release 5.0.0
 
 No ticket. Merge `v5` into `main`. The major changeset exists from PR 1. The
 package is at 4.13.1.
 
 The repository already releases Changesets from `main` and `test`, then
 publishes the version tag to pub.dev. Use that path. A prerelease goes from
-`test` after PR 6; stable 5.0.0 goes from `main` after PR 7. See
+`test` after PR 5; stable 5.0.0 goes from `main` after PR 6. See
 [Changesets prerelease mode](https://github.com/changesets/changesets/blob/main/docs/command-line-options.md#pre)
 and [pub.dev prereleases](https://dart.dev/tools/pub/publishing#publish-prerelease-versions).
 
@@ -245,14 +230,13 @@ and [pub.dev prereleases](https://dart.dev/tools/pub/publishing#publish-prerelea
 
 CI builds the example app on Android, iOS and web every time. Beyond that:
 
-- PR 2: the example smoke flow passes on Chrome, Android, and iOS.
-- PR 3: an AGP 9 consumer app builds with the supported Flutter 3.44 path and
+- PR 2: an AGP 9 consumer app builds with the supported Flutter 3.44 path and
   with latest Flutter plus built-in Kotlin enabled.
-- PR 4: tests pass after replacing `FingerprintPlatform.instance`.
-- PR 5: no positional tuple or v3 web implementation remains; generated code,
+- PR 3: tests pass after replacing `FingerprintPlatform.instance`.
+- PR 4: no positional tuple or v3 web implementation remains; generated code,
   API, error matrix, two-client independence, minified Android errors, and
   mocked web-agent behavior are covered.
-- PR 6: Changesets produces `fingerprint_flutter 5.0.0-alpha.0` and pub dry
+- PR 5: Changesets produces `fingerprint_flutter 5.0.0-alpha.0` and pub dry
   run succeeds.
-- PR 7: the migration guide is tested by updating the example to use only the
+- PR 6: the migration guide is tested by updating the example to use only the
   new package name and public API.
