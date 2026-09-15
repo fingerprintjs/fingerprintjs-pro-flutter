@@ -77,8 +77,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Flutter only understands `android.builtInKotlin` from 3.47, so 3.44 can only build with
+        # the legacy fallback. Latest stable is covered in both modes: `false` is the checked-in
+        # default, and Flutter implements the fallback itself, so it can change between versions.
         include:
           - flutter-version: "3.44.0"
+            built-in-kotlin: "false"
+          - flutter-version: ""
             built-in-kotlin: "false"
           - flutter-version: ""
             built-in-kotlin: "true"
