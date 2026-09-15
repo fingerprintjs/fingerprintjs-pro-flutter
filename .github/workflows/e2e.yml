@@ -10,6 +10,8 @@ concurrency:
   group: e2e-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+# The secret-backed jobs run in the `e2e` environment so the identification key is reachable
+# only from them, not from every workflow in the repository.
 jobs:
   example-tests:
     name: Example widget tests
@@ -35,6 +37,7 @@ jobs:
   check-secrets:
     name: Check E2E secrets
     runs-on: ubuntu-latest
+    environment: e2e
     timeout-minutes: 5
     outputs:
       available: ${{ steps.check.outputs.available }}
@@ -54,6 +57,7 @@ jobs:
   chrome:
     name: Chrome
     needs: check-secrets
+    environment: e2e
     if: needs.check-secrets.outputs.available == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -103,6 +107,7 @@ jobs:
   android:
     name: Android emulator
     needs: check-secrets
+    environment: e2e
     if: needs.check-secrets.outputs.available == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -154,6 +159,7 @@ jobs:
   ios:
     name: iOS simulator
     needs: check-secrets
+    environment: e2e
     if: needs.check-secrets.outputs.available == 'true'
     runs-on: macos-15
     timeout-minutes: 30
