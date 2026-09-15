@@ -88,11 +88,17 @@ jobs:
           "$CHROMEDRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
           CHROMEDRIVER_PID=$!
           trap 'kill "$CHROMEDRIVER_PID" 2>/dev/null || true' EXIT
-          flutter drive \
-            --driver=test_driver/integration_test.dart \
-            --target=integration_test/smoke_test.dart \
-            --web-port=3000 \
-            -d web-server
+          # One retry: the flow makes a dozen live identification calls, so a single
+          # transient network error should not fail the run. Two failures in a row is real.
+          for attempt in 1 2; do
+            flutter drive \
+              --driver=test_driver/integration_test.dart \
+              --target=integration_test/smoke_test.dart \
+              --web-port=3000 \
+              -d web-server && exit 0
+            echo "::warning::Chrome smoke test attempt $attempt failed"
+          done
+          exit 1
 
   android:
     name: Android emulator
@@ -136,7 +142,14 @@ jobs:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          script: cd example && flutter test integration_test/smoke_test.dart -d emulator-5554
+          # One retry, as in the Chrome job.
+          script: |
+            cd example
+            for attempt in 1 2; do
+              flutter test integration_test/smoke_test.dart -d emulator-5554 && exit 0
+              echo "::warning::Android smoke test attempt $attempt failed"
+            done
+            exit 1
 
   ios:
     name: iOS simulator
@@ -186,7 +199,14 @@ jobs:
           wait_for_boot: true
       - name: Run iOS smoke test
         working-directory: fpjs_pro_plugin/example
-        run: flutter test integration_test/smoke_test.dart -d "${{ steps.simulator.outputs.udid }}"
+        # One retry, as in the Chrome job.
+        run: |
+          for attempt in 1 2; do
+            flutter test integration_test/smoke_test.dart \
+              -d "${{ steps.simulator.outputs.udid }}" && exit 0
+            echo "::warning::iOS smoke test attempt $attempt failed"
+          done
+          exit 1
       # `flutter test` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
       - name: Verify Swift Package Manager was used
         run: |
