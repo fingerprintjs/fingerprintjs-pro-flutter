@@ -2,6 +2,14 @@ name: E2E smoke test
 
 on:
   pull_request:
+    paths:
+      - lib/**
+      - android/**
+      - ios/**
+      - example/**
+      - pubspec.yaml
+      - .github/workflows/e2e.yml
+      - .github/scripts/**
 
 permissions:
   contents: read
@@ -31,6 +39,7 @@ jobs:
         with:
           flutter-version: 3.44.0
           channel: stable
+          cache: true
       - name: Restore packages
         working-directory: example
         run: flutter pub get
@@ -68,6 +77,7 @@ jobs:
         with:
           flutter-version: 3.44.0
           channel: stable
+          cache: true
       - name: Restore packages
         working-directory: example
         run: flutter pub get
@@ -79,12 +89,34 @@ jobs:
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Cache the AVD
+        id: avd-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-35-x86_64-pixel_6
+      - name: Create the AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          script: echo "Snapshot generated."
       - name: Run smoke test
         uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
           working-directory: example
           script: flutter test integration_test/smoke_test.dart -d emulator-5554
 
@@ -116,6 +148,7 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: stable
+          cache: true
       - name: Restore packages
         working-directory: fpjs_pro_plugin/example
         run: flutter pub get
