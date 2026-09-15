@@ -90,34 +90,12 @@ jobs:
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Cache the AVD
-        id: avd-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-35-x86_64-pixel_6
-      - name: Create the AVD snapshot
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
-        with:
-          api-level: 35
-          arch: x86_64
-          profile: pixel_6
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          disable-animations: false
-          script: echo "Snapshot generated."
       - name: Run smoke test
         uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed #v2.34.0
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          disable-animations: true
           working-directory: example
           script: flutter test integration_test/smoke_test.dart -d emulator-5554
 
@@ -142,9 +120,10 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: fpjs_pro_plugin
-      # iOS runs on latest stable only, unlike the other jobs which pin the 3.44.0 floor.
-      # Pinned to 3.44.0 the example compiles but never starts on the simulator, so `flutter test`
-      # waits for a connection until the job times out. `ci.yml` covers the floor.
+      # iOS runs on latest stable only, unlike the other jobs which pin the 3.44.0 floor. Pinned to
+      # 3.44.0 the example compiled but never started on the simulator and the job timed out. Latest
+      # stable has hung the same way once, so treat the version as unproven rather than the cause.
+      # `ci.yml` covers the floor for iOS builds.
       - name: Install Flutter latest stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
