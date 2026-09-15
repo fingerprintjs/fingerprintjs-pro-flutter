@@ -71,16 +71,26 @@ jobs:
         run: flutter build web --wasm
 
   build-examples-android:
-    name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }}, built-in Kotlin ${{ matrix['built-in-kotlin'] }})"
     needs: analyze-and-test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.44.0", ""]
+        include:
+          - flutter-version: "3.44.0"
+            built-in-kotlin: "false"
+          - flutter-version: ""
+            built-in-kotlin: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
 
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
@@ -98,9 +108,32 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
+      - name: Configure built-in Kotlin
+        run: |
+          sed -i "s/^android\.builtInKotlin=.*/android.builtInKotlin=${{ matrix['built-in-kotlin'] }}/" example/android/gradle.properties
+          grep -Fx "android.builtInKotlin=${{ matrix['built-in-kotlin'] }}" example/android/gradle.properties
+
       - name: Build example (android)
         working-directory: example
         run: flutter build apk
+
+      - name: Verify Kotlin bytecode target
+        working-directory: example
+        run: |
+          plugin_class=$(find build -type f -name FpjsProPlugin.class -print -quit)
+          app_class=$(find build -type f -name MainActivity.class -print -quit)
+
+          for class_file in "$plugin_class" "$app_class"; do
+            if [ -z "$class_file" ]; then
+              echo "Expected Kotlin class was not compiled."
+              exit 1
+            fi
+            major_version=$(javap -verbose "$class_file" | sed -n 's/^  major version: //p')
+            if [ "$major_version" != "55" ]; then
+              echo "$class_file has bytecode major version $major_version, expected 55 (Java 11)."
+              exit 1
+            fi
+          done
 
   # iOS runs only on the latest stable Flutter, unlike the other jobs which also test an older floor.
   # The example's ios/ project is generated scaffolding that `flutter` keeps migrating to its newest
