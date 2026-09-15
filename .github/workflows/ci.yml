@@ -34,10 +34,6 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Restore example packages
-        working-directory: example
-        run: flutter pub get
-
       # `test` only: `integration_test` holds the live smoke flow and needs a device.
       - name: Run example tests
         working-directory: example
