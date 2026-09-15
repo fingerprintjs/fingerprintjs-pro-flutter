@@ -184,6 +184,12 @@ class _MyAppState extends State<MyApp> {
     return identificationInfo;
   }
 
+  /// Firing the checks back to back makes iOS reuse a connection the server has
+  /// already closed, so the call after the burst fails with
+  /// `NetworkError: The network connection was lost`. Leave a gap between them.
+  Future<void> _spaceOutChecks() =>
+      Future.delayed(const Duration(milliseconds: 500));
+
   Future<void> _runChecks() async {
     await requestLocationPermission();
     setState(() {
@@ -218,6 +224,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           _checksResult += '.';
         });
+        await _spaceOutChecks();
       }
       for (var check in timeoutChecks) {
         try {
@@ -229,6 +236,7 @@ class _MyAppState extends State<MyApp> {
             _checksResult += '!';
           });
         }
+        await _spaceOutChecks();
       }
       if (!mounted) return;
       setState(() {
