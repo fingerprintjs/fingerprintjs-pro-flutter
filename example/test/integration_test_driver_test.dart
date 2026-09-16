@@ -49,6 +49,20 @@ void main() {
       expect(reportsOnlySemanticsHandleRace(response), isFalse);
     });
 
+    // The binding skips the end-of-test check once a test has failed, so this
+    // shape should not occur. Rejected anyway, so a change upstream cannot turn a
+    // real failure into a pass.
+    test('does not tolerate details holding the race and a real failure', () {
+      final response = Response.someTestsFailed(<Failure>[
+        Failure(
+          'runs the example app smoke flow',
+          '$_realFailureDetails$_semanticsRaceDetails',
+        ),
+      ]);
+
+      expect(reportsOnlySemanticsHandleRace(response), isFalse);
+    });
+
     test('does not tolerate a failure that carries no details', () {
       final response = Response.someTestsFailed(<Failure>[
         Failure('runs the example app smoke flow', null),

@@ -22,6 +22,23 @@ import 'package:integration_test/integration_test_driver.dart';
 const semanticsHandleRaceAssertion =
     'A SemanticsHandle was active at the end of the test.';
 
+/// The banner `FlutterErrorDetails.toString()` puts above every reported error.
+const _exceptionBanner = 'EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK';
+
+/// Whether [failure] reports the semantics handle race and nothing besides it.
+///
+/// A test that has already failed never reaches the end-of-test check, because
+/// the binding skips its invariant verification once an exception is pending
+/// (`flutter_test/src/binding.dart`), so the race cannot be bundled with a real
+/// failure today. Requiring a single reported exception keeps that from becoming
+/// a silent pass if it ever changes.
+bool _isOnlySemanticsHandleRace(Failure failure) {
+  final details = failure.details;
+  if (details == null) return false;
+  if (!details.contains(semanticsHandleRaceAssertion)) return false;
+  return details.split(_exceptionBanner).length - 1 == 1;
+}
+
 /// Whether [response] reports the semantics handle race and nothing else.
 ///
 /// `failureDetails` is null rather than empty for a response that carries no
@@ -30,11 +47,7 @@ const semanticsHandleRaceAssertion =
 bool reportsOnlySemanticsHandleRace(Response response) {
   if (response.allTestsPassed) return false;
   final failures = response.failureDetails ?? const <Failure>[];
-  return failures.isNotEmpty &&
-      failures.every(
-        (failure) =>
-            failure.details?.contains(semanticsHandleRaceAssertion) ?? false,
-      );
+  return failures.isNotEmpty && failures.every(_isOnlySemanticsHandleRace);
 }
 
 Future<void> main() async {
