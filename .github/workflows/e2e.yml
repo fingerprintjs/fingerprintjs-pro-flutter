@@ -98,12 +98,16 @@ jobs:
           profile: pixel_6
           working-directory: fpjs_pro_plugin
           script: ./.github/scripts/run_smoke_test.sh android
-      - name: Run smoke test
-        if: matrix.platform != 'android'
+      - name: Run iOS smoke test
+        if: matrix.platform == 'ios'
         timeout-minutes: 10
         env:
           SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
-        run: ./.github/scripts/run_smoke_test.sh "${{ matrix.platform }}" "$SIMULATOR_UDID"
+        run: ./.github/scripts/run_smoke_test.sh ios "$SIMULATOR_UDID"
+      - name: Run web smoke test
+        if: matrix.platform == 'web'
+        timeout-minutes: 10
+        run: ./.github/scripts/run_smoke_test.sh web
       - name: Upload smoke-test results
         if: always()
         uses: actions/upload-artifact@v7
