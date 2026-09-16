@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/method_channel_fingerprint.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
+import 'package:fpjs_pro_plugin/src/method_channel_fingerprint.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class FakeFingerprint extends FingerprintPlatform
@@ -58,6 +58,7 @@ void main() {
         endpoint: 'https://example.com', region: Region.eu);
 
     expect(fake.config?.apiKey, 'test_api_key');
+    expect(fake.config?.pluginVersion, pluginVersion);
     expect(fake.config?.endpoint, 'https://example.com');
     expect(fake.config?.region, Region.eu);
     expect(fake.config?.extendedResponseFormat, false);

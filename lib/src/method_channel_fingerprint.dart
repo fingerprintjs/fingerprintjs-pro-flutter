@@ -2,16 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 
 /// An implementation of [FingerprintPlatform] that talks to the Android and iOS agents
 class MethodChannelFingerprint extends FingerprintPlatform {
-  static const channelName = 'fpjs_pro_plugin';
-
-  final MethodChannel _channel = const MethodChannel(channelName);
+  final MethodChannel _channel = const MethodChannel('fpjs_pro_plugin');
 
   var _isExtendedResult = false;
 
@@ -25,7 +22,7 @@ class MethodChannelFingerprint extends FingerprintPlatform {
       'scriptUrlPatternFallbacks': config.scriptUrlPatternFallbacks,
       'region': config.region?.stringValue,
       'extendedResponseFormat': config.extendedResponseFormat,
-      'pluginVersion': pluginVersion,
+      'pluginVersion': config.pluginVersion,
       'allowUseOfLocationData': config.allowUseOfLocationData,
       'locationTimeoutMillis': config.locationTimeoutMillisAndroid,
     });

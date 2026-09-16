@@ -7,14 +7,12 @@ import 'dart:js_interop';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fpjs_pro_plugin/js_agent_interop.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/web_error.dart';
 import 'package:fpjs_pro_plugin/web_result.dart';
-
-import 'js_agent_interop.dart';
 
 /// An implementation of [FingerprintPlatform] that talks to the JS agent
 class FingerprintWeb extends FingerprintPlatform {
@@ -29,8 +27,8 @@ class FingerprintWeb extends FingerprintPlatform {
   Future<void> init(FingerprintConfig config) async {
     final options = FingerprintJSOptions(
       apiKey: config.apiKey,
-      integrationInfo:
-          _toJSStringArray(['fingerprint-pro-flutter/$pluginVersion/web']),
+      integrationInfo: _toJSStringArray(
+          ['fingerprint-pro-flutter/${config.pluginVersion}/web']),
     );
     if (config.region != null) {
       options.region = config.region!.stringValue;

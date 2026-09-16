@@ -1,11 +1,12 @@
-import 'package:fpjs_pro_plugin/method_channel_fingerprint.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/method_channel_fingerprint.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// Configuration of the Fingerprint Pro client, passed to [FingerprintPlatform.init]
 class FingerprintConfig {
   final String apiKey;
+  final String pluginVersion;
   final String? endpoint;
   final List<String>? endpointFallbacks;
   final String? scriptUrlPattern;
@@ -17,6 +18,7 @@ class FingerprintConfig {
 
   const FingerprintConfig({
     required this.apiKey,
+    required this.pluginVersion,
     this.endpoint,
     this.endpointFallbacks,
     this.scriptUrlPattern,

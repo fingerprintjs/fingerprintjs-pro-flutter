@@ -5,7 +5,7 @@ import 'dart:js_interop';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/fingerprint_web.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_web.dart';
 import 'package:fpjs_pro_plugin/js_agent_interop.dart';
 import 'package:fpjs_pro_plugin/web_result.dart';
 

@@ -39,7 +39,7 @@ flutter:
         pluginClass: FpjsProPlugin
       web:
         pluginClass: FingerprintWeb
-        fileName: fingerprint_web.dart
+        fileName: src/fingerprint_web.dart
   assets:
     - web/index.js
 
