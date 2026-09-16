@@ -1,6 +1,7 @@
 - Values
-  - Eradicate accidental complexity
+  - Keep things simple, no accidental complexity
   - After reaching a milestone, ask yourself: could I radically simplify this if I was starting from scratch?
+  - Deep modules, clear interfaces - do not leak implementation details across boundaries
 - Structure
   - Avoid thin wrapper functions and helpers, minimize layers of indirection
 - Tests
