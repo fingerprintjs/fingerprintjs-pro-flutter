@@ -200,12 +200,13 @@ void main() {
       expect(error.rawCode, 'some_future_code');
     });
 
-    test('treats an empty raw code as unknown_error, since it says nothing',
-        () {
+    test('reports unknown for an empty raw code but keeps it empty', () {
+      // An empty code means the platform reported none, which is worth
+      // telling apart from one that reported `unknown_error`.
       final error = FingerprintError(rawCode: '');
 
       expect(error.code, FingerprintErrorCode.unknown);
-      expect(error.rawCode, 'unknown_error');
+      expect(error.rawCode, '');
     });
 
     test('normalizes an absent message to null', () {

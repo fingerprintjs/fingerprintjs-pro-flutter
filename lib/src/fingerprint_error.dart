@@ -166,11 +166,6 @@ enum FingerprintErrorCode {
   proxyIntegrationSecretEnvironmentMismatch(
       'proxy_integration_secret_environment_mismatch'),
 
-  /// The page ran the agent inside a sandboxed iframe.
-  ///
-  /// Platforms: web.
-  sandboxedIframe('sandboxed_iframe'),
-
   // ---------------------------------------------------------------------------
   // Client errors, Android and iOS. These are raised by the SDK rather than the
   // API, so they carry no event id, apart from [responseCannotBeParsed], where
@@ -238,6 +233,16 @@ enum FingerprintErrorCode {
   ///
   /// Platforms: web.
   cspBlock('csp_block'),
+
+  /// The page ran the agent inside a sandboxed iframe, which is unsupported.
+  ///
+  /// A client error despite sitting in the agent's `ApiErrorCode` type union:
+  /// the agent raises it locally with its own canned message, alongside
+  /// [cspBlock] and [clientTimeout], so no request is made and there is no
+  /// event id.
+  ///
+  /// Platforms: web.
+  sandboxedIframe('sandboxed_iframe'),
 
   /// The configured endpoint is not a usable URL.
   ///
@@ -341,10 +346,12 @@ final class FingerprintError implements Exception {
   /// [FingerprintErrorCode.unknown] when [rawCode] is not in the matrix.
   final FingerprintErrorCode code;
 
-  /// The code exactly as the platform reported it.
+  /// The code exactly as the platform reported it, never rewritten.
   ///
   /// Worth logging: when [code] is [FingerprintErrorCode.unknown] this is the
-  /// only description of what happened.
+  /// only description of what happened. Empty means the platform reported no
+  /// code at all, which is worth telling apart from one that reported
+  /// `unknown_error`, so it is left empty rather than filled in.
   final String rawCode;
 
   /// What the platform said went wrong, if it said anything.
@@ -362,17 +369,15 @@ final class FingerprintError implements Exception {
 
   /// Creates an error from what a platform reported.
   ///
-  /// An empty [rawCode] becomes [FingerprintErrorCode.unknown]'s raw code,
-  /// since it describes nothing. An empty [message] becomes null. An empty
+  /// [rawCode] is kept as given, empty included, and an empty one reports
+  /// [FingerprintErrorCode.unknown]. An empty [message] becomes null. An empty
   /// [eventId], or the literal `Unknown` that Android sends when the request
   /// never reached the server, becomes null.
   FingerprintError({
-    required String rawCode,
+    required this.rawCode,
     String? message,
     String? eventId,
   })  : code = FingerprintErrorCode.fromRawCode(rawCode),
-        rawCode =
-            rawCode.isEmpty ? FingerprintErrorCode.unknown.rawCode : rawCode,
         message = (message == null || message.isEmpty) ? null : message,
         eventId = (eventId == null ||
                 eventId.isEmpty ||
