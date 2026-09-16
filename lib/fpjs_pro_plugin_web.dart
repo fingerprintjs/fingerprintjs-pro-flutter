@@ -38,8 +38,7 @@ class FpjsProPluginWeb {
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'init':
-        initFpjs(call);
-        return;
+        return initFpjs(call);
       case 'getVisitorId':
         return getVisitorId(
             linkedId: call.arguments['linkedId'],
@@ -83,7 +82,11 @@ class FpjsProPluginWeb {
       ]);
     }
     try {
-      _fpPromise = FingerprintJS.load(options).toDart;
+      // Await the agent so a failed load surfaces here instead of in the next
+      // identification call.
+      final fpPromise = FingerprintJS.load(options).toDart;
+      await fpPromise;
+      _fpPromise = fpPromise;
       _isExtendedResult = call.arguments['extendedResponseFormat'];
       _isInitialized = true;
     } catch (e) {
