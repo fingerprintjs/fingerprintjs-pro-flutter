@@ -274,14 +274,20 @@ class _MyAppState extends State<MyApp> {
                 child: const Text('Run tests!'),
               ),
               const Text('Checks result:'),
-              Text(_checksResult, key: checksResultKey),
+              Semantics(
+                identifier: 'checks-result',
+                child: Text(_checksResult, key: checksResultKey),
+              ),
               ElevatedButton(
                 key: identifyButtonKey,
                 onPressed: isReady ? _getDeviceId : null,
                 child: const Text('Identify!'),
               ),
               const Text('The device id is:'),
-              Text(_deviceId, key: deviceIdResultKey),
+              Semantics(
+                identifier: 'device-id-result',
+                child: Text(_deviceId, key: deviceIdResultKey),
+              ),
               _VisitorDataDialog(
                 enabled: isReady,
                 loadVisitorData: _getDeviceData,
@@ -324,9 +330,12 @@ class _VisitorDataDialog extends StatelessWidget {
                     title: const Text('Visitor data'),
                     content: FittedBox(
                       fit: BoxFit.contain,
-                      child: Text(
-                        identificationInfo,
-                        key: visitorDataContentKey,
+                      child: Semantics(
+                        identifier: 'visitor-data-content',
+                        child: Text(
+                          identificationInfo,
+                          key: visitorDataContentKey,
+                        ),
                       ),
                     ),
                     actions: <Widget>[

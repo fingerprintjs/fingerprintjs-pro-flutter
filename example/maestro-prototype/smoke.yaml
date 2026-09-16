@@ -1,0 +1,33 @@
+# Local experiment: drive the normal example app without Flutter test bindings.
+# https://docs.maestro.dev/get-started/supported-platform/flutter
+appId: ${APP_ID}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: 'Fingerprint agent ready'
+    timeout: 90000
+- tapOn: 'Run tests!'
+- extendedWaitUntil:
+    visible:
+      id: 'checks-result'
+      text: 'Success!'
+    timeout: 90000
+- tapOn: 'Identify!'
+- extendedWaitUntil:
+    visible:
+      id: 'device-id-result'
+      text: '(?!Unknown$|Failed)[A-Za-z0-9]+'
+    timeout: 90000
+- copyTextFrom:
+    id: 'device-id-result'
+- evalScript: ${output.visitorId = maestro.copiedText}
+- tapOn: 'Get visitor data!'
+- extendedWaitUntil:
+    visible:
+      id: 'visitor-data-content'
+    timeout: 90000
+- copyTextFrom:
+    id: 'visitor-data-content'
+- assertTrue:
+    condition: ${JSON.parse(maestro.copiedText).visitorId === output.visitorId}
+    label: 'Visitor data matches the identified device'
