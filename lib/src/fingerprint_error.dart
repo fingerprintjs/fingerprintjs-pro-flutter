@@ -15,8 +15,9 @@
 /// The members are grouped as the platforms group them. The grouping decides
 /// whether an event id is available: a server error is a reply to a request the
 /// server accepted and assigned an id, so it can carry
-/// [FingerprintError.eventId]. A client error never reached the server, so it
-/// cannot.
+/// [FingerprintError.eventId]. A client error is raised without a reply, so it
+/// cannot, with one exception: [responseCannotBeParsed], where the reply did
+/// arrive and only reading it failed.
 enum FingerprintErrorCode {
   // ---------------------------------------------------------------------------
   // Server errors. The request reached the API, which rejected it. These may
@@ -359,9 +360,11 @@ final class FingerprintError implements Exception {
 
   /// The event this failure belongs to, if the server assigned one.
   ///
-  /// Null for every client error, and for a server error the platform did not
-  /// attribute. Use it to look the event up in the
-  /// [Server API](https://dev.fingerprint.com/reference/getevent).
+  /// Null for a client error, and for a server error the platform did not
+  /// attribute. Do not assume a client error has none:
+  /// [FingerprintErrorCode.responseCannotBeParsed] can carry an id, because
+  /// the reply did arrive and only reading it failed. Use it to look the event
+  /// up in the [Server API](https://dev.fingerprint.com/reference/getevent).
   final String? eventId;
 
   /// The event id Android sends when the request never reached the server.
