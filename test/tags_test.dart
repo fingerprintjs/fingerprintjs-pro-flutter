@@ -139,6 +139,44 @@ void main() {
     test('accepts null, meaning no tags', () {
       expect(() => validateTags(null), returnsNormally);
     });
+
+    test('rejects a list that contains itself', () {
+      final cyclic = <Object?>['a'];
+      cyclic.add(cyclic);
+
+      expect(
+          () => validateTags(cyclic),
+          throwsA(isA<ArgumentError>().having((error) => error.message,
+              'message', contains('cannot contain themselves'))));
+    });
+
+    test('rejects a map that contains itself', () {
+      final cyclic = <String, Object?>{};
+      cyclic['self'] = cyclic;
+
+      expect(() => validateTags(cyclic), throwsA(isA<ArgumentError>()));
+    });
+
+    test('rejects a cycle that closes further down', () {
+      final outer = <String, Object?>{};
+      outer['items'] = [
+        {'back': outer}
+      ];
+
+      expect(
+          () => validateTags(outer),
+          throwsA(isA<ArgumentError>().having((error) => error.name, 'name',
+              "tags['items'][0]['back']")));
+    });
+
+    test('accepts the same collection twice when it is not a cycle', () {
+      // Shared structure is fine: it serializes to two copies, not a loop.
+      final shared = {'nested': true};
+
+      expect(() => validateTags({'left': shared, 'right': shared}),
+          returnsNormally);
+      expect(() => validateTags([shared, shared]), returnsNormally);
+    });
   });
 
   group('the shaping functions validate', () {

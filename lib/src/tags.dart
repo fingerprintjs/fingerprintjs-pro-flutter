@@ -51,10 +51,14 @@ Object? tagsForWeb(Object? tags) {
 /// Accepts [String], [num], [bool], null, [List] and [Map] with [String] keys,
 /// nested to any depth. Rejects anything else, because it cannot survive the
 /// trip to the server: an arbitrary Dart object has no JSON form, a non-string
-/// map key has no JSON key, and a non-finite double has no JSON literal.
-void validateTags(Object? tags) => _validate(tags, 'tags');
+/// map key has no JSON key, a non-finite double has no JSON literal, and a
+/// collection that contains itself has no end.
+void validateTags(Object? tags) => _validate(tags, 'tags', []);
 
-void _validate(Object? value, String path) {
+/// Validates [value], with [enclosing] holding the collections currently being
+/// walked, outermost first, so a collection that contains itself is rejected
+/// rather than followed until the stack runs out.
+void _validate(Object? value, String path, List<Object> enclosing) {
   if (value == null || value is String || value is bool) {
     return;
   }
@@ -69,22 +73,43 @@ void _validate(Object? value, String path) {
     return;
   }
   if (value is List<Object?>) {
+    _checkNotEnclosing(value, path, enclosing);
+    enclosing.add(value);
     for (var index = 0; index < value.length; index++) {
-      _validate(value[index], '$path[$index]');
+      _validate(value[index], '$path[$index]', enclosing);
     }
+    enclosing.removeLast();
     return;
   }
   if (value is Map<Object?, Object?>) {
+    _checkNotEnclosing(value, path, enclosing);
+    enclosing.add(value);
     for (final entry in value.entries) {
       final key = entry.key;
       if (key is! String) {
         throw ArgumentError.value(
             key, path, 'Tag map keys must be strings, got ${key.runtimeType}');
       }
-      _validate(entry.value, "$path['$key']");
+      _validate(entry.value, "$path['$key']", enclosing);
     }
+    enclosing.removeLast();
     return;
   }
   throw ArgumentError.value(value, path,
       'Tags must be JSON-compatible, got ${value.runtimeType}');
+}
+
+/// Throws an [ArgumentError] if [collection] is one of the collections already
+/// being walked, which means the tags contain a cycle.
+///
+/// Compared by identity, so the same collection appearing twice side by side is
+/// still fine. Only a collection reachable from itself is a cycle.
+void _checkNotEnclosing(
+    Object collection, String path, List<Object> enclosing) {
+  for (final walked in enclosing) {
+    if (identical(walked, collection)) {
+      throw ArgumentError.value(
+          collection, path, 'Tags cannot contain themselves');
+    }
+  }
 }
