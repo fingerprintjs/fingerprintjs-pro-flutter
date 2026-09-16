@@ -34,6 +34,10 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      # Tests marked `@TestOn('browser')` are skipped by the run above.
+      - name: Run web tests
+        run: flutter test --platform chrome
+
   build-examples-web:
     name: "Build examples for Web (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     needs: analyze-and-test

@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/method_channel_fingerprint.dart';
 
 void main() {
-  const MethodChannel channel =
-      MethodChannel(MethodChannelFingerprint.channelName);
+  const MethodChannel channel = MethodChannel(FpjsProPlugin.channelName);
   const testApiKey = 'test_api_key';
   const testVisitorId = 'test_visitor_id';
   const requestId = 'test_request_id';

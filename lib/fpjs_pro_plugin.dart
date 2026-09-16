@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fpjs_pro_plugin/fingerprint_platform_interface.dart';
+import 'package:fpjs_pro_plugin/method_channel_fingerprint.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 
@@ -9,6 +10,9 @@ const pluginVersion = '4.13.1';
 
 /// A plugin that accesses native FingerprintJS Pro libraries to get a device identifier
 class FpjsProPlugin {
+  /// The channel the native implementation listens on
+  static const channelName = MethodChannelFingerprint.channelName;
+
   static var _isInitialized = false;
 
   static FingerprintPlatform get _platform => FingerprintPlatform.instance;
