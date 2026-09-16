@@ -44,7 +44,7 @@ class FpjsProPlugin {
   /// Support [timeoutMs](https://docs.fingerprint.com/reference/get-function#timeout)
   /// Throws a [FingerprintProError] if identification request fails for any reason
   static Future<String?> getVisitorId(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) {
+      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
     _checkInitialized();
     return _platform.getVisitorId(
         tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);

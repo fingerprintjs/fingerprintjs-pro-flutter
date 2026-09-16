@@ -33,13 +33,15 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  // Passing the future, not a closure, asserts the error arrives through it
+  // instead of being thrown synchronously.
   group('Should throw if called before initialization', () {
     test('getVisitorId', () async {
-      expect(() => FpjsProPlugin.getVisitorId(), throwsException);
+      await expectLater(FpjsProPlugin.getVisitorId(), throwsException);
     });
 
     test('getVisitorData', () async {
-      expect(() => FpjsProPlugin.getVisitorData(), throwsException);
+      await expectLater(FpjsProPlugin.getVisitorData(), throwsException);
     });
   });
 
