@@ -20,9 +20,9 @@ only unrelated or speculative work, not known breakage such as
 | # | PR | Tickets | Status |
 |---|---|---|---|
 | 1 | Requirements and native agent deps ([#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147)) | [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401) | Merged |
-| 2 | Built-in Kotlin and AGP 9 compatibility | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117) | To do |
-| 3 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
-| 4a | Dart foundations: result, error matrix, tags | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319) | To do |
+| 2 | Built-in Kotlin and AGP 9 compatibility ([#149](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/149)) | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117) | Merged |
+| 3 | Platform interface ([#153](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/153)) | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | In review |
+| 4a | Dart foundations: result, error matrix, tags ([#156](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/156)) | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319) | In review |
 | 4b | Pigeon contract and native implementations | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
 | 4c | Public API swap and web v4 | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396) | To do |
 | 5 | Rename repo and package | [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400) | To do |
@@ -56,12 +56,20 @@ Native needed for the same Android SDK. This was the largest open risk.
 Two defects it leaves for PR 4:
 
 - **Android error codes are R8-unsafe.** They come from
-  `error.javaClass.simpleName`, and the v4 AAR's consumer `proguard.txt` keeps
-  only 11 of the ~37 `com.fingerprint.android.*` error classes, so codes are
-  wrong in minified release builds. 4b replaces the reflection with an
-  exhaustive `when (error) { is ApiKeyRequired -> ... }`, and derives
-  `rawCode` from the same mapping. Not a keep rule: it would leak into every
-  consumer build.
+  `error.javaClass.simpleName`, so a consumer's R8 can rename the classes and
+  the codes come out wrong in minified release builds. 4b replaces the
+  reflection with an exhaustive `when (error) { is ApiKeyRequired -> ... }`,
+  and derives `rawCode` from the same mapping. Not a keep rule: it would leak
+  into every consumer build.
+
+  The v4 SDK looks like it ships no consumer rules at all. Its
+  `build.gradle.kts` declares no `consumerProguardFiles`, and its three `.pro`
+  files are DexGuard config for obfuscating the SDK itself. The `-keep` on
+  `@ProguardKeep` covers all 30 error classes, but only for the SDK's own
+  DexGuard pass, and the annotation is `internal` and stripped from the
+  published sources. Unverified against the published AAR: the Maven host
+  `maven.fpregistry.io` is not reachable from a sandboxed agent. Check the real
+  artifact during 4b. Either way the fix is the same.
 - **The positional tuple lies.** Index 0 is named `requestId` and carries
   `eventId`; index 1 is named `confidenceScore` and carries `suspectScore`.
   4b removes it.
@@ -108,7 +116,7 @@ wired to stubs asserts only that codegen ran. Split by provable unit.
 
 | | Scope | Proves |
 |---|---|---|
-| **4a** | `FingerprintResult`, `FingerprintError`, `FingerprintErrorCode` and the error matrix, tag normalization and validation. Pure Dart, public API unchanged. | Error matrix, result mapping, tag handling and unknown codes pass unit tests with no native or web code. |
+| **4a** | `FingerprintResult`, `FingerprintError`, `FingerprintErrorCode` and the error matrix, tag normalization and validation. Pure Dart, public API unchanged. Landed in `lib/src`, unexported; 4c exports it. | Error matrix, result mapping, tag handling and unknown codes pass unit tests with no native or web code. |
 | **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, one client serves repeated calls, error codes survive a minified build. |
 | **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app. | No tuple or v3 web implementation remains; two-client independence, scalar and list tag wrapping, mocked web agent, and the example app on all three platforms. |
 
@@ -129,23 +137,28 @@ The public API never ships over a v3 web implementation. That binds at 4c.
   timeouts are `Duration`.
 - `final class FingerprintError implements Exception` with
   `FingerprintErrorCode code`, `String rawCode`, `String? message`,
-  `String? eventId`. Android sends the literal `"Unknown"` when a failure
-  never reached the server; that and an empty string normalize to `null`.
-  `implements` rather than `extends` avoids inheriting an implementation the
-  type does not need ([Dart core](https://dart.dev/libraries/dart-core#exceptions)).
+  `String? eventId`. Android sends the literal `"Unknown"` as the event id when
+  a failure never reached the server; that and an empty string normalize to
+  `null`, as does an empty message. `rawCode` is the exception and is never
+  rewritten, empty included: a platform that reported no code is worth telling
+  apart from one that reported `unknown_error`, and `code` is `unknown` for
+  both. `implements` rather than `extends` avoids inheriting an implementation
+  the type does not need ([Dart core](https://dart.dev/libraries/dart-core#exceptions)).
 - `tags` accepts any recursively JSON-compatible string, number, boolean,
   list, or map. Anything that is not a root map, scalars and root lists alike,
   is wrapped as `{'tag': value}` before Pigeon, because Android and iOS
   require a map; web forwards it unwrapped. This matches React Native. Reject
-  only what cannot cross the boundary: non-JSON Dart objects and non-string
-  keys.
+  what cannot reach the server: non-JSON Dart objects, non-string keys,
+  non-finite numbers, and a collection that contains itself. React Native
+  rejects none of these and silently drops what it cannot convert.
 - No client-side tag size cap. The
   [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a
   server-side product limit reported as `payload_too_large`. Document it
   instead.
-- Also fix: `ipAddress` and `osName` accept two key spellings
-  (`json['ip'] ?? json['ipAddress']`); `sealedResult` is `String?` but both
-  native platforms send an empty string, normalized to `null`.
+- `sealedResult` is `String?` but both native platforms send an empty string,
+  normalized to `null`.
+- Nothing to fix for the `ipAddress` and `osName` two key spellings. Those
+  fields only exist on the extended response types, which 4c deletes.
 
 Deleted in 4c with the swap: the positional tuple, `FingerprintJSProResponse`,
 the extended response types, `ConfidenceScore`, `IpLocation`, `StSeenAt`,
@@ -153,12 +166,42 @@ the extended response types, `ConfidenceScore`, `IpLocation`, `StSeenAt`,
 
 ### Error matrix
 
-Before generating bindings, add and review a matrix of every known Android,
-iOS, and web raw code: `FingerprintErrorCode`, message behavior, and whether
-it carries `eventId`. Native v4 sources are authoritative. Unmapped codes
-become `unknown`. Include only errors a client SDK can emit, excluding Server
-API-only errors,
-[as React Native does](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/commit/1fcc272c943e362a12fe1c0f21429a5f47c22e81).
+Done in 4a. `lib/src/fingerprint_error.dart` is the matrix and is
+authoritative; do not re-derive it from the v3 list.
+
+Codes are the API's snake_case error keys, which is what the web agent
+reports, what the Android SDK keys its error classes off, and what
+[React Native settled on](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/commit/1fcc272c943e362a12fe1c0f21429a5f47c22e81).
+One code covers all three platforms. Unmapped codes become `unknown` and
+`rawCode` keeps the platform's string.
+
+Members are grouped into server and client errors. That grouping is the
+contract: it tells 4b whether to forward an event id. Two entries break their
+group, and both carry a comment saying why:
+
+- `response_cannot_be_parsed` can carry an id. The reply arrived, only reading
+  it failed.
+- `sandboxed_iframe` cannot, despite sitting in the agent's `ApiErrorCode`
+  type union. The agent raises it locally.
+
+4b must key the Kotlin off the server condition, not the class name. Two
+Android classes are named for something else, and React Native gets both
+wrong, giving one condition two codes depending on platform:
+
+- `RequestTimeout` comes from the key `request_read_timeout`.
+- `RequestNotFound` comes from `event_not_found`.
+
+The enum is closed, so it lists every code a platform can emit, including six
+that React Native's own `ErrorCode` union omits while its bridges can still
+emit them: `secret_api_key_required`, `secret_api_key_not_found`,
+`subscription_not_found`, `request_not_found`, `state_not_ready`,
+`ruleset_not_found`. Its union is an open string type and can afford the gap;
+a closed enum cannot, or `unknown` would mean both "new" and "we skipped it".
+
+These v3 codes are gone in v4 and are not in the matrix: `ApiKeyExpired`,
+`OriginNotAvailable`, `PackageNotAuthorized`, `HeaderRestricted`,
+`NotAvailableForCrawlBots`, `NotAvailableWithoutUA`, `UnsupportedVersion`,
+`IntegrationFailure`.
 
 ### Native client lifecycle
 
@@ -180,7 +223,35 @@ for the app's lifetime for location precision, so a per-call client would pay
 its artifact is obfuscated. 4b asserts reuse rather than assuming it, and the
 Android warm-state question goes to the native SDK team.
 
+### Native fixes for 4b
+
+Current defects, found in the v4 sources. Not new work:
+
+- **iOS messages are the generic bridged text.** `FPJSError+Flutter.swift`
+  reads `localizedDescription`, but v4's `FPError` implements
+  `CustomStringConvertible` and not `LocalizedError`, so the seven
+  non-`apiError` cases surface `The operation couldn't be completed.
+  (Fingerprint.FPError error N.)`. Read `description` instead.
+- **Both platforms drop the event id.** iOS never reads `APIError.eventId`,
+  non-optional in v4, and Android never reads `Error.eventId`.
+  `FingerprintError.eventId` stays null until 4b forwards them. Only
+  `FPError.apiError` carries one on iOS.
+- **Decide what an unrecognized iOS server code maps to.** `APIError.Code` is
+  decoded from the server, so `errorDetails` or its `code` can be nil. React
+  Native returns `failed`. Prefer `unknown_error`: `failed` is itself a
+  specific server code. Note also that `APIError.Code` has no explicit raw
+  values, so `rawValue` is the camelCase case name and a future code leaks as
+  e.g. `tooManyRequests`. The matrix maps only snake_case, so such a code
+  lands on `unknown`, which is correct.
+
 ### Web (4c)
+
+The v4 agent is a different npm package. `@fingerprintjs/fingerprintjs-pro`
+has no v4 at all, its latest is 3.12.15, and `web/index.js` pins 3.12.12. v4
+is [`@fingerprint/agent`](https://www.npmjs.com/package/@fingerprint/agent),
+which is where the start/get API, the cache options and the snake_case error
+codes come from. So this is a package swap, not a version bump, and the
+matrix's web column already assumes it.
 
 Rewrite `FingerprintWeb` for the v4 start/get API. Add `urlHashing`,
 `storageKeyPrefix`, and an optional `cache` configuration: required storage
@@ -205,6 +276,20 @@ so it is an acceptance criterion for the rewrite. PR 5 renames its import,
 PR 6 documents it.
 
 CI also runs Pigeon and fails if it changes tracked generated files.
+
+### Run the browser tests, even for pure Dart
+
+`flutter test` and `flutter test --platform chrome` disagree on pure Dart.
+Code with no native or web dependency can still pass on one and fail on the
+other, so run both.
+
+Known case: on the web every number is a double and `double.infinity is int`
+is true, because the check compiles to a floor comparison. An `int` branch
+ahead of a `double` branch then swallows infinity. Prefer one `num` branch.
+Same family as
+[#137](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/137),
+which is why `invalid_runtime_check_with_js_interop_types` is an error in
+`analysis_options.yaml`. The analyzer does not catch this one.
 
 ## PR 5. Rename repo and package
 
