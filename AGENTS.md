@@ -1,0 +1,21 @@
+- Values
+  - Eradicate accidental complexity
+  - After reaching a milestone, ask yourself: could I radically simplify this if I was starting from scratch?
+- Structure
+  - Avoid thin wrapper functions and helpers, minimize layers of indirection
+- Tests
+  - Test APIs and contracts like a real consumer uses them
+  - DO NOT test internal implementation details
+  - Minimize use of mocks
+- Comments & Docs
+  - Keep short, use simple english
+  - Write like a terse note to a self or teammate, no m-dashed essays
+  - Prefer bullet points over long `;` chains
+  - Avoid ambiguous jargon (seam, boundary, gate, envelope, wire shapes, ...), be plain, precise, specific
+  - No provenance needed: docs must stand alone, make sense later without PR/conversation context
+  - Module files begin with short overview comment explaining purpose and links to relevant docs
+  - Any non-obvious design decision, requirement, or claim gets a short explanatory note + exact docs link
+    - close to affected code + commit message body (always)
+    - in PR description (if significant)
+- Changesets
+  - Brief, only for changes affecting SDK consumers (public API, behavior)
