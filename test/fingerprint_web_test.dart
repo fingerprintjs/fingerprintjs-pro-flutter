@@ -27,8 +27,8 @@ void main() {
       expect(result.sealedResult, 'test_sealed_result');
     });
 
-    // The native platforms send an empty string, so web must not surface the
-    // agent's missing value as null.
+    // Flutter reports a missing sealed result as an empty string on every
+    // platform. PR 4c switches that to null, as React Native does.
     test('normalizes a missing sealed result', () {
       final result =
           FingerprintJSProResponseWeb.fromJsObject(_identificationResult());
