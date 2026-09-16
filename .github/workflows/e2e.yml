@@ -1,0 +1,117 @@
+name: E2E smoke test
+
+on:
+  pull_request:
+    paths:
+      - lib/**
+      - web/**
+      - android/**
+      - ios/**
+      - example/**
+      - pubspec.yaml
+      - .github/workflows/e2e.yml
+      - .github/scripts/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: ${{ matrix.platform }}
+    # Fork pull requests cannot access the live-service key.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: web
+            os: ubuntu-latest
+            flutter-version: 3.44.0
+          - platform: android
+            os: ubuntu-latest
+            flutter-version: 3.44.0
+          - platform: ios
+            os: macos-15
+            flutter-version: ""
+    defaults:
+      run:
+        working-directory: fpjs_pro_plugin
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      REGION: ${{ secrets.REGION }}
+      ENDPOINT: ${{ secrets.ENDPOINT }}
+      SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
+      DISABLE_LOCATION_COLLECTION: ${{ matrix.platform != 'web' }}
+      MAESTRO_CLI_NO_ANALYTICS: 1
+      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: true
+    steps:
+      # Flutter SwiftPM identifies path dependencies by directory name.
+      # https://github.com/flutter/flutter/issues/186881
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          path: fpjs_pro_plugin
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+          channel: stable
+          cache: true
+      - name: Install Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Maestro 2.10.0
+        run: |
+          curl -fsSL https://github.com/mobile-dev-inc/maestro/releases/download/cli-2.10.0/maestro.zip -o "$RUNNER_TEMP/maestro.zip"
+          unzip -q "$RUNNER_TEMP/maestro.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/maestro/bin" >> "$GITHUB_PATH"
+      - name: Write .env.local
+        run: ./.github/scripts/write_e2e_env.sh
+      - name: Start iOS simulator
+        if: matrix.platform == 'ios'
+        id: simulator
+        uses: futureware-tech/simulator-action@e89aa8f93d3aec35083ff49d2854d07f7186f7f5 # v5
+        with:
+          model: iPhone 16
+          wait_for_boot: true
+      - name: Enable KVM
+        if: matrix.platform == 'android'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run Android smoke test
+        if: matrix.platform == 'android'
+        timeout-minutes: 20
+        uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          working-directory: fpjs_pro_plugin
+          script: ./.github/scripts/run_smoke_test.sh android
+      - name: Run iOS smoke test
+        if: matrix.platform == 'ios'
+        timeout-minutes: 10
+        env:
+          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
+        run: ./.github/scripts/run_smoke_test.sh ios "$SIMULATOR_UDID"
+      - name: Run web smoke test
+        if: matrix.platform == 'web'
+        timeout-minutes: 10
+        run: ./.github/scripts/run_smoke_test.sh web
+      - name: Upload smoke-test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-${{ matrix.platform }}
+          path: fpjs_pro_plugin/.local/maestro/${{ matrix.platform }}
+          include-hidden-files: true

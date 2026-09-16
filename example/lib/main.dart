@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/region.dart';
@@ -14,12 +15,24 @@ const tags = {
   'b': 0,
   'c': {
     'foo': true,
-    'bar': [1, 2, 3]
+    'bar': [1, 2, 3],
   },
-  'd': false
+  'd': false,
 };
 
-Future main() async {
+const runChecksButtonKey = ValueKey('run-checks-button');
+const identifyButtonKey = ValueKey('identify-button');
+const visitorDataButtonKey = ValueKey('visitor-data-button');
+
+enum InitializationState { initializing, ready, error }
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    // Flutter web needs its accessibility DOM for external UI automation.
+    // https://docs.maestro.dev/get-started/supported-platform/flutter
+    SemanticsBinding.instance.ensureSemantics();
+  }
   // Explicitly define which files to load to avoid
   // console warnings about not finding other possible .env files
   await dotenv.load(fileNames: ['.env', '.env.local']);
@@ -36,11 +49,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _deviceId = 'Unknown';
   String _checksResult = 'Not run';
+  InitializationState _initializationState = InitializationState.initializing;
   String? _initializationError;
   final String? _apiKey = dotenv.env['API_KEY'];
   final String? _region = dotenv.env['REGION'];
   final String? _endpoint = dotenv.env['ENDPOINT'];
   final String? _scriptUrlPattern = dotenv.env['SCRIPT_URL_PATTERN'];
+  final bool _disableLocationCollection =
+      dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 
   @override
   void initState() {
@@ -65,23 +81,30 @@ class _MyAppState extends State<MyApp> {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      await FpjsProPlugin.initFpjs(_apiKey,
-          endpoint: _endpoint,
-          scriptUrlPattern: _scriptUrlPattern,
-          region: _parseRegion(_region),
-          allowUseOfLocationData: true,
-          locationTimeoutMillisAndroid: 6000,
-          extendedResponseFormat: false);
-    } catch (error) {
-      // print('Failed to initialize Fingerprint agent: $error');
+      await FpjsProPlugin.initFpjs(
+        _apiKey,
+        endpoint: _endpoint,
+        scriptUrlPattern: _scriptUrlPattern,
+        region: _parseRegion(_region),
+        allowUseOfLocationData: !_disableLocationCollection,
+        locationTimeoutMillisAndroid: 6000,
+        extendedResponseFormat: false,
+      );
+      if (!mounted) return;
       setState(() {
+        _initializationState = InitializationState.ready;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _initializationState = InitializationState.error;
         _initializationError = 'Failed to initialize Fingerprint agent: $error';
       });
     }
   }
 
   Future<void> requestLocationPermission() async {
-    if (kIsWeb) {
+    if (kIsWeb || _disableLocationCollection) {
       return;
     }
     LocationPermission permission = await Geolocator.checkPermission();
@@ -104,7 +127,8 @@ class _MyAppState extends State<MyApp> {
       // Permissions are denied forever, handle appropriately.
       if (kDebugMode) {
         print(
-            'Location permissions are permanently denied, we cannot request permissions.');
+          'Location permissions are permanently denied, we cannot request permissions.',
+        );
       }
       return;
     }
@@ -117,8 +141,11 @@ class _MyAppState extends State<MyApp> {
     await requestLocationPermission();
     String deviceId;
     try {
-      deviceId = await FpjsProPlugin.getVisitorId(
-              tags: tags, linkedId: 'some linkedId') ??
+      deviceId =
+          await FpjsProPlugin.getVisitorId(
+            tags: tags,
+            linkedId: 'some linkedId',
+          ) ??
           'Unknown';
     } catch (error) {
       deviceId = 'Failed to get device id: $error';
@@ -140,12 +167,17 @@ class _MyAppState extends State<MyApp> {
     try {
       const encoder = JsonEncoder.withIndent('    ');
       final deviceData = await FpjsProPlugin.getVisitorData(
-          tags: tags, linkedId: 'some linkedId');
+        tags: tags,
+        linkedId: 'some linkedId',
+      );
       final jsonDeviceData = deviceData.toJson();
       if (deviceData.sealedResult != null &&
           deviceData.sealedResult!.isNotEmpty) {
-        jsonDeviceData["sealedResult"] = deviceData.sealedResult
-            ?.replaceRange(10, deviceData.sealedResult?.length, '...');
+        jsonDeviceData["sealedResult"] = deviceData.sealedResult?.replaceRange(
+          10,
+          deviceData.sealedResult?.length,
+          '...',
+        );
       }
       identificationInfo = encoder.convert(jsonDeviceData);
     } on FingerprintProError catch (error) {
@@ -170,102 +202,143 @@ class _MyAppState extends State<MyApp> {
         () async =>
             FpjsProPlugin.getVisitorId(linkedId: 'checkIdWithTag', tags: tags),
         () async => FpjsProPlugin.getVisitorData(
-            linkedId: 'checkDataWithTag', tags: tags),
+          linkedId: 'checkDataWithTag',
+          tags: tags,
+        ),
         () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
         () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
       ];
 
       var timeoutChecks = [
         () async => FpjsProPlugin.getVisitorId(timeoutMs: 5),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5)
+        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5),
       ];
 
-      for (var check in checks) {
-        await check();
-        setState(() {
-          _checksResult += '.';
-        });
-      }
+      // The timeout checks cancel a request mid-flight. On iOS the call right after
+      // such a cancellation fails with "NetworkError: The network connection was
+      // lost", so run them first and leave the plain checks last.
       for (var check in timeoutChecks) {
         try {
           await check();
           throw Exception('Expected timeout error');
         } on FingerprintProError {
+          if (!mounted) return;
           setState(() {
             _checksResult += '!';
           });
         }
       }
+      for (var check in checks) {
+        await check();
+        if (!mounted) return;
+        setState(() {
+          _checksResult += '.';
+        });
+      }
+      if (!mounted) return;
       setState(() {
         _checksResult = 'Success!';
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _checksResult = 'Failed: $e';
       });
     }
   }
 
+  String get _initializationStatus {
+    switch (_initializationState) {
+      case InitializationState.initializing:
+        return 'Initializing Fingerprint agent...';
+      case InitializationState.ready:
+        return 'Fingerprint agent ready';
+      case InitializationState.error:
+        return _initializationError!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isReady = _initializationState == InitializationState.ready;
+
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('FPJS Pro Flutter plugin'),
-        ),
+        appBar: AppBar(title: const Text('FPJS Pro Flutter plugin')),
         body: Center(
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          if (_initializationError != null) Text(_initializationError!),
-          ElevatedButton(
-              onPressed: () => _runChecks(), child: const Text('Run tests!')),
-          Text('Checks result: $_checksResult\n'),
-          ElevatedButton(
-              onPressed: () => _getDeviceId(), child: const Text('Identify!')),
-          Text('The device id is: $_deviceId\n'),
-          _ExtendedResultDialog(handleIdentificate: _getDeviceData)
-        ])),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_initializationStatus),
+              ElevatedButton(
+                key: runChecksButtonKey,
+                onPressed: isReady ? _runChecks : null,
+                child: const Text('Run tests!'),
+              ),
+              const Text('Checks result:'),
+              Text(_checksResult),
+              ElevatedButton(
+                key: identifyButtonKey,
+                onPressed: isReady ? _getDeviceId : null,
+                child: const Text('Identify!'),
+              ),
+              const Text('The device id is:'),
+              Text(_deviceId),
+              _VisitorDataDialog(
+                enabled: isReady,
+                loadVisitorData: _getDeviceData,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _ExtendedResultDialog extends StatelessWidget {
-  const _ExtendedResultDialog({required this.handleIdentificate});
+class _VisitorDataDialog extends StatelessWidget {
+  const _VisitorDataDialog({
+    required this.enabled,
+    required this.loadVisitorData,
+  });
 
-  final Future<String> Function() handleIdentificate;
+  final bool enabled;
+  final Future<String> Function() loadVisitorData;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () async {
-        final resultContext = context;
-        String identificationInfo;
-        try {
-          identificationInfo = await handleIdentificate();
-        } catch (e) {
-          identificationInfo = 'Identification error: $e';
-        }
-        if (resultContext.mounted) {
-          showDialog<String>(
-            context: resultContext,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('Extended result'),
-              content: FittedBox(
-                fit: BoxFit.contain,
-                child: Text(identificationInfo),
-              ),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, 'OK'),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
-      },
-      child: const Text('Identify with extended result!'),
+      key: visitorDataButtonKey,
+      onPressed: enabled
+          ? () async {
+              final resultContext = context;
+              String identificationInfo;
+              try {
+                identificationInfo = await loadVisitorData();
+              } catch (e) {
+                identificationInfo = 'Identification error: $e';
+              }
+              if (resultContext.mounted) {
+                showDialog<String>(
+                  context: resultContext,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: const Text('Visitor data'),
+                    content: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(identificationInfo),
+                    ),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, 'OK'),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            }
+          : null,
+      child: const Text('Get visitor data!'),
     );
   }
 }

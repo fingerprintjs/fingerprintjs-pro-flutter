@@ -1,0 +1,36 @@
+# Shared UI flow for mobile and web. Text selectors also work with Flutter's web DOM.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: '(?s)Fingerprint agent ready|Failed to initialize.*'
+    timeout: 90000
+- assertVisible: 'Fingerprint agent ready'
+- tapOn: 'Run tests!'
+- extendedWaitUntil:
+    visible: '(?s)Success!|Failed:.*'
+    timeout: 90000
+- assertVisible: 'Success!'
+- tapOn: 'Identify!'
+- extendedWaitUntil:
+    visible:
+      text: '(?s)(?!Unknown$).+'
+      below: 'The device id is:'
+      above: 'Get visitor data!'
+    timeout: 90000
+- copyTextFrom:
+    text: '(?s)(?!Unknown$).+'
+    below: 'The device id is:'
+    above: 'Get visitor data!'
+- evalScript: ${output.visitorId = maestro.copiedText}
+- assertTrue:
+    condition: ${output.visitorId.length > 0 && !/^Failed/.test(output.visitorId)}
+    label: 'Identification returns a visitor ID'
+- tapOn: 'Get visitor data!'
+- extendedWaitUntil:
+    visible: 'Visitor data'
+    timeout: 90000
+- copyTextFrom:
+    text: '(?s)\{.*\}'
+- assertTrue:
+    condition: ${JSON.parse(maestro.copiedText).visitorId === output.visitorId}
+    label: 'Visitor data matches the identified device'

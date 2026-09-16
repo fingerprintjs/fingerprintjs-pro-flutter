@@ -1,0 +1,10 @@
+# Launch the browser and run the shared smoke checks.
+url: ${URL}
+---
+- launchApp
+- runFlow:
+    file: shared/smoke.yaml
+    env:
+      # Maestro uses the URL as the web application identifier.
+      # https://docs.maestro.dev/get-started/supported-platform/web-browser
+      APP_ID: ${URL}
