@@ -259,13 +259,29 @@ void main() {
       final error = FingerprintError.unknown('the agent rejected with a string');
 
       expect(error.code, FingerprintErrorCode.unknown);
-      expect(error.rawCode, 'unknown_error');
+      // Empty rather than `unknown_error`, which no platform said.
+      expect(error.rawCode, '');
       expect(error.message, 'the agent rejected with a string');
       expect(error.eventId, isNull);
     });
 
     test('FingerprintError.unknown takes no message at all', () {
       expect(FingerprintError.unknown().message, isNull);
+    });
+
+    test('a codeless failure is distinguishable from a reported unknown_error',
+        () {
+      final codeless = FingerprintError.unknown();
+      final reported = FingerprintError(rawCode: 'unknown_error');
+
+      expect(codeless.code, reported.code);
+      expect(codeless.rawCode, isNot(reported.rawCode));
+    });
+
+    test('says so in toString when no code was reported', () {
+      expect(FingerprintError.unknown('the agent rejected with a string')
+          .toString(),
+          'FingerprintError(no code, the agent rejected with a string)');
     });
   });
 }

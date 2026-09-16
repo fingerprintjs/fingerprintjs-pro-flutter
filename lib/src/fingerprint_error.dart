@@ -389,13 +389,18 @@ final class FingerprintError implements Exception {
   ///
   /// The web implementation needs this: the agent can reject with a value that
   /// is not one of its own errors.
+  ///
+  /// [rawCode] is left empty rather than filled in with `unknown_error`, which
+  /// no platform said. [code] is [FingerprintErrorCode.unknown] either way.
   FingerprintError.unknown([String? message])
-      : this(rawCode: FingerprintErrorCode.unknown.rawCode, message: message);
+      : this(rawCode: '', message: message);
 
   @override
   String toString() {
     final parts = [
-      rawCode,
+      // An empty raw code is what a platform that reported none looks like.
+      // Saying so beats an empty slot in the middle of the line.
+      rawCode.isEmpty ? 'no code' : rawCode,
       if (message != null) message,
       if (eventId != null) 'eventId: $eventId',
     ];
