@@ -20,70 +20,34 @@ For running tests just call `flutter test`.
 
 ### Integration smoke test
 
-The smoke test follows the manual example flow: it waits for the Fingerprint
-agent to be ready, runs the built-in checks, identifies a visitor, and verifies
-that visitor data is available.
+The Maestro smoke test builds the normal example app, waits for initialization,
+runs all built-in checks, identifies a visitor, and verifies that the visitor-data
+JSON contains the same `visitorId`. Mobile and web use the same flow.
 
-First create `example/.env.local` as described in the
-[example README](example/README.md), and start the target emulator or simulator
-when testing a native platform. Then from the `example` folder run one of:
+Install [Maestro](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli)
+and Java 17 or newer. CI pins Maestro 2.10.0. Create `example/.env.local` as
+explained in the [example README](example/README.md). For native tests, set
+`DISABLE_LOCATION_COLLECTION=true` there to avoid permission dialogs.
 
-```bash
-# replace the device with the ID from `flutter devices`
-flutter drive \
-  --driver=test_driver/integration_test.dart \
-  --target=integration_test/smoke_test.dart \
-  -d emulator-5554
-```
-
-`flutter test integration_test/smoke_test.dart` also works and is quicker.
-
-On an iOS simulator both commands intermittently miss the app's VM service URL
-in the simulator log and wait forever, with no output after "Xcode build done"
-([flutter#181771](https://github.com/flutter/flutter/issues/181771)). Retrying
-usually works locally. CI sidesteps the race by building the app, launching it
-on a fixed port and pointing `flutter drive --use-existing-app` at it; see
-`.github/scripts/drive_ios_simulator.sh` if you want the same locally:
+Start the native emulator or simulator first. From the repository root, run:
 
 ```bash
-flutter build ios --simulator --target=integration_test/smoke_test.dart
-../.github/scripts/drive_ios_simulator.sh <simulator udid>
+./.github/scripts/run_smoke_test.sh web
+./.github/scripts/run_smoke_test.sh android emulator-5554
+./.github/scripts/run_smoke_test.sh ios <simulator-udid>
 ```
 
-When accessibility turns on while a test is running, the framework's end-of-test
-check reports a `SemanticsHandle` that the test never took
-([flutter#153850](https://github.com/flutter/flutter/issues/153850)). CI
-simulators do this in roughly a third of runs, so
-`example/test_driver/integration_test.dart` treats that one assertion, and only
-it, as a pass.
+Android requires `adb` on `PATH`. Get device IDs with `flutter devices`. The iOS
+checkout directory must be named `fpjs_pro_plugin` as described above.
 
-Chrome also requires a matching
-[ChromeDriver](https://developer.chrome.com/docs/chromedriver) on `PATH`. Start
-it in one terminal:
+The web command serves the built app on port 3000 and runs headless Chromium.
+Flutter web enables its accessibility DOM so Maestro can read the app's text.
+The script stops its server when the test ends.
+[Maestro's web support is beta](https://docs.maestro.dev/get-started/supported-platform/web-browser).
 
-```bash
-chromedriver --port=4444
-```
-
-Then run the web smoke test in another:
-
-```bash
-flutter drive \
-  --driver=test_driver/integration_test.dart \
-  --target=integration_test/smoke_test.dart \
-  --web-port=3000 \
-  -d chrome
-```
-
-Native automation should also add the following setting to `.env.local`:
-
-```bash
-DISABLE_LOCATION_COLLECTION=true
-```
-
-This prevents Android and iOS permission dialogs from blocking unattended
-tests. Leave it absent or set it to `false` for normal manual runs; location
-collection remains enabled by default.
+JUnit reports and failure screenshots, hierarchies, and logs are written to
+`.local/maestro/<platform>`. CI uploads these as `smoke-<platform>` artifacts.
+Test failures fail the job without retries or exception filtering.
 
 ### GitHub Actions secrets
 
@@ -106,4 +70,4 @@ The `main` branch is locked for the push action. For proposing changes, use the 
 We use [changesets](https://github.com/changesets/changesets) for handling release notes. If there are relevant changes,
 please add a changeset via `pnpm exec changeset` (run `pnpm install` first).
 
-After the release is created, [publish.yaml](.github%2Fworkflows%2Fpublish.yaml) workflow is triggered that publishes the package to pub.dev 
+After the release is created, [publish.yaml](.github%2Fworkflows%2Fpublish.yaml) workflow is triggered that publishes the package to pub.dev

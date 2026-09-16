@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/region.dart';
@@ -19,18 +20,19 @@ const tags = {
   'd': false,
 };
 
-const initializationStatusKey = ValueKey('initialization-status');
 const runChecksButtonKey = ValueKey('run-checks-button');
-const checksResultKey = ValueKey('checks-result');
 const identifyButtonKey = ValueKey('identify-button');
-const deviceIdResultKey = ValueKey('device-id-result');
 const visitorDataButtonKey = ValueKey('visitor-data-button');
-const visitorDataDialogKey = ValueKey('visitor-data-dialog');
-const visitorDataContentKey = ValueKey('visitor-data-content');
 
 enum InitializationState { initializing, ready, error }
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    // Flutter web needs its accessibility DOM for external UI automation.
+    // https://docs.maestro.dev/get-started/supported-platform/flutter
+    SemanticsBinding.instance.ensureSemantics();
+  }
   // Explicitly define which files to load to avoid
   // console warnings about not finding other possible .env files
   await dotenv.load(fileNames: ['.env', '.env.local']);
@@ -267,27 +269,21 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_initializationStatus, key: initializationStatusKey),
+              Text(_initializationStatus),
               ElevatedButton(
                 key: runChecksButtonKey,
                 onPressed: isReady ? _runChecks : null,
                 child: const Text('Run tests!'),
               ),
               const Text('Checks result:'),
-              Semantics(
-                identifier: 'checks-result',
-                child: Text(_checksResult, key: checksResultKey),
-              ),
+              Text(_checksResult),
               ElevatedButton(
                 key: identifyButtonKey,
                 onPressed: isReady ? _getDeviceId : null,
                 child: const Text('Identify!'),
               ),
               const Text('The device id is:'),
-              Semantics(
-                identifier: 'device-id-result',
-                child: Text(_deviceId, key: deviceIdResultKey),
-              ),
+              Text(_deviceId),
               _VisitorDataDialog(
                 enabled: isReady,
                 loadVisitorData: _getDeviceData,
@@ -326,17 +322,10 @@ class _VisitorDataDialog extends StatelessWidget {
                 showDialog<String>(
                   context: resultContext,
                   builder: (BuildContext context) => AlertDialog(
-                    key: visitorDataDialogKey,
                     title: const Text('Visitor data'),
                     content: FittedBox(
                       fit: BoxFit.contain,
-                      child: Semantics(
-                        identifier: 'visitor-data-content',
-                        child: Text(
-                          identificationInfo,
-                          key: visitorDataContentKey,
-                        ),
-                      ),
+                      child: Text(identificationInfo),
                     ),
                     actions: <Widget>[
                       ElevatedButton(
