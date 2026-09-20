@@ -42,7 +42,7 @@ abstract class FingerprintPlatform extends PlatformInterface {
   static FingerprintPlatform get instance => _instance;
 
   static set instance(FingerprintPlatform instance) {
-    PlatformInterface.verifyToken(instance, _token);
+    PlatformInterface.verify(instance, _token);
     _instance = instance;
   }
 
