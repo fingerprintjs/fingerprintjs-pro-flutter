@@ -3,7 +3,6 @@ import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/method_channel_fingerprint.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class FakeFingerprint extends FingerprintPlatform
@@ -46,11 +45,6 @@ void main() {
   setUp(() {
     fake = FakeFingerprint();
     FingerprintPlatform.instance = fake;
-  });
-
-  test('uses the method channel implementation by default', () {
-    FingerprintPlatform.instance = MethodChannelFingerprint();
-    expect(FingerprintPlatform.instance, isA<MethodChannelFingerprint>());
   });
 
   test('initFpjs passes the configuration to the platform', () async {
