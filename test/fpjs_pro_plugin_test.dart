@@ -44,10 +44,13 @@ void main() {
   });
 
   group('getVisitorId', () {
+    MethodCall? capturedCall;
+
     setUp(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorId') {
+          capturedCall = methodCall;
           return testVisitorId;
         }
         return null;
@@ -59,37 +62,30 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('should return visitor id when called with timeout', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorId(timeoutMs: 1000);
-      expect(result, testVisitorId);
-    });
+    test('forwards arguments and returns the visitor id', () async {
+      const tags = {'sessionId': 1};
 
-    test('should return visitor id when called without tags', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorId();
-      expect(result, testVisitorId);
-    });
-
-    test('should return visitor id when called with tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorId(
-          tags: {'sessionId': DateTime.now().millisecondsSinceEpoch});
-      expect(result, testVisitorId);
-    });
+          tags: tags, linkedId: linkedId, timeoutMs: 1000);
 
-    test('should return visitor id when called with linkedId', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorId(linkedId: linkedId);
       expect(result, testVisitorId);
+      expect(capturedCall?.arguments, {
+        'linkedId': linkedId,
+        'tags': tags,
+        'timeoutMs': 1000,
+      });
     });
   });
 
   group('getVisitorData', () {
+    MethodCall? capturedCall;
+
     setUp(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         if (methodCall.method == 'getVisitorData') {
+          capturedCall = methodCall;
           return [requestId, confidence, extendedResultAsJsonString, null];
         }
         return null;
@@ -101,29 +97,19 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('should return visitor data when called with timeout', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorData(timeoutMs: 1000);
-      expect(result.toJson(), getVisitorDataResponse);
-    });
+    test('forwards arguments and decodes the visitor data', () async {
+      const tags = {'sessionId': 1};
 
-    test('should return visitor data when called without tags', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorData();
-      expect(result.toJson(), getVisitorDataResponse);
-    });
-
-    test('should return visitor data when called with tags', () async {
       await FpjsProPlugin.initFpjs(testApiKey);
       final result = await FpjsProPlugin.getVisitorData(
-          tags: {'sessionId': DateTime.now().millisecondsSinceEpoch});
-      expect(result.toJson(), getVisitorDataResponse);
-    });
+          tags: tags, linkedId: linkedId, timeoutMs: 1000);
 
-    test('should return visitor id when called with linkedId', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorData(linkedId: linkedId);
       expect(result.toJson(), getVisitorDataResponse);
+      expect(capturedCall?.arguments, {
+        'linkedId': linkedId,
+        'tags': tags,
+        'timeoutMs': 1000,
+      });
     });
   });
 
