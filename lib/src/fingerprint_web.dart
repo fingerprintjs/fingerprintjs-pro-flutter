@@ -42,7 +42,9 @@ class FingerprintWeb extends FingerprintPlatform {
           [config.scriptUrlPattern!, ...?config.scriptUrlPatternFallbacks]);
     }
     try {
-      _agent = FingerprintJS.load(options).toDart;
+      final agent = FingerprintJS.load(options).toDart;
+      await agent;
+      _agent = agent;
       _isExtendedResult = config.extendedResponseFormat;
     } catch (e) {
       throw _wrapJsAgentError(e);

@@ -1,0 +1,11 @@
+# Launch the installed example app and run the shared smoke checks.
+appId: ${APP_ID}
+---
+- launchApp
+# The CI launcher can show an ANR dialog over the app. Dismiss only Quickstep.
+- runFlow:
+    when:
+      visible: "Quickstep isn't responding"
+    commands:
+      - tapOn: 'Close app'
+- runFlow: shared/smoke.yaml
