@@ -18,6 +18,7 @@
   - Module files begin with short overview comment explaining purpose and links to relevant docs
   - Any non-obvious design decision, requirement, or claim gets a short explanatory note + exact docs link
     - close to affected code + commit message body (always)
+    - only use public sources, never internal Github/Notion/Slack links
     - in PR description (if significant)
 - Changesets
   - Brief, only for changes affecting SDK consumers (public API, behavior)
