@@ -45,7 +45,10 @@ internal class FingerprintClientCache(
       configuration.allowUseOfLocationData,
       configuration.locationTimeoutMillis,
     )
-    return clients.getOrPut(key) {
+    // Kotlin ConcurrentHashMap.getOrPut is not atomic: concurrent first hits can
+    // each create a Fingerprint client. computeIfAbsent runs the factory once.
+    // https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/get-or-put.html
+    return clients.computeIfAbsent(key) {
       createFingerprint(applicationContext, configuration)
     }
   }
