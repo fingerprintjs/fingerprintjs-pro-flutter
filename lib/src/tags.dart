@@ -1,59 +1,27 @@
-/// Validation and platform-specific shaping of the `tags` argument.
+/// Validation of the `tags` argument.
 ///
-/// A tag can be any recursively JSON-compatible value. The platforms disagree
-/// on the shape they accept: Android and iOS require a map, the web agent takes
-/// any JSON value. So a non-map tag is wrapped as `{'tag': value}` for native
-/// and forwarded as is to the web agent. This matches the React Native SDK.
+/// Tags use the same string-keyed map on every platform. Android and iOS
+/// require that shape, and the web agent accepts it. See the Android v4
+/// [interface](https://github.com/fingerprintjs/fingerprintjs-pro-android-private/blob/f6b574089e8dfb98747a0901bfe506b67b49c6a2/fpjs-pro/src/main/java/com/fingerprint/android/Fingerprint.kt#L63-L89)
+/// and iOS v4 [metadata](https://github.com/fingerprintjs/fingerprintjs-pro-ios-private/blob/0dae3509bc38080d2c57ad295a3cbb6962b21273/Sources/FingerprintPro/Library/Metadata.swift#L1-L25).
 ///
 /// There is no size cap here. The
 /// [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a
 /// server-side product limit reported as `payload_too_large`.
 library;
 
-/// The key a non-map tag is wrapped under before it is sent to Android or iOS.
-const wrappedTagKey = 'tag';
-
-/// Validates [tags] and returns the value to send to Android and iOS.
-///
-/// Both native SDKs take a map, so anything else, scalars and lists alike, is
-/// wrapped as `{'tag': tags}`. Returns null for null, meaning no tags.
-///
-/// Throws an [ArgumentError] if [tags] is not recursively JSON-compatible.
-Map<String, Object?>? tagsForNative(Object? tags) {
-  if (tags == null) {
-    return null;
-  }
-  validateTags(tags);
-  if (tags is Map<Object?, Object?>) {
-    // Copied rather than cast, so the result is a plain map even when the
-    // caller passed one that is not statically string-keyed.
-    return {for (final entry in tags.entries) entry.key as String: entry.value};
-  }
-  return {wrappedTagKey: tags};
-}
-
-/// Validates [tags] and returns the value to forward to the web agent.
-///
-/// The web agent accepts any JSON value, so nothing is wrapped. Returns null
-/// for null, meaning no tags.
-///
-/// Throws an [ArgumentError] if [tags] is not recursively JSON-compatible.
-Object? tagsForWeb(Object? tags) {
-  if (tags == null) {
-    return null;
-  }
-  validateTags(tags);
-  return tags;
-}
-
 /// Throws an [ArgumentError] unless [tags] is recursively JSON-compatible.
 ///
-/// Accepts [String], [num], [bool], null, [List] and [Map] with [String] keys,
-/// nested to any depth. Rejects anything else, because it cannot survive the
-/// trip to the server: an arbitrary Dart object has no JSON form, a non-string
-/// map key has no JSON key, a non-finite double has no JSON literal, and a
-/// collection that contains itself has no end.
-void validateTags(Object? tags) => _validate(tags, 'tags', []);
+/// The root is a map with [String] keys. Its values can contain [String], [num],
+/// [bool], null, [List] and nested maps. Rejects anything else, because it
+/// cannot survive the trip to the server: an arbitrary Dart object has no JSON
+/// form, a non-string nested map key has no JSON key, a non-finite double has no
+/// JSON literal, and a collection that contains itself has no end.
+void validateTags(Map<String, Object?>? tags) {
+  if (tags != null) {
+    _validate(tags, 'tags', []);
+  }
+}
 
 /// Validates [value], with [enclosing] holding the collections currently being
 /// walked, outermost first, so a collection that contains itself is rejected
@@ -68,7 +36,10 @@ void _validate(Object? value, String path, List<Object> enclosing) {
   if (value is num) {
     if (!value.isFinite) {
       throw ArgumentError.value(
-          value, path, 'Tags cannot hold a non-finite number');
+        value,
+        path,
+        'Tags cannot hold a non-finite number',
+      );
     }
     return;
   }
@@ -88,15 +59,21 @@ void _validate(Object? value, String path, List<Object> enclosing) {
       final key = entry.key;
       if (key is! String) {
         throw ArgumentError.value(
-            key, path, 'Tag map keys must be strings, got ${key.runtimeType}');
+          key,
+          path,
+          'Tag map keys must be strings, got ${key.runtimeType}',
+        );
       }
       _validate(entry.value, "$path['$key']", enclosing);
     }
     enclosing.removeLast();
     return;
   }
-  throw ArgumentError.value(value, path,
-      'Tags must be JSON-compatible, got ${value.runtimeType}');
+  throw ArgumentError.value(
+    value,
+    path,
+    'Tags must be JSON-compatible, got ${value.runtimeType}',
+  );
 }
 
 /// Throws an [ArgumentError] if [collection] is one of the collections already
@@ -105,11 +82,17 @@ void _validate(Object? value, String path, List<Object> enclosing) {
 /// Compared by identity, so the same collection appearing twice side by side is
 /// still fine. Only a collection reachable from itself is a cycle.
 void _checkNotEnclosing(
-    Object collection, String path, List<Object> enclosing) {
+  Object collection,
+  String path,
+  List<Object> enclosing,
+) {
   for (final walked in enclosing) {
     if (identical(walked, collection)) {
       throw ArgumentError.value(
-          collection, path, 'Tags cannot contain themselves');
+        collection,
+        path,
+        'Tags cannot contain themselves',
+      );
     }
   }
 }
