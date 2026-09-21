@@ -1,65 +1,99 @@
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
+import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
+import 'package:fpjs_pro_plugin/src/tags.dart';
 
-/// An implementation of [FingerprintPlatform] that talks to the Android and iOS agents
+/// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
 class MethodChannelFingerprint extends FingerprintPlatform {
-  final MethodChannel _channel = const MethodChannel('fpjs_pro_plugin');
+  MethodChannelFingerprint({FingerprintHostApi? hostApi})
+      : _hostApi = hostApi ?? FingerprintHostApi();
 
-  var _isExtendedResult = false;
+  final FingerprintHostApi _hostApi;
+  FingerprintConfig? _config;
 
   @override
   Future<void> init(FingerprintConfig config) async {
-    await _channel.invokeMethod('init', {
-      'apiToken': config.apiKey,
-      'endpoint': config.endpoint,
-      'endpointFallbacks': config.endpointFallbacks,
-      'scriptUrlPattern': config.scriptUrlPattern,
-      'scriptUrlPatternFallbacks': config.scriptUrlPatternFallbacks,
-      'region': config.region?.stringValue,
-      'extendedResponseFormat': config.extendedResponseFormat,
-      'pluginVersion': config.pluginVersion,
-      'allowUseOfLocationData': config.allowUseOfLocationData,
-      'locationTimeoutMillis': config.locationTimeoutMillisAndroid,
-    });
-    _isExtendedResult = config.extendedResponseFormat;
+    _config = config;
   }
 
   @override
-  Future<String?> getVisitorId(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
+  Future<String?> getVisitorId({
+    Map<String, dynamic>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  }) async {
+    final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
+    return FingerprintResult(
+      eventId: result.eventId,
+      visitorId: result.visitorId,
+      suspectScore: result.suspectScore,
+      sealedResult: result.sealedResult,
+    ).visitorId;
+  }
+
+  @override
+  Future<FingerprintJSProResponse> getVisitorData({
+    Map<String, dynamic>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  }) async {
+    final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
+    final normalized = FingerprintResult(
+      eventId: result.eventId,
+      visitorId: result.visitorId,
+      suspectScore: result.suspectScore,
+      sealedResult: result.sealedResult,
+    );
+    return FingerprintJSProResponse(
+      normalized.eventId,
+      normalized.visitorId ?? '',
+      ConfidenceScore(normalized.suspectScore ?? 0),
+      normalized.sealedResult,
+    );
+  }
+
+  Future<FingerprintNativeResult> _getNative({
+    Map<String, dynamic>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  }) async {
+    final config = _config;
+    if (config == null) {
+      throw Exception(
+        'You need to initialize the FPJS Client first by calling the "initFpjs" method',
+      );
+    }
+    validateTags(tags);
     try {
-      return await _channel.invokeMethod<String>('getVisitorId',
-          {'linkedId': linkedId, 'tags': tags, 'timeoutMs': timeoutMs});
+      return await _hostApi.get(
+        _toNativeConfig(config),
+        tags,
+        linkedId,
+        timeoutMs,
+      );
     } on PlatformException catch (exception) {
       throw unwrapError(exception);
     }
   }
 
-  @override
-  Future<FingerprintJSProResponse> getVisitorData(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
-    try {
-      final visitorDataTuple = await _channel.invokeMethod('getVisitorData',
-          {'linkedId': linkedId, 'tags': tags, 'timeoutMs': timeoutMs});
-
-      final String requestId = visitorDataTuple[0];
-      final num confidence = visitorDataTuple[1];
-      final Map<String, dynamic> visitorDataJson =
-          jsonDecode(visitorDataTuple[2]);
-      final String sealedResult = visitorDataTuple[3] ?? '';
-
-      return _isExtendedResult
-          ? FingerprintJSProExtendedResponse.fromJson(
-              visitorDataJson, requestId, confidence, sealedResult)
-          : FingerprintJSProResponse.fromJson(
-              visitorDataJson, requestId, confidence, sealedResult);
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
-    }
+  FingerprintNativeConfig _toNativeConfig(FingerprintConfig config) {
+    final endpoints = config.endpoint != null
+        ? [
+            config.endpoint!,
+            ...?config.endpointFallbacks,
+          ]
+        : null;
+    return FingerprintNativeConfig(
+      apiKey: config.apiKey,
+      region: config.region?.stringValue,
+      endpoints: endpoints,
+      pluginVersion: config.pluginVersion,
+      allowUseOfLocationData: config.allowUseOfLocationData ?? false,
+      locationTimeoutMillis: config.locationTimeoutMillisAndroid,
+    );
   }
 }

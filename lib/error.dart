@@ -186,9 +186,11 @@ FingerprintProError unwrapError(PlatformException error) {
   switch (error.code) {
     case 'InvalidURL':
     case 'InvalidUrlError':
+    case 'invalid_url':
       return InvalidUrlError(error.message);
     case 'InvalidURLParams':
     case 'InvalidURLParamsError':
+    case 'invalid_url_params':
       return InvalidURLParamsError(error.message);
     case 'ApiError':
       return ApiError(error.message);
@@ -196,10 +198,12 @@ FingerprintProError unwrapError(PlatformException error) {
     case 'ApiKeyRequired':
     case 'TokenRequired':
     case 'ApiKeyRequiredError':
+    case 'public_api_key_required':
       return ApiKeyRequiredError(error.message);
     case 'ApiKeyNotFound':
     case 'TokenNotFound':
     case 'ApiKeyNotFoundError':
+    case 'public_api_key_not_found':
       return ApiKeyNotFoundError(error.message);
     case 'ApiKeyExpired':
     case 'TokenExpired':
@@ -207,15 +211,19 @@ FingerprintProError unwrapError(PlatformException error) {
       return ApiKeyExpiredError(error.message);
     case 'RequestCannotBeParsed':
     case 'RequestCannotBeParsedError':
+    case 'request_cannot_be_parsed':
       return RequestCannotBeParsedError(error.message);
     case 'Failed':
     case 'FailedError':
+    case 'failed':
       return FailedError(error.message);
     case 'RequestTimeout':
     case 'RequestTimeoutError':
+    case 'request_read_timeout':
       return RequestTimeoutError(error.message);
     case 'TooManyRequest':
     case 'TooManyRequestError':
+    case 'too_many_requests':
       return TooManyRequestError(error.message);
     case 'OriginNotAvailable':
     case 'OriginNotAvailableError':
@@ -234,34 +242,44 @@ FingerprintProError unwrapError(PlatformException error) {
       return NotAvailableWithoutUAError(error.message);
     case 'WrongRegion':
     case 'WrongRegionError':
+    case 'wrong_region':
       return WrongRegionError(error.message);
     case 'SubscriptionNotActive':
     case 'SubscriptionNotActiveError':
+    case 'subscription_not_active':
       return SubscriptionNotActiveError(error.message);
     case 'UnsupportedVersion':
     case 'UnsupportedVersionError':
       return UnsupportedVersionError(error.message);
     case 'InstallationMethodRestricted':
     case 'InstallationMethodRestrictedError':
+    case 'installation_method_restricted':
       return InstallationMethodRestrictedError(error.message);
     case 'ResponseCannotBeParsed':
     case 'ResponseCannotBeParsedError':
+    case 'response_cannot_be_parsed':
       return ResponseCannotBeParsedError(error.message);
     case 'InvalidProxyIntegrationHeaders':
     case 'InvalidProxyIntegrationHeadersError':
+    case 'invalid_proxy_integration_headers':
       return InvalidProxyIntegrationHeaders(error.message);
     case 'InvalidProxyIntegrationSecret':
     case 'InvalidProxyIntegrationSecretError':
+    case 'invalid_proxy_integration_secret':
       return InvalidProxyIntegrationSecret(error.message);
     case 'ProxyIntegrationSecretEnvironmentMismatch':
+    case 'proxy_integration_secret_environment_mismatch':
       return ProxyIntegrationSecretEnvironmentMismatch(error.message);
     // end of API Errors block
     case 'NetworkError':
+    case 'network_error':
       return NetworkError(error.message);
     case 'JsonParsingError':
+    case 'json_parsing_error':
       return JsonParsingError(error.message);
     case 'InvalidResponseType':
     case 'InvalidResponseTypeError':
+    case 'invalid_response_type':
       return InvalidResponseTypeError(error.message);
     case 'ScriptLoadFailError':
       return ScriptLoadFailError(error.message);
@@ -271,7 +289,10 @@ FingerprintProError unwrapError(PlatformException error) {
       return IntegrationFailureError(error.message);
     case 'ClientTimeout':
     case 'ClientTimeoutError':
+    case 'client_timeout':
       return ClientTimeoutError(error.message);
+    case 'unknown_error':
+      return UnknownError(error.message);
     default:
       return UnknownError(error.message);
   }

@@ -22,6 +22,8 @@ class JSONTypeConvertor {
     static func convertObjectToJSONTypeConvertible(_ object: Any) -> JSONTypeConvertible? {
         if let intValue = object as? Int {
             return intValue
+        } else if let doubleValue = object as? Double {
+            return doubleValue
         } else if let stringValue = object as? String {
             return stringValue
         } else if let boolValue = object as? Bool {

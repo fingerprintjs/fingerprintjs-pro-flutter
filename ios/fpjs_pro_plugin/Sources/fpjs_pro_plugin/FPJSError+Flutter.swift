@@ -2,44 +2,95 @@ import Foundation
 @preconcurrency import Fingerprint
 
 extension FPError {
-    var flutterFields: (String, String) {
-        let description = self.localizedDescription
-        switch self {
-        case .invalidURL:
-            return ("InvalidURL", description)
-        case .invalidURLParams:
-            return ("InvalidURLParams", description)
-        case .apiError(let apiError):
-            let code = apiError.flutterCode("apiError")
-            let message = apiError.message ?? description
-            return (code, message)
-        case .networkError(let networkError):
-            return ("NetworkError", networkError.localizedDescription)
-        case .jsonParsingError(let jsonParsingError):
-            return ("JsonParsingError", jsonParsingError.localizedDescription)
-        case .invalidResponseType:
-            return ("InvalidResponseType", description)
-        case .clientTimeout:
-            return ("ClientTimeout", description)
-        case .unknownError:
-            fallthrough
-        @unknown default:
-            return ("UnknownError", description)
-        }
+  /// Snake_case code and message for Pigeon [PigeonError].
+  func pigeonFields() -> (code: String, message: String?, eventId: String?) {
+    let description = self.description
+    switch self {
+    case .invalidURL:
+      return ("invalid_url", description, nil)
+    case .invalidURLParams:
+      return ("invalid_url_params", description, nil)
+    case .apiError(let apiError):
+      let code = apiError.pigeonCode()
+      let message = apiError.errorDetails?.message ?? description
+      let eventId = normalizeEventId(apiError.eventId)
+      return (code, message, eventId)
+    case .networkError:
+      return ("network_error", description, nil)
+    case .jsonParsingError:
+      return ("json_parsing_error", description, nil)
+    case .invalidResponseType:
+      return ("invalid_response_type", description, nil)
+    case .clientTimeout:
+      return ("client_timeout", description, nil)
+    case .unknownError:
+      fallthrough
+    @unknown default:
+      return ("unknown_error", description, nil)
     }
+  }
 }
 
 extension APIError {
-    func flutterCode(_ defaultName: String) -> String {
-        let name = self.errorDetails?.code?.rawValue ?? defaultName
-        return name.firstUppercased
+  func pigeonCode() -> String {
+    guard let code = errorDetails?.code else {
+      return "unknown_error"
     }
+    return Self.snakeCaseCode(code)
+  }
 
-    var message: String? {
-        return self.errorDetails?.message
+  static func snakeCaseCode(_ code: APIError.Code) -> String {
+    switch code {
+    case .requestCannotBeParsed: return "request_cannot_be_parsed"
+    case .failed: return "failed"
+    case .requestReadTimeout: return "request_read_timeout"
+    case .tooManyRequests: return "too_many_requests"
+    case .publicApiKeyRequired: return "public_api_key_required"
+    case .publicApiKeyNotFound: return "public_api_key_not_found"
+    case .subscriptionNotActive: return "subscription_not_active"
+    case .subscriptionRestricted: return "subscription_restricted"
+    case .wrongRegion: return "wrong_region"
+    case .featureNotEnabled: return "feature_not_enabled"
+    case .visitorNotFound: return "visitor_not_found"
+    case .missingModule: return "missing_module"
+    case .payloadTooLarge: return "payload_too_large"
+    case .serviceUnavailable: return "service_unavailable"
+    case .environmentRestricted: return "environment_restricted"
+    case .installationMethodRestricted: return "installation_method_restricted"
+    case .invalidProxyIntegrationSecret: return "invalid_proxy_integration_secret"
+    case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
+    case .proxyIntegrationSecretEnvironmentMismatch:
+      return "proxy_integration_secret_environment_mismatch"
+    case .secretApiKeyRequired: return "secret_api_key_required"
+    case .secretApiKeyNotFound: return "secret_api_key_not_found"
+    case .stateNotReady: return "state_not_ready"
+    case .eventNotFound: return "event_not_found"
+    case .rulesetNotFound: return "ruleset_not_found"
+    case .subscriptionNotFound: return "subscription_not_found"
+    @unknown default:
+      return camelCaseToSnakeCase(code.rawValue)
     }
+  }
 }
 
-extension StringProtocol {
-    var firstUppercased: String { prefix(1).uppercased() + dropFirst() }
+func normalizeEventId(_ eventId: String?) -> String? {
+  guard let eventId, !eventId.isEmpty, eventId != "Unknown" else {
+    return nil
+  }
+  return eventId
+}
+
+private func camelCaseToSnakeCase(_ value: String) -> String {
+  var result = ""
+  for character in value {
+    if character.isUppercase {
+      if !result.isEmpty {
+        result.append("_")
+      }
+      result.append(character.lowercased())
+    } else {
+      result.append(character)
+    }
+  }
+  return result
 }

@@ -1,38 +1,25 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
+import 'package:fpjs_pro_plugin/src/method_channel_fingerprint.dart';
+import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel(FpjsProPlugin.channelName);
-  const testApiKey = 'test_api_key';
-  const testVisitorId = 'test_visitor_id';
-  const requestId = 'test_request_id';
-  const linkedId = 'test_linked_id';
-  const confidence = 0.09;
-  const extendedResultAsJson = {'visitorId': testVisitorId};
-  final extendedResultAsJsonString = jsonEncode(extendedResultAsJson);
-  const getVisitorDataResponse = {
-    "requestId": "test_request_id",
-    "visitorId": "test_visitor_id",
-    "confidenceScore": {"score": 0.09},
-    "sealedResult": ''
-  };
-
-  const sealedResult = 'test_sealed_result';
-
-  const getVisitorDataResponseWithSealedResult = {
-    "requestId": "test_request_id",
-    "visitorId": "test_visitor_id",
-    "confidenceScore": {"score": 0.09},
-    "sealedResult": sealedResult
-  };
-
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // Passing the future, not a closure, asserts the error arrives through it
-  // instead of being thrown synchronously.
+  late FakeFingerprintHostApi fakeHostApi;
+  late FingerprintPlatform previousPlatform;
+
+  setUp(() {
+    fakeHostApi = FakeFingerprintHostApi();
+    previousPlatform = FingerprintPlatform.instance;
+    FingerprintPlatform.instance = MethodChannelFingerprint(hostApi: fakeHostApi);
+  });
+
+  tearDown(() {
+    FingerprintPlatform.instance = previousPlatform;
+  });
+
   group('Should throw if called before initialization', () {
     test('getVisitorId', () async {
       await expectLater(FpjsProPlugin.getVisitorId(), throwsException);
@@ -44,100 +31,95 @@ void main() {
   });
 
   group('getVisitorId', () {
-    MethodCall? capturedCall;
-
-    setUp(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        if (methodCall.method == 'getVisitorId') {
-          capturedCall = methodCall;
-          return testVisitorId;
-        }
-        return null;
-      });
-    });
-
-    tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, null);
-    });
-
     test('forwards arguments and returns the visitor id', () async {
       const tags = {'sessionId': 1};
+      const linkedId = 'test_linked_id';
+      const testVisitorId = 'test_visitor_id';
 
-      await FpjsProPlugin.initFpjs(testApiKey);
+      fakeHostApi.nextResult = FingerprintNativeResult(
+        eventId: 'evt',
+        visitorId: testVisitorId,
+        suspectScore: 0,
+        sealedResult: null,
+      );
+
+      await FpjsProPlugin.initFpjs('test_api_key');
       final result = await FpjsProPlugin.getVisitorId(
-          tags: tags, linkedId: linkedId, timeoutMs: 1000);
+        tags: tags,
+        linkedId: linkedId,
+        timeoutMs: 1000,
+      );
 
       expect(result, testVisitorId);
-      expect(capturedCall?.arguments, {
-        'linkedId': linkedId,
-        'tags': tags,
-        'timeoutMs': 1000,
-      });
+      expect(fakeHostApi.lastTags, tags);
+      expect(fakeHostApi.lastLinkedId, linkedId);
+      expect(fakeHostApi.lastTimeoutMs, 1000);
+      expect(fakeHostApi.lastConfig?.apiKey, 'test_api_key');
     });
   });
 
   group('getVisitorData', () {
-    MethodCall? capturedCall;
-
-    setUp(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        if (methodCall.method == 'getVisitorData') {
-          capturedCall = methodCall;
-          return [requestId, confidence, extendedResultAsJsonString, null];
-        }
-        return null;
-      });
-    });
-
-    tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, null);
-    });
-
-    test('forwards arguments and decodes the visitor data', () async {
+    test('forwards arguments and maps visitor data', () async {
       const tags = {'sessionId': 1};
+      const linkedId = 'test_linked_id';
+      const requestId = 'test_request_id';
+      const testVisitorId = 'test_visitor_id';
+      const sealedResult = 'test_sealed_result';
 
-      await FpjsProPlugin.initFpjs(testApiKey);
+      fakeHostApi.nextResult = FingerprintNativeResult(
+        eventId: requestId,
+        visitorId: testVisitorId,
+        suspectScore: 9,
+        sealedResult: sealedResult,
+      );
+
+      await FpjsProPlugin.initFpjs('test_api_key');
       final result = await FpjsProPlugin.getVisitorData(
-          tags: tags, linkedId: linkedId, timeoutMs: 1000);
+        tags: tags,
+        linkedId: linkedId,
+        timeoutMs: 1000,
+      );
 
-      expect(result.toJson(), getVisitorDataResponse);
-      expect(capturedCall?.arguments, {
-        'linkedId': linkedId,
-        'tags': tags,
-        'timeoutMs': 1000,
-      });
+      expect(
+        result.toJson(),
+        {
+          'requestId': requestId,
+          'visitorId': testVisitorId,
+          'confidenceScore': {'score': 9},
+          'sealedResult': sealedResult,
+        },
+      );
+      expect(fakeHostApi.lastTags, tags);
+      expect(fakeHostApi.lastLinkedId, linkedId);
+      expect(fakeHostApi.lastTimeoutMs, 1000);
     });
   });
+}
 
-  group('getVisitorDataSealed', () {
-    setUp(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        if (methodCall.method == 'getVisitorData') {
-          return [
-            requestId,
-            confidence,
-            extendedResultAsJsonString,
-            sealedResult
-          ];
-        }
-        return null;
-      });
-    });
+class FakeFingerprintHostApi extends FingerprintHostApi {
+  FingerprintNativeConfig? lastConfig;
+  Map<Object?, Object?>? lastTags;
+  String? lastLinkedId;
+  int? lastTimeoutMs;
 
-    tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, null);
-    });
+  FingerprintNativeResult nextResult = FingerprintNativeResult(
+    eventId: 'default-event',
+    visitorId: 'default-visitor',
+    suspectScore: 0,
+    sealedResult: null,
+  );
 
-    test('should return data with sealed result', () async {
-      await FpjsProPlugin.initFpjs(testApiKey);
-      final result = await FpjsProPlugin.getVisitorData();
-      expect(result.toJson(), getVisitorDataResponseWithSealedResult);
-    });
-  });
+  @override
+  Future<FingerprintNativeResult> get(
+    FingerprintNativeConfig config,
+    Map<Object?, Object?>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  ) async {
+    lastConfig = config;
+    lastTags = tags;
+    lastLinkedId = linkedId;
+    lastTimeoutMs = timeoutMs;
+    return nextResult;
+  }
 }
