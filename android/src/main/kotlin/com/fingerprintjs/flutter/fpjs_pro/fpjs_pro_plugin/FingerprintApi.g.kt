@@ -196,7 +196,8 @@ class FlutterError (
 data class FingerprintNativeConfig (
   val apiKey: String,
   val region: String? = null,
-  val endpoints: List<String>? = null,
+  val endpoint: String? = null,
+  val endpointFallbacks: List<String>? = null,
   val pluginVersion: String,
   val allowUseOfLocationData: Boolean,
   val locationTimeoutMillis: Long? = null
@@ -206,18 +207,20 @@ data class FingerprintNativeConfig (
     fun fromList(pigeonVar_list: List<Any?>): FingerprintNativeConfig {
       val apiKey = pigeonVar_list[0] as String
       val region = pigeonVar_list[1] as String?
-      val endpoints = pigeonVar_list[2] as List<String>?
-      val pluginVersion = pigeonVar_list[3] as String
-      val allowUseOfLocationData = pigeonVar_list[4] as Boolean
-      val locationTimeoutMillis = pigeonVar_list[5] as Long?
-      return FingerprintNativeConfig(apiKey, region, endpoints, pluginVersion, allowUseOfLocationData, locationTimeoutMillis)
+      val endpoint = pigeonVar_list[2] as String?
+      val endpointFallbacks = pigeonVar_list[3] as List<String>?
+      val pluginVersion = pigeonVar_list[4] as String
+      val allowUseOfLocationData = pigeonVar_list[5] as Boolean
+      val locationTimeoutMillis = pigeonVar_list[6] as Long?
+      return FingerprintNativeConfig(apiKey, region, endpoint, endpointFallbacks, pluginVersion, allowUseOfLocationData, locationTimeoutMillis)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
       apiKey,
       region,
-      endpoints,
+      endpoint,
+      endpointFallbacks,
       pluginVersion,
       allowUseOfLocationData,
       locationTimeoutMillis,
@@ -231,21 +234,22 @@ data class FingerprintNativeConfig (
       return true
     }
     val other = other as FingerprintNativeConfig
-    return FingerprintApiPigeonUtils.deepEquals(this.apiKey, other.apiKey) && FingerprintApiPigeonUtils.deepEquals(this.region, other.region) && FingerprintApiPigeonUtils.deepEquals(this.endpoints, other.endpoints) && FingerprintApiPigeonUtils.deepEquals(this.pluginVersion, other.pluginVersion) && FingerprintApiPigeonUtils.deepEquals(this.allowUseOfLocationData, other.allowUseOfLocationData) && FingerprintApiPigeonUtils.deepEquals(this.locationTimeoutMillis, other.locationTimeoutMillis)
+    return FingerprintApiPigeonUtils.deepEquals(this.apiKey, other.apiKey) && FingerprintApiPigeonUtils.deepEquals(this.region, other.region) && FingerprintApiPigeonUtils.deepEquals(this.endpoint, other.endpoint) && FingerprintApiPigeonUtils.deepEquals(this.endpointFallbacks, other.endpointFallbacks) && FingerprintApiPigeonUtils.deepEquals(this.pluginVersion, other.pluginVersion) && FingerprintApiPigeonUtils.deepEquals(this.allowUseOfLocationData, other.allowUseOfLocationData) && FingerprintApiPigeonUtils.deepEquals(this.locationTimeoutMillis, other.locationTimeoutMillis)
   }
 
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
     result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.apiKey)
     result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.region)
-    result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.endpoints)
+    result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.endpoint)
+    result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.endpointFallbacks)
     result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.pluginVersion)
     result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.allowUseOfLocationData)
     result = 31 * result + FingerprintApiPigeonUtils.deepHash(this.locationTimeoutMillis)
     return result
   }
   override fun toString(): String {
-    return "FingerprintNativeConfig(apiKey=$apiKey, region=$region, endpoints=$endpoints, pluginVersion=$pluginVersion, allowUseOfLocationData=$allowUseOfLocationData, locationTimeoutMillis=$locationTimeoutMillis)"
+    return "FingerprintNativeConfig(apiKey=$apiKey, region=$region, endpoint=$endpoint, endpointFallbacks=$endpointFallbacks, pluginVersion=$pluginVersion, allowUseOfLocationData=$allowUseOfLocationData, locationTimeoutMillis=$locationTimeoutMillis)"
   }
 }
 
@@ -337,7 +341,7 @@ interface FingerprintHostApi {
    * https://docs.fingerprint.com/docs/ios-sdk
    */
   fun create(config: FingerprintNativeConfig)
-  fun get(config: FingerprintNativeConfig, tags: Map<Any?, Any?>?, linkedId: String?, timeoutMs: Long?, callback: (Result<FingerprintNativeResult>) -> Unit)
+  fun get(config: FingerprintNativeConfig, tags: Map<String?, Any?>?, linkedId: String?, timeoutMs: Long?, callback: (Result<FingerprintNativeResult>) -> Unit)
 
   companion object {
     /** The codec used by FingerprintHostApi. */
@@ -372,7 +376,7 @@ interface FingerprintHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val configArg = args[0] as FingerprintNativeConfig
-            val tagsArg = args[1] as Map<Any?, Any?>?
+            val tagsArg = args[1] as Map<String?, Any?>?
             val linkedIdArg = args[2] as String?
             val timeoutMsArg = args[3] as Long?
             api.get(configArg, tagsArg, linkedIdArg, timeoutMsArg) { result: Result<FingerprintNativeResult> ->

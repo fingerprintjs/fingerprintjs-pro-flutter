@@ -98,7 +98,7 @@ void main() {
 
 class FakeFingerprintHostApi extends FingerprintHostApi {
   FingerprintNativeConfig? lastConfig;
-  Map<Object?, Object?>? lastTags;
+  Map<String?, Object?>? lastTags;
   String? lastLinkedId;
   int? lastTimeoutMs;
 
@@ -115,7 +115,7 @@ class FakeFingerprintHostApi extends FingerprintHostApi {
   @override
   Future<FingerprintNativeResult> get(
     FingerprintNativeConfig config,
-    Map<Object?, Object?>? tags,
+    Map<String?, Object?>? tags,
     String? linkedId,
     int? timeoutMs,
   ) async {

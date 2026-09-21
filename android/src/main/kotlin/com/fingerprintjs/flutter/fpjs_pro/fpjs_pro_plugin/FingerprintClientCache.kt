@@ -9,38 +9,30 @@ import java.util.concurrent.ConcurrentHashMap
 
 internal typealias FingerprintFactoryFn = (Context, Configuration) -> Fingerprint
 
-internal fun configCacheKey(
-  apiKey: String,
-  region: Configuration.Region,
-  endpointUrl: String,
-  fallbackEndpointUrls: List<String>,
-  pluginVersion: String,
-  allowUseOfLocationData: Boolean,
-  locationTimeoutMillis: Long,
-): String = listOf(
-  apiKey,
-  region.name,
-  endpointUrl,
-  fallbackEndpointUrls.joinToString("\u0001"),
-  pluginVersion,
-  allowUseOfLocationData.toString(),
-  locationTimeoutMillis.toString(),
-).joinToString("\u0000")
-
 internal class FingerprintClientCache(
   private val applicationContext: Context,
   private val createFingerprint: FingerprintFactoryFn = { context, configuration ->
     FingerprintFactory(context).createInstance(configuration)
   },
 ) {
-  private val clients = ConcurrentHashMap<String, Fingerprint>()
+  private data class ClientKey(
+    val apiKey: String,
+    val region: Configuration.Region,
+    val endpointUrl: String,
+    val fallbackEndpointUrls: List<String>,
+    val pluginVersion: String,
+    val allowUseOfLocationData: Boolean,
+    val locationTimeoutMillis: Long,
+  )
+
+  private val clients = ConcurrentHashMap<ClientKey, Fingerprint>()
 
   fun getOrCreate(configuration: Configuration, pluginVersion: String): Fingerprint {
-    val key = configCacheKey(
+    val key = ClientKey(
       configuration.apiKey,
       configuration.region,
       configuration.endpointUrl,
-      configuration.fallbackEndpointUrls,
+      configuration.fallbackEndpointUrls.toList(),
       pluginVersion,
       configuration.allowUseOfLocationData,
       configuration.locationTimeoutMillis,
@@ -51,9 +43,5 @@ internal class FingerprintClientCache(
     return clients.computeIfAbsent(key) {
       createFingerprint(applicationContext, configuration)
     }
-  }
-
-  fun clear() {
-    clients.clear()
   }
 }

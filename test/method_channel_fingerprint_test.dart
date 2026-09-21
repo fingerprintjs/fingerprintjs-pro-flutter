@@ -37,8 +37,8 @@ void main() {
 
       expect(fakeHostApi.createdConfig?.apiKey, 'key-1');
       expect(fakeHostApi.createdConfig?.region, 'eu');
-      expect(fakeHostApi.createdConfig?.endpoints, [
-        'https://primary.example',
+      expect(fakeHostApi.createdConfig?.endpoint, 'https://primary.example');
+      expect(fakeHostApi.createdConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
       expect(fakeHostApi.createdConfig?.pluginVersion, '9.9.9');
@@ -65,8 +65,8 @@ void main() {
 
       expect(fakeHostApi.lastConfig?.apiKey, 'key-1');
       expect(fakeHostApi.lastConfig?.region, 'eu');
-      expect(fakeHostApi.lastConfig?.endpoints, [
-        'https://primary.example',
+      expect(fakeHostApi.lastConfig?.endpoint, 'https://primary.example');
+      expect(fakeHostApi.lastConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
       expect(fakeHostApi.lastConfig?.pluginVersion, '9.9.9');
@@ -75,6 +75,20 @@ void main() {
       expect(fakeHostApi.lastTags, {'sessionId': 1});
       expect(fakeHostApi.lastLinkedId, 'link-1');
       expect(fakeHostApi.lastTimeoutMs, 500);
+    });
+
+    test('forwards fallbacks when no primary endpoint is set', () async {
+      await FingerprintPlatform.instance.init(FingerprintConfig(
+        apiKey: 'key-1',
+        pluginVersion: '9.9.9',
+        region: Region.us,
+        endpointFallbacks: ['https://fallback.example'],
+      ));
+
+      expect(fakeHostApi.createdConfig?.endpoint, isNull);
+      expect(fakeHostApi.createdConfig?.endpointFallbacks, [
+        'https://fallback.example',
+      ]);
     });
 
     test('failed create does not store config', () async {
@@ -155,7 +169,7 @@ void main() {
 class FakeFingerprintHostApi extends FingerprintHostApi {
   FingerprintNativeConfig? createdConfig;
   FingerprintNativeConfig? lastConfig;
-  Map<Object?, Object?>? lastTags;
+  Map<String?, Object?>? lastTags;
   String? lastLinkedId;
   int? lastTimeoutMs;
 
@@ -180,7 +194,7 @@ class FakeFingerprintHostApi extends FingerprintHostApi {
   @override
   Future<FingerprintNativeResult> get(
     FingerprintNativeConfig config,
-    Map<Object?, Object?>? tags,
+    Map<String?, Object?>? tags,
     String? linkedId,
     int? timeoutMs,
   ) async {

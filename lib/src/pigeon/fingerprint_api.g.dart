@@ -101,7 +101,8 @@ class FingerprintNativeConfig {
   FingerprintNativeConfig({
     required this.apiKey,
     this.region,
-    this.endpoints,
+    this.endpoint,
+    this.endpointFallbacks,
     required this.pluginVersion,
     required this.allowUseOfLocationData,
     this.locationTimeoutMillis,
@@ -111,7 +112,9 @@ class FingerprintNativeConfig {
 
   String? region;
 
-  List<String>? endpoints;
+  String? endpoint;
+
+  List<String>? endpointFallbacks;
 
   String pluginVersion;
 
@@ -123,7 +126,8 @@ class FingerprintNativeConfig {
     return <Object?>[
       apiKey,
       region,
-      endpoints,
+      endpoint,
+      endpointFallbacks,
       pluginVersion,
       allowUseOfLocationData,
       locationTimeoutMillis,
@@ -138,10 +142,11 @@ class FingerprintNativeConfig {
     return FingerprintNativeConfig(
       apiKey: result[0]! as String,
       region: result[1] as String?,
-      endpoints: (result[2] as List<Object?>?)?.cast<String>(),
-      pluginVersion: result[3]! as String,
-      allowUseOfLocationData: result[4]! as bool,
-      locationTimeoutMillis: result[5] as int?,
+      endpoint: result[2] as String?,
+      endpointFallbacks: (result[3] as List<Object?>?)?.cast<String>(),
+      pluginVersion: result[4]! as String,
+      allowUseOfLocationData: result[5]! as bool,
+      locationTimeoutMillis: result[6] as int?,
     );
   }
 
@@ -154,7 +159,7 @@ class FingerprintNativeConfig {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(apiKey, other.apiKey) && _deepEquals(region, other.region) && _deepEquals(endpoints, other.endpoints) && _deepEquals(pluginVersion, other.pluginVersion) && _deepEquals(allowUseOfLocationData, other.allowUseOfLocationData) && _deepEquals(locationTimeoutMillis, other.locationTimeoutMillis);
+    return _deepEquals(apiKey, other.apiKey) && _deepEquals(region, other.region) && _deepEquals(endpoint, other.endpoint) && _deepEquals(endpointFallbacks, other.endpointFallbacks) && _deepEquals(pluginVersion, other.pluginVersion) && _deepEquals(allowUseOfLocationData, other.allowUseOfLocationData) && _deepEquals(locationTimeoutMillis, other.locationTimeoutMillis);
   }
 
   @override
@@ -163,7 +168,7 @@ class FingerprintNativeConfig {
 
   @override
   String toString() {
-    return 'FingerprintNativeConfig(apiKey: $apiKey, region: $region, endpoints: $endpoints, pluginVersion: $pluginVersion, allowUseOfLocationData: $allowUseOfLocationData, locationTimeoutMillis: $locationTimeoutMillis)';
+    return 'FingerprintNativeConfig(apiKey: $apiKey, region: $region, endpoint: $endpoint, endpointFallbacks: $endpointFallbacks, pluginVersion: $pluginVersion, allowUseOfLocationData: $allowUseOfLocationData, locationTimeoutMillis: $locationTimeoutMillis)';
   }
 }
 
@@ -293,7 +298,7 @@ class FingerprintHostApi {
     ;
   }
 
-  Future<FingerprintNativeResult> get(FingerprintNativeConfig config, Map<Object?, Object?>? tags, String? linkedId, int? timeoutMs) async {
+  Future<FingerprintNativeResult> get(FingerprintNativeConfig config, Map<String?, Object?>? tags, String? linkedId, int? timeoutMs) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,

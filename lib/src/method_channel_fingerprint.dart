@@ -86,16 +86,11 @@ class MethodChannelFingerprint extends FingerprintPlatform {
   }
 
   FingerprintNativeConfig _toNativeConfig(FingerprintConfig config) {
-    final endpoints = config.endpoint != null
-        ? [
-            config.endpoint!,
-            ...?config.endpointFallbacks,
-          ]
-        : null;
     return FingerprintNativeConfig(
       apiKey: config.apiKey,
       region: config.region?.stringValue,
-      endpoints: endpoints,
+      endpoint: config.endpoint,
+      endpointFallbacks: config.endpointFallbacks,
       pluginVersion: config.pluginVersion,
       allowUseOfLocationData: config.allowUseOfLocationData ?? false,
       locationTimeoutMillis: config.locationTimeoutMillisAndroid,

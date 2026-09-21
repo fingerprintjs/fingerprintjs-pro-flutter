@@ -65,6 +65,36 @@ class FingerprintClientCacheTest {
   }
 
   @Test
+  fun createsNewClientWhenFallbacksChange() {
+    var createCount = 0
+    val cache = FingerprintClientCache(context) { _, _ ->
+      createCount += 1
+      mock(Fingerprint::class.java)
+    }
+    val base = Configuration(
+      "key-a",
+      Configuration.Region.US,
+      Configuration.Region.US.endpointUrl,
+      emptyList(),
+      listOf(Pair("fingerprint-pro-flutter", "1.0.0")),
+      false,
+      5000L,
+    )
+    cache.getOrCreate(base, "1.0.0")
+    val other = Configuration(
+      "key-a",
+      Configuration.Region.US,
+      Configuration.Region.US.endpointUrl,
+      listOf("https://fallback.example"),
+      listOf(Pair("fingerprint-pro-flutter", "1.0.0")),
+      false,
+      5000L,
+    )
+    cache.getOrCreate(other, "1.0.0")
+    assertEquals(2, createCount)
+  }
+
+  @Test
   fun createsClientOnceUnderConcurrentFirstAccess() {
     val ready = CountDownLatch(16)
     val go = CountDownLatch(1)

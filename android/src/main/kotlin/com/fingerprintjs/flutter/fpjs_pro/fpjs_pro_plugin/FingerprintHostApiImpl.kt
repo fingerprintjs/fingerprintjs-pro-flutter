@@ -16,7 +16,7 @@ internal class FingerprintHostApiImpl(
 
   override fun get(
     config: FingerprintNativeConfig,
-    tags: Map<Any?, Any?>?,
+    tags: Map<String?, Any?>?,
     linkedId: String?,
     timeoutMs: Long?,
     callback: (Result<FingerprintNativeResult>) -> Unit,
@@ -56,17 +56,8 @@ internal class FingerprintHostApiImpl(
 
   internal fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
     val region = parseRegion(config.region)
-    val endpoints = config.endpoints?.filter { it.isNotEmpty() } ?: emptyList()
-    val endpointUrl = if (endpoints.isEmpty()) {
-      region.endpointUrl
-    } else {
-      endpoints.first()
-    }
-    val fallbacks = if (endpoints.size > 1) {
-      endpoints.drop(1)
-    } else {
-      emptyList()
-    }
+    val endpointUrl = config.endpoint?.takeIf { it.isNotEmpty() } ?: region.endpointUrl
+    val fallbacks = config.endpointFallbacks?.filter { it.isNotEmpty() } ?: emptyList()
     val locationTimeout = config.locationTimeoutMillis ?: 5000L
     return Configuration(
       config.apiKey,
@@ -89,15 +80,14 @@ internal fun parseRegion(region: String?): Configuration.Region {
   }
 }
 
-internal fun pigeonTagsToNative(tags: Map<Any?, Any?>?): Map<String, Any> {
+internal fun pigeonTagsToNative(tags: Map<String?, Any?>?): Map<String, Any> {
   if (tags == null) {
     return emptyMap()
   }
   val result = mutableMapOf<String, Any>()
   for ((key, value) in tags) {
-    val stringKey = key as? String ?: continue
-    if (value != null) {
-      result[stringKey] = value
+    if (key != null && value != null) {
+      result[key] = value
     }
   }
   return result

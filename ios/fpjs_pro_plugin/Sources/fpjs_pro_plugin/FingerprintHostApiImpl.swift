@@ -19,7 +19,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
 
   func get(
     config: FingerprintNativeConfig,
-    tags: [AnyHashable?: Any?]?,
+    tags: [String?: Any?]?,
     linkedId: String?,
     timeoutMs: Int64?,
     completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void
@@ -58,56 +58,43 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
   }
 
   private func nativeClient(for config: FingerprintNativeConfig) -> FingerprintClientProviding {
-    let (configuration, cacheKey) = buildConfiguration(config: config)
-    return clientCache.getOrCreate(configuration: configuration, cacheKey: cacheKey)
+    clientCache.getOrCreate(
+      configuration: buildConfiguration(config: config),
+      pluginVersion: config.pluginVersion
+    )
   }
 
-  private func buildConfiguration(config: FingerprintNativeConfig) -> (Configuration, String) {
-    let endpoints = config.endpoints?.filter { !$0.isEmpty } ?? []
+  private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
+    let fallbacks = config.endpointFallbacks?.filter { !$0.isEmpty } ?? []
     let region: Region
-    let regionToken: String
-    if !endpoints.isEmpty {
-      let fallback = endpoints.count > 1 ? Array(endpoints.dropFirst()) : []
-      region = .custom(domain: endpoints[0], fallback: fallback)
-      regionToken = "custom:\(endpoints.joined(separator: ","))"
+    if let endpoint = config.endpoint, !endpoint.isEmpty {
+      region = .custom(domain: endpoint, fallback: fallbacks)
     } else {
       switch config.region?.lowercased() {
       case "eu":
         region = .eu
-        regionToken = "eu"
       case "ap":
         region = .ap
-        regionToken = "ap"
       default:
         region = .global
-        regionToken = "global"
       }
     }
-    let configuration = Configuration(
+    return Configuration(
       apiKey: config.apiKey,
       region: region,
       integrationInfo: [("fingerprint-pro-flutter", config.pluginVersion)],
       allowUseOfLocationData: config.allowUseOfLocationData
     )
-    let endpointsToken = endpoints.joined(separator: "\u{0001}")
-    let cacheKey = fingerprintCacheKey(
-      apiKey: config.apiKey,
-      regionToken: regionToken,
-      endpointsToken: endpointsToken,
-      pluginVersion: config.pluginVersion,
-      allowUseOfLocationData: config.allowUseOfLocationData
-    )
-    return (configuration, cacheKey)
   }
 
-  private func prepareMetadata(linkedId: String?, tags: [AnyHashable?: Any?]?) -> Metadata {
+  private func prepareMetadata(linkedId: String?, tags: [String?: Any?]?) -> Metadata {
     var metadata = Metadata(linkedId: linkedId)
     guard let tags else {
       return metadata
     }
     var dict: [String: Any] = [:]
     for (key, value) in tags {
-      guard let key = key as? String, let value else { continue }
+      guard let key, let value else { continue }
       dict[key] = value
     }
     let jsonTags = JSONTypeConvertor.convertDictionaryToJSONTypeConvertible(dict)

@@ -1,6 +1,7 @@
 package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
+import com.fingerprint.android.Configuration
 import com.fingerprint.android.Fingerprint
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -21,6 +22,7 @@ class FingerprintHostApiImplTest {
       "key-a",
       "us",
       null,
+      null,
       "1.0.0",
       false,
       5000L,
@@ -28,5 +30,26 @@ class FingerprintHostApiImplTest {
     api.create(config)
     api.create(config)
     assertEquals(1, createCount)
+  }
+
+  @Test
+  fun buildConfigurationKeepsFallbacksWithoutPrimaryEndpoint() {
+    val cache = FingerprintClientCache(context) { _, _ ->
+      mock(Fingerprint::class.java)
+    }
+    val api = FingerprintHostApiImpl(context, cache)
+    val built = api.buildConfiguration(
+      FingerprintNativeConfig(
+        "key-a",
+        "us",
+        null,
+        listOf("https://fallback.example"),
+        "1.0.0",
+        false,
+        5000L,
+      ),
+    )
+    assertEquals(Configuration.Region.US.endpointUrl, built.endpointUrl)
+    assertEquals(listOf("https://fallback.example"), built.fallbackEndpointUrls)
   }
 }

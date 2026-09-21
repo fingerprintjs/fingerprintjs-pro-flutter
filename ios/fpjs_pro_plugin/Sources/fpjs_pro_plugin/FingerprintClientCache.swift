@@ -1,36 +1,53 @@
 import Foundation
 @preconcurrency import Fingerprint
 
-/// One [FingerprintClientProviding] per resolved configuration key.
+/// One [FingerprintClientProviding] per resolved configuration.
 final class FingerprintClientCache: @unchecked Sendable {
-  private var clients: [String: FingerprintClientProviding] = [:]
+  private struct ClientKey: Hashable {
+    var apiKey: String
+    var regionCode: String
+    var customDomain: String?
+    var customFallbacks: [String]
+    var pluginVersion: String
+    var allowUseOfLocationData: Bool
+
+    init(configuration: Configuration, pluginVersion: String) {
+      apiKey = configuration.apiKey
+      self.pluginVersion = pluginVersion
+      allowUseOfLocationData = configuration.allowUseOfLocationData
+      switch configuration.region {
+      case .eu:
+        regionCode = "eu"
+        customDomain = nil
+        customFallbacks = []
+      case .ap:
+        regionCode = "ap"
+        customDomain = nil
+        customFallbacks = []
+      case .custom(let domain, let fallback):
+        regionCode = "custom"
+        customDomain = domain
+        customFallbacks = fallback
+      default:
+        regionCode = "global"
+        customDomain = nil
+        customFallbacks = []
+      }
+    }
+  }
+
+  private var clients: [ClientKey: FingerprintClientProviding] = [:]
   private let lock = NSLock()
 
-  func getOrCreate(configuration: Configuration, cacheKey: String) -> FingerprintClientProviding {
+  func getOrCreate(configuration: Configuration, pluginVersion: String) -> FingerprintClientProviding {
     lock.lock()
     defer { lock.unlock() }
-    if let existing = clients[cacheKey] {
+    let key = ClientKey(configuration: configuration, pluginVersion: pluginVersion)
+    if let existing = clients[key] {
       return existing
     }
     let client = FingerprintFactory.getInstance(configuration)
-    clients[cacheKey] = client
+    clients[key] = client
     return client
   }
-
-  func clear() {
-    lock.lock()
-    defer { lock.unlock() }
-    clients.removeAll()
-  }
-}
-
-func fingerprintCacheKey(
-  apiKey: String,
-  regionToken: String,
-  endpointsToken: String,
-  pluginVersion: String,
-  allowUseOfLocationData: Bool
-) -> String {
-  [apiKey, regionToken, endpointsToken, pluginVersion, String(allowUseOfLocationData)]
-    .joined(separator: "\u{0000}")
 }
