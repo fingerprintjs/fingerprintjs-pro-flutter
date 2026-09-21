@@ -118,11 +118,11 @@ The public API never ships over a v3 web implementation. That binds at 4c.
 - `Fingerprint` takes immutable `apiKey`, `region`, `endpoints`, and platform
   configuration in its constructor, and exposes `get({tags, linkedId,
   timeout})`.
-- `FingerprintResult`: `String eventId`, `String visitorId`,
+- `FingerprintResult`: `String eventId`, `String? visitorId`,
   `int? suspectScore`, `String? sealedResult`, web-only `bool? cacheHit`.
   `suspectScore` is nullable because the iOS v4 SDK declares it `Int?`; React
-  Native's `-1` sentinel is not carried over. A missing Zero Trust `visitorId`
-  normalizes to `''`. An empty native `sealedResult` normalizes to `null`.
+  Native's `-1` sentinel is not carried over. Empty native `visitorId` and
+  `sealedResult` become null, matching the JS agent omit.
 - `AndroidOptions`, `IosOptions`, `WebOptions` hold platform settings; shared
   settings and the single ordered `endpoints` list stay at top level. All
   timeouts are `Duration`.
@@ -168,6 +168,8 @@ v4 API code.
 - Read iOS `FPError.description`, not `localizedDescription`. `FPError`
   implements `CustomStringConvertible`, not `LocalizedError`.
 - An iOS `APIError` with no code is `unknown_error`, not `failed`.
+- Pigeon can carry `visitorId` as `String`. Empty becomes null on
+  `FingerprintResult`.
 
 ### Native client lifecycle
 

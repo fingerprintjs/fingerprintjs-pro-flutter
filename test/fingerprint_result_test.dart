@@ -3,17 +3,12 @@ import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 
 void main() {
   group('FingerprintResult', () {
-    test('normalizes a missing visitor id to an empty string', () {
-      expect(
-          FingerprintResult(eventId: 'event-1', visitorId: null).visitorId, '');
-    });
+    test('normalizes empty visitor id and sealed result to null', () {
+      final result = FingerprintResult(
+          eventId: 'event-1', visitorId: '', sealedResult: '');
 
-    test('normalizes an empty sealed result to null', () {
-      expect(
-          FingerprintResult(
-                  eventId: 'event-1', visitorId: 'visitor-1', sealedResult: '')
-              .sealedResult,
-          isNull);
+      expect(result.visitorId, isNull);
+      expect(result.sealedResult, isNull);
     });
 
     test('keeps a zero suspect score, which is not the same as none', () {

@@ -9,9 +9,9 @@ final class FingerprintResult {
 
   /// The visitor identifier.
   ///
-  /// Empty when the visitor could not be identified. See
+  /// Null when hidden. See
   /// [Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode).
-  final String visitorId;
+  final String? visitorId;
 
   /// How likely the request came from a bad actor, 0 to 100.
   ///
@@ -32,15 +32,15 @@ final class FingerprintResult {
 
   /// Creates a result.
   ///
-  /// A null [visitorId] becomes `''`. An empty [sealedResult] becomes null
-  /// (native sends `''` where web omits the field).
+  /// Empty [visitorId] and [sealedResult] become null. Native sends `''`
+  /// where the JS agent omits the field.
   FingerprintResult({
     required this.eventId,
     required String? visitorId,
     this.suspectScore,
     String? sealedResult,
     this.cacheHit,
-  })  : visitorId = visitorId ?? '',
+  })  : visitorId = (visitorId == null || visitorId.isEmpty) ? null : visitorId,
         sealedResult =
             (sealedResult == null || sealedResult.isEmpty) ? null : sealedResult;
 
