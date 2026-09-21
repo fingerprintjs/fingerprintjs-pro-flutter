@@ -66,18 +66,18 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
 
   private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
     let fallbacks = config.endpointFallbacks?.filter { !$0.isEmpty } ?? []
+    let namedRegion = Self.namedRegion(config.region)
     let region: Region
     if let endpoint = config.endpoint, !endpoint.isEmpty {
       region = .custom(domain: endpoint, fallback: fallbacks)
+    } else if !fallbacks.isEmpty {
+      // iOS only attaches fallbacks on Region.custom. With no primary URL, use
+      // the region's default endpoint as that custom domain so fallbacks still
+      // apply. Android does the same with `endpoint ?: region.endpointUrl`.
+      // https://docs.fingerprint.com/docs/ios-sdk
+      region = .custom(domain: Self.defaultEndpoint(namedRegion), fallback: fallbacks)
     } else {
-      switch config.region?.lowercased() {
-      case "eu":
-        region = .eu
-      case "ap":
-        region = .ap
-      default:
-        region = .global
-      }
+      region = namedRegion
     }
     return Configuration(
       apiKey: config.apiKey,
@@ -102,5 +102,27 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
       metadata.setTag(jsonType, forKey: key)
     }
     return metadata
+  }
+
+  private static func namedRegion(_ region: String?) -> Region {
+    switch region?.lowercased() {
+    case "eu":
+      return .eu
+    case "ap":
+      return .ap
+    default:
+      return .global
+    }
+  }
+
+  private static func defaultEndpoint(_ region: Region) -> String {
+    switch region {
+    case .eu:
+      return "https://eu.api.fpjs.io"
+    case .ap:
+      return "https://ap.api.fpjs.io"
+    default:
+      return "https://api.fpjs.io"
+    }
   }
 }

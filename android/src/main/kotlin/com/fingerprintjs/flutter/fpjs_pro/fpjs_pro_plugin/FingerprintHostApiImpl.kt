@@ -54,7 +54,7 @@ internal class FingerprintHostApiImpl(
   private fun nativeClient(config: FingerprintNativeConfig) =
     clientCache.getOrCreate(buildConfiguration(config), config.pluginVersion)
 
-  internal fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
+  private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
     val region = parseRegion(config.region)
     val endpointUrl = config.endpoint?.takeIf { it.isNotEmpty() } ?: region.endpointUrl
     val fallbacks = config.endpointFallbacks?.filter { it.isNotEmpty() } ?: emptyList()

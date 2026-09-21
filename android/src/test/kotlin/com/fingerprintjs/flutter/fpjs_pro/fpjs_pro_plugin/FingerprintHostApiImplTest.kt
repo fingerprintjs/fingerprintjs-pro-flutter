@@ -1,8 +1,12 @@
 package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
+import com.fingerprint.android.ApiKeyRequired
 import com.fingerprint.android.Configuration
+import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
+import com.fingerprint.android.FingerprintResponse
+import com.fingerprint.android.RequestTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -11,34 +15,13 @@ class FingerprintHostApiImplTest {
   private val context = mock(Context::class.java)
 
   @Test
-  fun createBuildsOneClientForTheSameConfig() {
-    var createCount = 0
-    val cache = FingerprintClientCache(context) { _, _ ->
-      createCount += 1
+  fun createKeepsFallbacksWithoutPrimaryEndpoint() {
+    var captured: Configuration? = null
+    val cache = FingerprintClientCache(context) { _, configuration ->
+      captured = configuration
       mock(Fingerprint::class.java)
     }
-    val api = FingerprintHostApiImpl(context, cache)
-    val config = FingerprintNativeConfig(
-      "key-a",
-      "us",
-      null,
-      null,
-      "1.0.0",
-      false,
-      5000L,
-    )
-    api.create(config)
-    api.create(config)
-    assertEquals(1, createCount)
-  }
-
-  @Test
-  fun buildConfigurationKeepsFallbacksWithoutPrimaryEndpoint() {
-    val cache = FingerprintClientCache(context) { _, _ ->
-      mock(Fingerprint::class.java)
-    }
-    val api = FingerprintHostApiImpl(context, cache)
-    val built = api.buildConfiguration(
+    FingerprintHostApiImpl(context, cache).create(
       FingerprintNativeConfig(
         "key-a",
         "us",
@@ -49,7 +32,44 @@ class FingerprintHostApiImplTest {
         5000L,
       ),
     )
+    val built = checkNotNull(captured)
     assertEquals(Configuration.Region.US.endpointUrl, built.endpointUrl)
     assertEquals(listOf("https://fallback.example"), built.fallbackEndpointUrls)
+  }
+
+  @Test
+  fun mapsErrorTypesByInstanceNotSimpleName() {
+    val cases = listOf(
+      ApiKeyRequired("e1", "msg") to "public_api_key_required",
+      Failed("e2", "fail") to "failed",
+      RequestTimeout("e3", "timeout") to "request_read_timeout",
+    )
+    for ((nativeError, expectedCode) in cases) {
+      val cache = FingerprintClientCache(context) { _, _ ->
+        FakeFingerprint(nativeError)
+      }
+      var captured: Result<FingerprintNativeResult>? = null
+      FingerprintHostApiImpl(context, cache).get(
+        FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+        null,
+        null,
+        null,
+      ) { captured = it }
+      val error = captured!!.exceptionOrNull() as FlutterError
+      assertEquals(expectedCode, error.code)
+    }
+  }
+}
+
+private class FakeFingerprint(
+  private val error: com.fingerprint.android.Error,
+) : Fingerprint by mock(Fingerprint::class.java) {
+  override fun getVisitorId(
+    tags: Map<String, Any>,
+    linkedId: String,
+    listener: (FingerprintResponse) -> Unit,
+    errorListener: (com.fingerprint.android.Error) -> Unit,
+  ) {
+    errorListener(error)
   }
 }
