@@ -1,13 +1,11 @@
-// The identification error shared by Android, iOS, and web.
+// The identification request error shared by Android, iOS, and web.
 
-/// An identification request that failed.
-///
 /// [code] is the client's snake_case value. Compare it with the constants on
 /// this class. Other strings are kept.
 ///
 /// Platform adapters construct this after stripping platform-only sentinels.
 final class FingerprintError implements Exception {
-  // Server errors returned by identification.
+  // Server errors returned by Identification API.
   static const failed = 'failed';
   static const requestCannotBeParsed = 'request_cannot_be_parsed';
   static const requestReadTimeout = 'request_read_timeout';
@@ -41,7 +39,7 @@ final class FingerprintError implements Exception {
   static const clientTimeout = 'client_timeout';
   static const unknownError = 'unknown_error';
 
-  // Web agent errors.
+  // JavaScript agent errors.
   static const sandboxedIframe = 'sandboxed_iframe';
   static const cspBlock = 'csp_block';
   static const invalidEndpoint = 'invalid_endpoint';

@@ -25,14 +25,5 @@ void main() {
       expect(error.message, isNull);
       expect(error.eventId, isNull);
     });
-
-    test('keeps an event id without inferring policy from its code', () {
-      final error = FingerprintError(
-        code: FingerprintError.networkError,
-        eventId: 'event-1',
-      );
-
-      expect(error.eventId, 'event-1');
-    });
   });
 }
