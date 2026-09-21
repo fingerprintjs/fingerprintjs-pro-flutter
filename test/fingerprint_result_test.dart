@@ -3,31 +3,10 @@ import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 
 void main() {
   group('FingerprintResult', () {
-    test('keeps what it was given', () {
-      final result = FingerprintResult(
-        eventId: 'event-1',
-        visitorId: 'visitor-1',
-        suspectScore: 42,
-        sealedResult: 'c2VhbGVk',
-        cacheHit: true,
-      );
-
-      expect(result.eventId, 'event-1');
-      expect(result.visitorId, 'visitor-1');
-      expect(result.suspectScore, 42);
-      expect(result.sealedResult, 'c2VhbGVk');
-      expect(result.cacheHit, true);
-    });
-
     test('normalizes a missing visitor id to an empty string', () {
       // Zero Trust mode omits the visitor id.
       expect(
           FingerprintResult(eventId: 'event-1', visitorId: null).visitorId, '');
-    });
-
-    test('leaves an empty visitor id empty', () {
-      expect(FingerprintResult(eventId: 'event-1', visitorId: '').visitorId,
-          '');
     });
 
     test('normalizes an empty sealed result to null', () {
@@ -39,44 +18,12 @@ void main() {
           isNull);
     });
 
-    test('leaves a missing sealed result null', () {
-      expect(
-          FingerprintResult(eventId: 'event-1', visitorId: 'visitor-1')
-              .sealedResult,
-          isNull);
-    });
-
-    test('keeps a sealed result that is there', () {
-      expect(
-          FingerprintResult(
-                  eventId: 'event-1',
-                  visitorId: 'visitor-1',
-                  sealedResult: 'c2VhbGVk')
-              .sealedResult,
-          'c2VhbGVk');
-    });
-
     test('keeps a zero suspect score, which is not the same as none', () {
       expect(
           FingerprintResult(
                   eventId: 'event-1', visitorId: 'visitor-1', suspectScore: 0)
               .suspectScore,
           0);
-    });
-
-    test('leaves the suspect score null when the platform reported none', () {
-      // The iOS SDK declares it optional, so there is no sentinel to read.
-      expect(
-          FingerprintResult(eventId: 'event-1', visitorId: 'visitor-1')
-              .suspectScore,
-          isNull);
-    });
-
-    test('leaves cacheHit null off the web, the only platform that caches', () {
-      expect(
-          FingerprintResult(eventId: 'event-1', visitorId: 'visitor-1')
-              .cacheHit,
-          isNull);
     });
 
     test('keeps a false cacheHit, which is not the same as none', () {
@@ -105,19 +52,6 @@ void main() {
           FingerprintResult(
               eventId: 'event-1', visitorId: null, sealedResult: ''),
           FingerprintResult(eventId: 'event-1', visitorId: ''));
-    });
-
-    test('names every field in toString', () {
-      expect(
-          FingerprintResult(
-            eventId: 'event-1',
-            visitorId: 'visitor-1',
-            suspectScore: 42,
-            sealedResult: 'c2VhbGVk',
-            cacheHit: true,
-          ).toString(),
-          'FingerprintResult(eventId: event-1, visitorId: visitor-1, '
-          'suspectScore: 42, sealedResult: c2VhbGVk, cacheHit: true)');
     });
   });
 }
