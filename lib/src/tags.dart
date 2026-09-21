@@ -1,38 +1,29 @@
 /// Validation of the `tags` argument.
 ///
-/// Tags use the same string-keyed map on every platform. Android and iOS
-/// require that shape, and the web agent accepts it. See the Android v4
-/// [interface](https://github.com/fingerprintjs/fingerprintjs-pro-android-private/blob/f6b574089e8dfb98747a0901bfe506b67b49c6a2/fpjs-pro/src/main/java/com/fingerprint/android/Fingerprint.kt#L63-L89)
-/// and iOS v4 [metadata](https://github.com/fingerprintjs/fingerprintjs-pro-ios-private/blob/0dae3509bc38080d2c57ad295a3cbb6962b21273/Sources/FingerprintPro/Library/Metadata.swift#L1-L25).
-///
-/// There is no size cap here. The
-/// [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a
-/// server-side product limit reported as `payload_too_large`.
+/// Same string-keyed map on every platform. No size cap here. The server
+/// enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
+/// as `payload_too_large`.
 library;
 
 /// Throws an [ArgumentError] unless [tags] is recursively JSON-compatible.
 ///
-/// The root is a map with [String] keys. Its values can contain [String], [num],
-/// [bool], null, [List] and nested maps. Rejects anything else, because it
-/// cannot survive the trip to the server: an arbitrary Dart object has no JSON
-/// form, a non-string nested map key has no JSON key, a non-finite double has no
-/// JSON literal, and a collection that contains itself has no end.
+/// Root is a string-keyed map. Values may be [String], [num], [bool], null,
+/// [List], or nested maps. Rejects non-JSON objects, non-string keys,
+/// non-finite numbers, and cycles.
 void validateTags(Map<String, Object?>? tags) {
   if (tags != null) {
     _validate(tags, 'tags', []);
   }
 }
 
-/// Validates [value], with [enclosing] holding the collections currently being
-/// walked, outermost first, so a collection that contains itself is rejected
-/// rather than followed until the stack runs out.
+/// Walks [value]. [enclosing] is the collections currently being visited,
+/// outermost first, so a cycle is rejected before the stack overflows.
 void _validate(Object? value, String path, List<Object> enclosing) {
   if (value == null || value is String || value is bool) {
     return;
   }
-  // One `num` branch rather than `int` and `double` ones: on the web every
-  // number is a double, and `double.infinity is int` is true there because the
-  // check is a floor comparison. Split branches would let infinity through.
+  // On the web, `double.infinity is int` is true. One `num` check so infinity
+  // is rejected.
   if (value is num) {
     if (!value.isFinite) {
       throw ArgumentError.value(
@@ -76,11 +67,8 @@ void _validate(Object? value, String path, List<Object> enclosing) {
   );
 }
 
-/// Throws an [ArgumentError] if [collection] is one of the collections already
-/// being walked, which means the tags contain a cycle.
-///
-/// Compared by identity, so the same collection appearing twice side by side is
-/// still fine. Only a collection reachable from itself is a cycle.
+/// Rejects [collection] if it is already being walked. Compared by identity,
+/// so the same map twice side by side is fine.
 void _checkNotEnclosing(
   Object collection,
   String path,

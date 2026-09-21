@@ -1,44 +1,39 @@
 /// The result of a successful identification request.
 ///
-/// The constructor normalizes what the platforms report inconsistently, so
-/// every implementation, Android, iOS and web, produces the same shape.
+/// The constructor normalizes values the platforms report differently.
 final class FingerprintResult {
   /// Identifier of this identification event. Different for every request.
   ///
-  /// Use it to look the event up in the
-  /// [Server API](https://dev.fingerprint.com/reference/getevent).
+  /// Look it up in the [Server API](https://dev.fingerprint.com/reference/getevent).
   final String eventId;
 
   /// The visitor identifier.
   ///
-  /// An empty string when the visitor could not be identified, which happens
-  /// with [Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)
-  /// traffic, and with bots and modified browsers.
+  /// Empty when the visitor could not be identified. See
+  /// [Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode).
   final String visitorId;
 
-  /// How likely it is that the request came from a bad actor, from 0 to 100.
+  /// How likely the request came from a bad actor, 0 to 100.
   ///
   /// Null when the platform did not report one. See
   /// [Suspect Score](https://dev.fingerprint.com/docs/suspect-score).
   final int? suspectScore;
 
-  /// The encrypted `/events` Server API response for this event, base64-encoded.
+  /// Encrypted `/events` response for this event, base64-encoded.
   ///
   /// Null unless [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results)
   /// are enabled and available.
   final String? sealedResult;
 
-  /// Whether the result came from the agent's cache instead of the server.
+  /// Whether the result came from the agent's cache.
   ///
-  /// Always null outside the web, which is the only platform that caches.
+  /// Null outside the web. Only the web agent caches.
   final bool? cacheHit;
 
-  /// Creates a result, normalizing the values the platforms disagree on.
+  /// Creates a result.
   ///
-  /// A null [visitorId] becomes an empty string, and an empty [sealedResult]
-  /// becomes null: Android and iOS send an empty string where the web agent
-  /// omits the field, and neither absence should surface as two different
-  /// values.
+  /// A null [visitorId] becomes `''`. An empty [sealedResult] becomes null
+  /// (native sends `''` where web omits the field).
   FingerprintResult({
     required this.eventId,
     required String? visitorId,

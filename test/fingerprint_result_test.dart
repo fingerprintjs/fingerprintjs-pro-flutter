@@ -4,13 +4,11 @@ import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 void main() {
   group('FingerprintResult', () {
     test('normalizes a missing visitor id to an empty string', () {
-      // Zero Trust mode omits the visitor id.
       expect(
           FingerprintResult(eventId: 'event-1', visitorId: null).visitorId, '');
     });
 
     test('normalizes an empty sealed result to null', () {
-      // Android and iOS send an empty string where the web agent omits it.
       expect(
           FingerprintResult(
                   eventId: 'event-1', visitorId: 'visitor-1', sealedResult: '')

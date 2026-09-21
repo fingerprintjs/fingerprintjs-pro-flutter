@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/src/tags.dart';
 
-/// A value with no JSON form, standing in for any Dart object a caller
-/// might pass by mistake.
+/// A value with no JSON form.
 class _NotJson {
   const _NotJson();
 }
@@ -174,7 +173,6 @@ void main() {
     });
 
     test('accepts the same collection twice when it is not a cycle', () {
-      // Shared structure is fine: it serializes to two copies, not a loop.
       final shared = {'nested': true};
 
       expect(

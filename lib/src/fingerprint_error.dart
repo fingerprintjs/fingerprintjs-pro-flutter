@@ -2,13 +2,10 @@
 
 /// An identification request that failed.
 ///
-/// [code] uses the snake_case value reported by the identification client.
-/// Compare it with the constants on this class. New native SDK or web agent
-/// versions may report other values, which remain available unchanged.
+/// [code] is the client's snake_case value. Compare it with the constants on
+/// this class. Other strings are kept.
 ///
-/// Platform adapters translate native errors into this type. They also remove
-/// platform-only sentinel values before constructing it. This keeps platform
-/// rules out of the public error type.
+/// Platform adapters construct this after stripping platform-only sentinels.
 final class FingerprintError implements Exception {
   // Server errors returned by identification.
   static const failed = 'failed';
@@ -60,19 +57,16 @@ final class FingerprintError implements Exception {
   static const wrongWorkerOption = 'wrong_worker_option';
   static const workerInitializationFailed = 'worker_initialization_failed';
 
-  /// The machine-readable error code.
-  ///
-  /// This is not limited to the known constants. Keeping an unfamiliar code
-  /// lets applications log or handle an error added by a newer client.
+  /// The machine-readable error code. Not limited to the constants above.
   final String code;
 
   /// What the client said went wrong, if it said anything.
   final String? message;
 
-  /// The server event associated with the failure, if the client reported it.
+  /// The server event for this failure, if the client reported one.
   final String? eventId;
 
-  /// Creates an error from values normalized by a platform adapter.
+  /// Creates an error from values a platform adapter already normalized.
   ///
   /// An empty code becomes [unknownError]. Empty optional strings become null.
   FingerprintError({required String code, String? message, String? eventId})
