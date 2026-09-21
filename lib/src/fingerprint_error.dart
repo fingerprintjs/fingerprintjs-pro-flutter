@@ -1,8 +1,4 @@
 // The identification error shared by Android, iOS, and web.
-//
-// Known codes follow the React Native identification contract. Shared Server
-// API codes that identification cannot return are intentionally absent:
-// https://github.com/fingerprintjs/fingerprintjs-pro-react-native/commit/1fcc272c943e362a12fe1c0f21429a5f47c22e81
 
 /// An identification request that failed.
 ///
@@ -12,9 +8,7 @@
 ///
 /// Platform adapters translate native errors into this type. They also remove
 /// platform-only sentinel values before constructing it. This keeps platform
-/// rules out of the public error type. The React Native SDK uses the same
-/// model:
-/// https://github.com/fingerprintjs/fingerprintjs-pro-react-native/blob/15ed1c477c1c8bfe39a3c200d4d7db01f70ec666/sdk/src/errors.ts#L66-L105
+/// rules out of the public error type.
 final class FingerprintError implements Exception {
   // Server errors returned by identification.
   static const failed = 'failed';
@@ -28,7 +22,6 @@ final class FingerprintError implements Exception {
   static const wrongRegion = 'wrong_region';
   static const featureNotEnabled = 'feature_not_enabled';
   static const visitorNotFound = 'visitor_not_found';
-  static const eventNotFound = 'event_not_found';
   static const missingModule = 'missing_module';
   static const payloadTooLarge = 'payload_too_large';
   static const serviceUnavailable = 'service_unavailable';

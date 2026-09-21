@@ -3,10 +3,10 @@ import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
 
 void main() {
   group('FingerprintError', () {
-    test('keeps a code added by a newer identification client', () {
-      final error = FingerprintError(code: 'some_future_code');
+    test('keeps a Server API-only code that has no constant', () {
+      final error = FingerprintError(code: 'unexpected_error_code');
 
-      expect(error.code, 'some_future_code');
+      expect(error.code, 'unexpected_error_code');
     });
 
     test('normalizes an empty code to unknown_error', () {

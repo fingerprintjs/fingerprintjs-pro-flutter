@@ -156,9 +156,9 @@ the extended response types, `ConfidenceScore`, `IpLocation`, `StSeenAt`,
 Every platform throws one `FingerprintError`. The platform adapters translate
 native names to canonical snake_case codes and normalize platform-only values.
 The error class keeps unfamiliar codes unchanged. Its known constants include
-only errors identification clients can return. Shared Server API-only codes are
-excluded,
-[as React Native does](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/commit/1fcc272c943e362a12fe1c0f21429a5f47c22e81).
+only errors identification clients can return. Server API-only codes are
+excluded: `secret_api_key_*`, `state_not_ready`, `subscription_not_found`,
+`ruleset_not_found`, `request_not_found`, and `event_not_found`.
 
 ### Native client lifecycle
 
