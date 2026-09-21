@@ -17,6 +17,11 @@ class MethodChannelFingerprint extends FingerprintPlatform {
 
   @override
   Future<void> init(FingerprintConfig config) async {
+    try {
+      await _hostApi.create(_toNativeConfig(config));
+    } on PlatformException catch (exception) {
+      throw unwrapError(exception);
+    }
     _config = config;
   }
 

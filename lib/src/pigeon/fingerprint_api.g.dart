@@ -272,6 +272,27 @@ class FingerprintHostApi {
 
   final String pigeonVar_messageChannelSuffix;
 
+  /// Builds the native Fingerprint client immediately so location can warm
+  /// before identification. get still carries config and reuses this client.
+  /// https://docs.fingerprint.com/docs/ios-sdk
+  Future<void> create(FingerprintNativeConfig config) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[config]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
   Future<FingerprintNativeResult> get(FingerprintNativeConfig config, Map<Object?, Object?>? tags, String? linkedId, int? timeoutMs) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(

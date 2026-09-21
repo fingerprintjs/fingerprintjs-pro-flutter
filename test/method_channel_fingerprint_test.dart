@@ -24,6 +24,28 @@ void main() {
   });
 
   group('config and call forwarding', () {
+    test('creates the native client during init', () async {
+      await FingerprintPlatform.instance.init(FingerprintConfig(
+        apiKey: 'key-1',
+        pluginVersion: '9.9.9',
+        region: Region.eu,
+        endpoint: 'https://primary.example',
+        endpointFallbacks: ['https://fallback.example'],
+        allowUseOfLocationData: true,
+        locationTimeoutMillisAndroid: 3000,
+      ));
+
+      expect(fakeHostApi.createdConfig?.apiKey, 'key-1');
+      expect(fakeHostApi.createdConfig?.region, 'eu');
+      expect(fakeHostApi.createdConfig?.endpoints, [
+        'https://primary.example',
+        'https://fallback.example',
+      ]);
+      expect(fakeHostApi.createdConfig?.pluginVersion, '9.9.9');
+      expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
+      expect(fakeHostApi.createdConfig?.locationTimeoutMillis, 3000);
+    });
+
     test('forwards stored config and get arguments on every call', () async {
       await FingerprintPlatform.instance.init(FingerprintConfig(
         apiKey: 'key-1',
@@ -53,6 +75,24 @@ void main() {
       expect(fakeHostApi.lastTags, {'sessionId': 1});
       expect(fakeHostApi.lastLinkedId, 'link-1');
       expect(fakeHostApi.lastTimeoutMs, 500);
+    });
+
+    test('failed create does not store config', () async {
+      fakeHostApi.nextCreateError = PlatformException(
+        code: 'unknown_error',
+        message: 'Invalid region: xx',
+      );
+      await expectLater(
+        FingerprintPlatform.instance.init(FingerprintConfig(
+          apiKey: 'key-1',
+          pluginVersion: '9.9.9',
+        )),
+        throwsA(isA<FingerprintProError>()),
+      );
+      await expectLater(
+        FingerprintPlatform.instance.getVisitorId(),
+        throwsException,
+      );
     });
   });
 
@@ -113,6 +153,7 @@ void main() {
 }
 
 class FakeFingerprintHostApi extends FingerprintHostApi {
+  FingerprintNativeConfig? createdConfig;
   FingerprintNativeConfig? lastConfig;
   Map<Object?, Object?>? lastTags;
   String? lastLinkedId;
@@ -126,6 +167,15 @@ class FakeFingerprintHostApi extends FingerprintHostApi {
   );
 
   PlatformException? nextError;
+  PlatformException? nextCreateError;
+
+  @override
+  Future<void> create(FingerprintNativeConfig config) async {
+    if (nextCreateError != null) {
+      throw nextCreateError!;
+    }
+    createdConfig = config;
+  }
 
   @override
   Future<FingerprintNativeResult> get(

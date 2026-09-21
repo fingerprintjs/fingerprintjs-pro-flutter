@@ -108,7 +108,7 @@ wired to stubs asserts only that codegen ran. Split by provable unit.
 | | Scope | Proves |
 |---|---|---|
 | **4a** | `FingerprintResult`, `FingerprintError`, known error constants, tag validation. Pure Dart, public API unchanged. | Result mapping, tag validation and open error codes pass unit tests with no native or web code. |
-| **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, one client serves repeated calls, error codes survive a minified build. |
+| **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, `init` creates a native client that later gets reuse, error codes survive a minified build. |
 | **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app. | No tuple or v3 web implementation remains; two-client independence, tag forwarding, mocked web agent, and the example app on all three platforms. |
 
 The public API never ships over a v3 web implementation. That binds at 4c.
@@ -177,19 +177,18 @@ Two separate decisions; only the first is an invariant.
 
 **Messages are stateless.** Every get carries the full config and nothing
 refers to a previously established native client, so two Dart clients with
-different configs stay independent and no `init`/`get` ordering can fail.
+different configs stay independent and identification cannot fail because
+`create` was skipped.
 
-**Clients are not.** Each platform holds a `Map<configKey, NativeClient>`
-keyed by a hash of the resolved config, created on first use. This keeps
-independence without a client handle or disposal protocol, which Dart
-finalizers cannot reliably close.
-
-Reuse is a correctness requirement, not only latency: the iOS SDK documents
-that with `allowUseOfLocationData` the client should be created early and kept
-for the app's lifetime for location precision, so a per-call client would pay
-`locationTimeoutMillis` every call. Android documents nothing either way and
-its artifact is obfuscated. 4b asserts reuse rather than assuming it, and the
-Android warm-state question goes to the native SDK team.
+**Clients are created at Dart init.** `init` (and later the `Fingerprint`
+constructor) calls native `create`, which inserts into
+`Map<configKey, NativeClient>`. `get` uses the same cache and still creates
+if `create` never ran. iOS documents that with `allowUseOfLocationData` the
+client should be created at app start and kept for the process lifetime, so
+the first identification is not the first time the native client exists.
+https://docs.fingerprint.com/docs/ios-sdk
+Android's quickstart creates the client in `onCreate` before UI.
+https://docs.fingerprint.com/docs/android-quickstart
 
 ### Web (4c)
 

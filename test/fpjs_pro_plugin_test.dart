@@ -110,6 +110,9 @@ class FakeFingerprintHostApi extends FingerprintHostApi {
   );
 
   @override
+  Future<void> create(FingerprintNativeConfig config) async {}
+
+  @override
   Future<FingerprintNativeResult> get(
     FingerprintNativeConfig config,
     Map<Object?, Object?>? tags,

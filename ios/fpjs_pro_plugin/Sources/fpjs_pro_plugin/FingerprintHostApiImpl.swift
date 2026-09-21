@@ -13,6 +13,10 @@ private final class CompletionBox: @unchecked Sendable {
 final class FingerprintHostApiImpl: FingerprintHostApi {
   private let clientCache = FingerprintClientCache()
 
+  func create(config: FingerprintNativeConfig) throws {
+    _ = nativeClient(for: config)
+  }
+
   func get(
     config: FingerprintNativeConfig,
     tags: [AnyHashable?: Any?]?,
@@ -20,8 +24,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     timeoutMs: Int64?,
     completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void
   ) {
-    let (configuration, cacheKey) = buildConfiguration(config: config)
-    let client = clientCache.getOrCreate(configuration: configuration, cacheKey: cacheKey)
+    let client = nativeClient(for: config)
     let metadata = prepareMetadata(linkedId: linkedId, tags: tags)
     let timeoutSeconds: TimeInterval? = timeoutMs.map { TimeInterval($0) / 1000.0 }
     let box = CompletionBox(completion)
@@ -52,6 +55,11 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     } else {
       client.getVisitorIdResponse(metadata, completion: handler)
     }
+  }
+
+  private func nativeClient(for config: FingerprintNativeConfig) -> FingerprintClientProviding {
+    let (configuration, cacheKey) = buildConfiguration(config: config)
+    return clientCache.getOrCreate(configuration: configuration, cacheKey: cacheKey)
   }
 
   private func buildConfiguration(config: FingerprintNativeConfig) -> (Configuration, String) {

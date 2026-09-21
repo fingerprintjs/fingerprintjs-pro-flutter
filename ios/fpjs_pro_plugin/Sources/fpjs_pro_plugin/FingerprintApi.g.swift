@@ -338,6 +338,10 @@ class FingerprintApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendabl
 
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol FingerprintHostApi {
+  /// Builds the native Fingerprint client immediately so location can warm
+  /// before identification. get still carries config and reuses this client.
+  /// https://docs.fingerprint.com/docs/ios-sdk
+  func create(config: FingerprintNativeConfig) throws
   func get(config: FingerprintNativeConfig, tags: [AnyHashable?: Any?]?, linkedId: String?, timeoutMs: Int64?, completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void)
 }
 
@@ -347,6 +351,24 @@ class FingerprintHostApiSetup {
   /// Sets up an instance of `FingerprintHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: FingerprintHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    /// Builds the native Fingerprint client immediately so location can warm
+    /// before identification. get still carries config and reuses this client.
+    /// https://docs.fingerprint.com/docs/ios-sdk
+    let createChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      createChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let configArg = args[0] as! FingerprintNativeConfig
+        do {
+          try api.create(config: configArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      createChannel.setMessageHandler(nil)
+    }
     let getChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getChannel.setMessageHandler { message, reply in

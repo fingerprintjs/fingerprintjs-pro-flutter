@@ -331,6 +331,12 @@ private open class FingerprintApiPigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface FingerprintHostApi {
+  /**
+   * Builds the native Fingerprint client immediately so location can warm
+   * before identification. get still carries config and reuses this client.
+   * https://docs.fingerprint.com/docs/ios-sdk
+   */
+  fun create(config: FingerprintNativeConfig)
   fun get(config: FingerprintNativeConfig, tags: Map<Any?, Any?>?, linkedId: String?, timeoutMs: Long?, callback: (Result<FingerprintNativeResult>) -> Unit)
 
   companion object {
@@ -342,6 +348,24 @@ interface FingerprintHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: FingerprintHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val configArg = args[0] as FingerprintNativeConfig
+            val wrapped: List<Any?> = try {
+              api.create(configArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              FingerprintApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get$separatedMessageChannelSuffix", codec)
         if (api != null) {

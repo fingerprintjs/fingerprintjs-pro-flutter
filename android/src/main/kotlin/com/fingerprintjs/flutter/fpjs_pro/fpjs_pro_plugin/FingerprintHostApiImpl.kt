@@ -10,6 +10,10 @@ internal class FingerprintHostApiImpl(
   private val clientCache: FingerprintClientCache = FingerprintClientCache(applicationContext),
 ) : FingerprintHostApi {
 
+  override fun create(config: FingerprintNativeConfig) {
+    nativeClient(config)
+  }
+
   override fun get(
     config: FingerprintNativeConfig,
     tags: Map<Any?, Any?>?,
@@ -17,13 +21,12 @@ internal class FingerprintHostApiImpl(
     timeoutMs: Long?,
     callback: (Result<FingerprintNativeResult>) -> Unit,
   ) {
-    val nativeConfig = try {
-      buildConfiguration(config)
+    val client = try {
+      nativeClient(config)
     } catch (error: FlutterError) {
       callback(Result.failure(error))
       return
     }
-    val client = clientCache.getOrCreate(nativeConfig, config.pluginVersion)
     val tagMap = pigeonTagsToNative(tags)
     val linked = linkedId ?: ""
     val listener: (FingerprintResponse) -> Unit = { response ->
@@ -47,6 +50,9 @@ internal class FingerprintHostApiImpl(
       client.getVisitorId(tagMap, linked, listener, errorListener)
     }
   }
+
+  private fun nativeClient(config: FingerprintNativeConfig) =
+    clientCache.getOrCreate(buildConfiguration(config), config.pluginVersion)
 
   internal fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
     val region = parseRegion(config.region)
