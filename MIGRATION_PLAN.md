@@ -56,12 +56,11 @@ Native needed for the same Android SDK. This was the largest open risk.
 Two defects it leaves for PR 4:
 
 - **Android error codes are R8-unsafe.** They come from
-  `error.javaClass.simpleName`, and the v4 AAR's consumer `proguard.txt` keeps
-  only 11 of the ~37 `com.fingerprint.android.*` error classes, so codes are
-  wrong in minified release builds. 4b replaces the reflection with an
-  exhaustive `when (error) { is ApiKeyRequired -> ... }`, and derives the
-  canonical code from the same mapping. Not a keep rule: it would leak into
-  every consumer build.
+  `error.javaClass.simpleName`. The v4 AAR appears to ship no consumer keep
+  rules for error class names (unconfirmed against the published AAR), so
+  codes are wrong in minified builds. 4b maps types with
+  `when (error) { is ApiKeyRequired -> ... }`, keyed off the server condition,
+  not the class name. Not a keep rule: it would leak into every consumer build.
 - **The positional tuple lies.** Index 0 is named `requestId` and carries
   `eventId`; index 1 is named `confidenceScore` and carries `suspectScore`.
   4b removes it.
@@ -123,7 +122,7 @@ The public API never ships over a v3 web implementation. That binds at 4c.
   `int? suspectScore`, `String? sealedResult`, web-only `bool? cacheHit`.
   `suspectScore` is nullable because the iOS v4 SDK declares it `Int?`; React
   Native's `-1` sentinel is not carried over. A missing Zero Trust `visitorId`
-  normalizes to `''`.
+  normalizes to `''`. An empty native `sealedResult` normalizes to `null`.
 - `AndroidOptions`, `IosOptions`, `WebOptions` hold platform settings; shared
   settings and the single ordered `endpoints` list stay at top level. All
   timeouts are `Duration`.
@@ -143,9 +142,6 @@ The public API never ships over a v3 web implementation. That binds at 4c.
   [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a
   server-side product limit reported as `payload_too_large`. Document it
   instead.
-- Also fix: `ipAddress` and `osName` accept two key spellings
-  (`json['ip'] ?? json['ipAddress']`); `sealedResult` is `String?` but both
-  native platforms send an empty string, normalized to `null`.
 
 Deleted in 4c with the swap: the positional tuple, `FingerprintJSProResponse`,
 the extended response types, `ConfidenceScore`, `IpLocation`, `StSeenAt`,
@@ -159,6 +155,19 @@ The error class keeps unfamiliar codes unchanged. Its known constants include
 only errors identification clients can return. Server API-only codes are
 excluded: `secret_api_key_*`, `state_not_ready`, `subscription_not_found`,
 `ruleset_not_found`, `request_not_found`, and `event_not_found`.
+`request_timeout` is Android's class name for `request_read_timeout`, not a
+v4 API code.
+
+### Native (4b)
+
+- Map native types to canonical codes with `when (error) { is ApiKeyRequired ->
+  ... }`. Key off the server condition, not `javaClass.simpleName`.
+  `RequestTimeout` is `request_read_timeout`.
+- Forward `eventId` from iOS `APIError.eventId` and Android `Error.eventId`.
+  Today's plugin drops both. Strip Android's `"Unknown"` sentinel.
+- Read iOS `FPError.description`, not `localizedDescription`. `FPError`
+  implements `CustomStringConvertible`, not `LocalizedError`.
+- An iOS `APIError` with no code is `unknown_error`, not `failed`.
 
 ### Native client lifecycle
 
@@ -182,8 +191,10 @@ Android warm-state question goes to the native SDK team.
 
 ### Web (4c)
 
-Rewrite `FingerprintWeb` for the v4 start/get API. Add `urlHashing`,
-`storageKeyPrefix`, and an optional `cache` configuration: required storage
+Rewrite `FingerprintWeb` for the v4 start/get API of `@fingerprint/agent`.
+The current pin is `@fingerprintjs/fingerprintjs-pro` 3.12.x, which has no v4.
+4c is a package swap. Add `urlHashing`, `storageKeyPrefix`, and an optional
+`cache` configuration: required storage
 (`sessionStorage`, `localStorage`, `agent`), a duration (`optimize-cost`,
 `aggressive`, or a custom `Duration` up to 12 hours), and an optional key
 prefix. Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
