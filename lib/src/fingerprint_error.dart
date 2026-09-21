@@ -61,7 +61,7 @@ final class FingerprintError implements Exception {
   /// What the client said went wrong, if it said anything.
   final String? message;
 
-  /// The identifcation event ID for this failure, if the client reported one.
+  /// The identification event ID for this failure, if the client reported one.
   final String? eventId;
 
   /// Creates an error from values a platform adapter already normalized.

@@ -122,7 +122,7 @@ The public API never ships over a v3 web implementation. That binds at 4c.
   `int? suspectScore`, `String? sealedResult`, web-only `bool? cacheHit`.
   `suspectScore` is nullable because the iOS v4 SDK declares it `Int?`; React
   Native's `-1` sentinel is not carried over. Empty native `visitorId` and
-  `sealedResult` become null, matching the JS agent omit.
+  `sealedResult` become null, matching fields the JS agent omits.
 - `AndroidOptions`, `IosOptions`, `WebOptions` hold platform settings; shared
   settings and the single ordered `endpoints` list stay at top level. All
   timeouts are `Duration`.
