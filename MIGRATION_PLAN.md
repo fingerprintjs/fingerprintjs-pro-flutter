@@ -134,9 +134,9 @@ The public API never ships over a v3 web implementation. That binds at 4c.
   `extends` avoids inheriting an implementation the type does not need
   ([Dart core](https://dart.dev/libraries/dart-core#exceptions)).
 - `tags` accepts a string-keyed map containing recursively JSON-compatible
-  values. The same map is forwarded on every platform. This matches the
-  existing Flutter contract and the map required by Android and iOS. Reject
-  only what cannot reach the server: non-JSON Dart objects, non-string nested
+  values. The same map is forwarded on every platform, including JSON null.
+  iOS converts through `JSONType` (`JSONType.null` for null). Reject only
+  what cannot reach the server: non-JSON Dart objects, non-string nested
   keys, non-finite numbers, and cyclic collections.
 - No client-side tag size cap. The
   [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a
@@ -170,6 +170,9 @@ v4 API code.
 - An iOS `APIError` with no code is `unknown_error`, not `failed`.
 - Pigeon can carry `visitorId` as `String`. Empty becomes null on
   `FingerprintResult`.
+- Keep JSON null tags: Android HashMap (SDK type is `Map<String, Any>`),
+  iOS `JSONType.null`. Nested iOS maps may arrive as `[AnyHashable: Any]`;
+  convert by string key.
 
 ### Native client lifecycle
 

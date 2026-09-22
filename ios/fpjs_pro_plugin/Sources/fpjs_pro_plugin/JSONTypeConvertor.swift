@@ -1,39 +1,62 @@
-//
-//  JSONTypeConvertor.swift
-//  fpjs_pro_plugin
-//
-//  Created by Petr Palata on 23.08.2022.
-//
+// Converts Flutter/Pigeon tag values to Fingerprint.JSONType.
+// JSON null is JSONType.null. Nested maps often arrive as [AnyHashable: Any].
+// https://docs.fingerprint.com/docs/tagging-information
 
 import Foundation
 @preconcurrency import Fingerprint
 
 class JSONTypeConvertor {
-    static func convertDictionaryToJSONTypeConvertible(_ dict: [String: Any]) -> [String: JSONTypeConvertible] {
-        var jsonDict: [String: JSONTypeConvertible] = [:]
-        dict.forEach { key, jsonValue in
-            if let jsonTypeConvertible = convertObjectToJSONTypeConvertible(jsonValue) {
-                jsonDict[key] = jsonTypeConvertible
-            }
-        }
-        return jsonDict
+  static func convert(_ object: Any?) -> JSONType? {
+    guard let object else {
+      return .null
     }
-    
-    static func convertObjectToJSONTypeConvertible(_ object: Any) -> JSONTypeConvertible? {
-        if let intValue = object as? Int {
-            return intValue
-        } else if let doubleValue = object as? Double {
-            return doubleValue
-        } else if let stringValue = object as? String {
-            return stringValue
-        } else if let boolValue = object as? Bool {
-            return boolValue
-        } else if let dictValue = object as? [String: Any] {
-            return convertDictionaryToJSONTypeConvertible(dictValue)
-        } else if let arrayValue = object as? [Any] {
-            return arrayValue.compactMap { convertObjectToJSONTypeConvertible($0) }
-        } else {
-            return nil
-        }
+    if object is NSNull {
+      return .null
     }
+    if let value = object as? Int {
+      return .int(value)
+    }
+    if let value = object as? Double {
+      return .double(value)
+    }
+    if let value = object as? String {
+      return .string(value)
+    }
+    if let value = object as? Bool {
+      return .bool(value)
+    }
+    if let array = object as? [Any] {
+      return .array(array.compactMap(convert))
+    }
+    if let array = object as? [Any?] {
+      return .array(array.compactMap(convert))
+    }
+    if let entries = stringKeyedEntries(object) {
+      var result: [String: JSONType] = [:]
+      for (key, value) in entries {
+        if let converted = convert(value) {
+          result[key] = converted
+        }
+      }
+      return .object(result)
+    }
+    return nil
+  }
+
+  private static func stringKeyedEntries(_ object: Any) -> [(String, Any?)]? {
+    if let dict = object as? [String: Any?] {
+      return Array(dict)
+    }
+    if let dict = object as? [AnyHashable: Any?] {
+      return dict.compactMap { key, value in
+        (key as? String).map { ($0, value) }
+      }
+    }
+    if let dict = object as? [AnyHashable: Any] {
+      return dict.compactMap { key, value in
+        (key as? String).map { ($0, value) }
+      }
+    }
+    return nil
+  }
 }

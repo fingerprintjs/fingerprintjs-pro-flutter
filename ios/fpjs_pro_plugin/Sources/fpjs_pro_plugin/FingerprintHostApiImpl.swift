@@ -96,14 +96,11 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     guard let tags else {
       return metadata
     }
-    var dict: [String: Any] = [:]
     for (key, value) in tags {
-      guard let key, let value else { continue }
-      dict[key] = value
-    }
-    let jsonTags = JSONTypeConvertor.convertDictionaryToJSONTypeConvertible(dict)
-    jsonTags.forEach { key, jsonType in
-      metadata.setTag(jsonType, forKey: key)
+      guard let key else { continue }
+      if let jsonType = JSONTypeConvertor.convert(value) {
+        metadata.setTag(jsonType, forKey: key)
+      }
     }
     return metadata
   }
