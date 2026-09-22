@@ -192,7 +192,11 @@ class FakeAgent {
         : (options.dartify() as Map).cast<Object?, Object?>();
     final error = nextError;
     if (error != null) {
-      return Future<JSObject>.error(error.jsify()!).toJS;
+      final jsError = JSObject();
+      jsError['code'] = (error['code'] as String).toJS;
+      jsError['message'] = (error['message'] as String).toJS;
+      jsError['event_id'] = (error['event_id'] as String).toJS;
+      throw jsError;
     }
     return Future<JSObject>.value(nextResult.jsify() as JSObject).toJS;
   }

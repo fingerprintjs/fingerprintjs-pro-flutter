@@ -36,9 +36,16 @@ class FingerprintWeb extends FingerprintPlatform {
   }) async {
     validateTags(tags);
     try {
-      final result = await _agentFor(config)
-          .get(_toGetOptions(tags: tags, linkedId: linkedId, timeout: timeout))
-          .toDart;
+      final agent = _agentFor(config);
+      final options = _toGetOptions(
+        tags: tags,
+        linkedId: linkedId,
+        timeout: timeout,
+      );
+      // `get(null)` is not `get()`. JS default params only apply to undefined.
+      // https://docs.fingerprint.com/reference/js-agent-get-function
+      final result =
+          await (options == null ? agent.get() : agent.get(options)).toDart;
       return _toResult(result);
     } catch (error) {
       if (error is FingerprintError) {
