@@ -69,6 +69,24 @@ void main() {
       });
     });
 
+    test('sends the aggressive cache duration', () async {
+      await platform.create(
+        config(
+          web: const WebOptions(
+            cache: WebCache(
+              storage: WebCacheStorage.localStorage,
+              duration: WebCacheDuration.aggressive,
+            ),
+          ),
+        ),
+      );
+
+      expect(fake.startOptions['cache'], {
+        'storage': 'localStorage',
+        'duration': 'aggressive',
+      });
+    });
+
     test('sends a custom cache duration in seconds', () async {
       await platform.create(
         config(

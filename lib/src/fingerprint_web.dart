@@ -117,10 +117,10 @@ JSObject? _toGetOptions({
 }
 
 Object _cacheDuration(WebCacheDuration duration) {
-  if (identical(duration, WebCacheDuration.optimizeCost)) {
+  if (duration == WebCacheDuration.optimizeCost) {
     return 'optimize-cost';
   }
-  if (identical(duration, WebCacheDuration.aggressive)) {
+  if (duration == WebCacheDuration.aggressive) {
     return 'aggressive';
   }
   return duration.seconds!;

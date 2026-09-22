@@ -81,10 +81,11 @@ enum WebCacheStorage { sessionStorage, localStorage, agent }
 /// cannot exceed 12 hours.
 /// https://docs.fingerprint.com/reference/js-agent-start-function
 class WebCacheDuration {
-  const WebCacheDuration._({this.seconds});
+  // Distinct const args so Dart does not canonicalize the presets together.
+  const WebCacheDuration._(this._kind, {this.seconds});
 
-  static const optimizeCost = WebCacheDuration._();
-  static const aggressive = WebCacheDuration._();
+  static const optimizeCost = WebCacheDuration._(_Kind.optimizeCost);
+  static const aggressive = WebCacheDuration._(_Kind.aggressive);
 
   /// [duration] in whole seconds. Must be greater than zero and at most 12 hours.
   factory WebCacheDuration.custom(Duration duration) {
@@ -95,28 +96,34 @@ class WebCacheDuration {
         'Cache duration must be greater than zero and at most 12 hours',
       );
     }
-    return WebCacheDuration._(seconds: duration.inSeconds);
+    if (duration != Duration(seconds: duration.inSeconds)) {
+      throw ArgumentError.value(
+        duration,
+        'duration',
+        'Cache duration must be a whole number of seconds',
+      );
+    }
+    return WebCacheDuration._(_Kind.custom, seconds: duration.inSeconds);
   }
 
   static const _max = Duration(hours: 12);
+
+  final _Kind _kind;
 
   /// Seconds for a custom duration. Null for [optimizeCost] and [aggressive].
   final int? seconds;
 
   @override
-  bool operator ==(Object other) {
-    if (other is! WebCacheDuration) {
-      return false;
-    }
-    if (seconds != null) {
-      return other.seconds == seconds;
-    }
-    return identical(this, other);
-  }
+  bool operator ==(Object other) =>
+      other is WebCacheDuration &&
+      other._kind == _kind &&
+      other.seconds == seconds;
 
   @override
-  int get hashCode => seconds ?? identityHashCode(this);
+  int get hashCode => Object.hash(_kind, seconds);
 }
+
+enum _Kind { optimizeCost, aggressive, custom }
 
 /// Web identification result cache. Off when omitted from [WebOptions].
 ///
