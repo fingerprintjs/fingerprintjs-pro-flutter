@@ -77,6 +77,19 @@ void main() {
       expect(fakeHostApi.lastTimeoutMs, 500);
     });
 
+    test('forwards JSON null tag values unchanged', () async {
+      await FingerprintPlatform.instance.init(FingerprintConfig(
+        apiKey: 'key-1',
+        pluginVersion: '9.9.9',
+      ));
+
+      await FingerprintPlatform.instance.getVisitorId(
+        tags: {'campaign': null, 'sessionId': 1},
+      );
+
+      expect(fakeHostApi.lastTags, {'campaign': null, 'sessionId': 1});
+    });
+
     test('forwards fallbacks when no primary endpoint is set', () async {
       await FingerprintPlatform.instance.init(FingerprintConfig(
         apiKey: 'key-1',

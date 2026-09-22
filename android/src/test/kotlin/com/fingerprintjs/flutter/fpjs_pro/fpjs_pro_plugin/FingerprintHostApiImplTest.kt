@@ -8,6 +8,7 @@ import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
 import com.fingerprint.android.RequestTimeout
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito.mock
 
@@ -59,6 +60,22 @@ class FingerprintHostApiImplTest {
       assertEquals(expectedCode, error.code)
     }
   }
+
+  @Test
+  fun getForwardsExplicitNullTagValues() {
+    val client = CapturingFingerprint()
+    val cache = FingerprintClientCache(context) { _, _ -> client }
+    FingerprintHostApiImpl(context, cache).get(
+      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      mapOf("campaign" to null, "sessionId" to 1),
+      null,
+      null,
+    ) {}
+    val tags = checkNotNull(client.tags)
+    assertTrue(tags.containsKey("campaign"))
+    assertEquals(null, tags["campaign"])
+    assertEquals(1, tags["sessionId"])
+  }
 }
 
 private class FakeFingerprint(
@@ -71,5 +88,18 @@ private class FakeFingerprint(
     errorListener: (com.fingerprint.android.Error) -> Unit,
   ) {
     errorListener(error)
+  }
+}
+
+private class CapturingFingerprint : Fingerprint by mock(Fingerprint::class.java) {
+  var tags: Map<String, Any>? = null
+
+  override fun getVisitorId(
+    tags: Map<String, Any>,
+    linkedId: String,
+    listener: (FingerprintResponse) -> Unit,
+    errorListener: (com.fingerprint.android.Error) -> Unit,
+  ) {
+    this.tags = tags
   }
 }

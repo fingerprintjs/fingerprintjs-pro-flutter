@@ -84,15 +84,20 @@ internal fun parseRegion(region: String?): Configuration.Region {
   }
 }
 
+// Keep JSON null values. The SDK type is Map<String, Any>, so this is an
+// unchecked cast of a HashMap that may contain nulls. Null keys cannot
+// be stored.
+// https://docs.fingerprint.com/docs/tagging-information
 internal fun pigeonTagsToNative(tags: Map<String?, Any?>?): Map<String, Any> {
   if (tags == null) {
     return emptyMap()
   }
-  val result = mutableMapOf<String, Any>()
+  val result = HashMap<String, Any?>(tags.size)
   for ((key, value) in tags) {
-    if (key != null && value != null) {
+    if (key != null) {
       result[key] = value
     }
   }
-  return result
+  @Suppress("UNCHECKED_CAST")
+  return result as Map<String, Any>
 }
