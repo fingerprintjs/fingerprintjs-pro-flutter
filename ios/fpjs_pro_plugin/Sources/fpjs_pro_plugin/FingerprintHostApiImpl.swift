@@ -1,5 +1,5 @@
-import Foundation
 @preconcurrency import Fingerprint
+import Foundation
 
 // Pigeon completion is not Sendable. Box it so the SDK callback can call it
 // under Swift 6.
@@ -37,6 +37,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
       case .success(let response):
         box.completion(
           .success(
+            // Native FingerprintResponse -> Pigeon result.
             FingerprintNativeResult(
               eventId: response.eventId,
               visitorId: response.visitorId,

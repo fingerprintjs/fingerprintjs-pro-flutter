@@ -253,7 +253,14 @@ data class FingerprintNativeConfig (
   }
 }
 
-/** Generated class from Pigeon that represents data sent in messages. */
+/**
+ * Pigeon copy of the Android/iOS SDK identification response.
+ *
+ * `visitorId` is `String` because those SDKs always send a string. Empty means
+ * hidden. Dart `FingerprintResult` turns empty into null.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
 data class FingerprintNativeResult (
   val eventId: String,
   val visitorId: String,

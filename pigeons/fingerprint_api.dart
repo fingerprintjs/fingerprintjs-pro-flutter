@@ -38,6 +38,10 @@ class FingerprintNativeConfig {
   int? locationTimeoutMillis;
 }
 
+/// Pigeon copy of the Android/iOS SDK identification response.
+///
+/// `visitorId` is `String` because those SDKs always send a string. Empty means
+/// hidden. Dart `FingerprintResult` turns empty into null.
 class FingerprintNativeResult {
   FingerprintNativeResult({
     required this.eventId,

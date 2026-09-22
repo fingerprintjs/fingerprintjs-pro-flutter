@@ -1,6 +1,7 @@
-/// The result of a successful identification request.
+/// Dart identification result after platform values are normalized.
 ///
-/// The constructor normalizes values the platforms report differently.
+/// Android/iOS send this through Pigeon `FingerprintNativeResult` (empty strings).
+/// Web sends omitted fields as null. The constructor maps both to the same shape.
 final class FingerprintResult {
   /// Identifier of this identification event. Different for every request.
   ///

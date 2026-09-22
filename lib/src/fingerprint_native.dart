@@ -32,12 +32,8 @@ class FingerprintNative extends FingerprintPlatform {
     int? timeoutMs,
   }) async {
     final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
-    return FingerprintResult(
-      eventId: result.eventId,
-      visitorId: result.visitorId,
-      suspectScore: result.suspectScore,
-      sealedResult: result.sealedResult,
-    ).visitorId;
+    // Native/Pigeon send "" when the id is hidden. Dart uses null.
+    return result.visitorId.isEmpty ? null : result.visitorId;
   }
 
   @override
@@ -46,6 +42,7 @@ class FingerprintNative extends FingerprintPlatform {
     String? linkedId,
     int? timeoutMs,
   }) async {
+    // Pigeon result -> Dart FingerprintResult -> old public FingerprintJSProResponse.
     final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
     final normalized = FingerprintResult(
       eventId: result.eventId,

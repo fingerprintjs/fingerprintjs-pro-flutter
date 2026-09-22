@@ -32,6 +32,7 @@ internal class FingerprintHostApiImpl(
     val listener: (FingerprintResponse) -> Unit = { response ->
       callback(
         Result.success(
+          // Native FingerprintResponse -> Pigeon result.
           FingerprintNativeResult(
             eventId = response.eventId,
             visitorId = response.visitorId,
