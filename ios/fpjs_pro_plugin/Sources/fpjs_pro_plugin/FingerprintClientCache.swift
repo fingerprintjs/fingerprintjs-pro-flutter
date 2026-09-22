@@ -3,6 +3,7 @@ import Foundation
 
 /// One [FingerprintClientProviding] per resolved configuration.
 final class FingerprintClientCache: @unchecked Sendable {
+  // Fields, not a joined string. A delimiter key can collide or drop a field.
   private struct ClientKey: Hashable {
     var apiKey: String
     var regionCode: String

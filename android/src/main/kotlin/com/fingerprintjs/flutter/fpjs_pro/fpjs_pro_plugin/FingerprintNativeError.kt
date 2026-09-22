@@ -1,4 +1,7 @@
 // Maps com.fingerprint.android.Error to Pigeon FlutterError codes (snake_case).
+// Match on type, not javaClass.simpleName. R8 can rename classes in minified
+// builds, which would send the wrong Dart code.
+// https://developer.android.com/build/shrink-code
 package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import com.fingerprint.android.ApiKeyNotFound
@@ -36,7 +39,7 @@ import com.fingerprint.android.WrongRegion
 internal fun errorCode(error: Error): String = when (error) {
   is Failed -> "failed"
   is RequestCannotBeParsed -> "request_cannot_be_parsed"
-  is RequestTimeout -> "request_read_timeout"
+  is RequestTimeout -> "request_read_timeout" // API code, not class name request_timeout
   is TooManyRequest -> "too_many_requests"
   is ApiKeyRequired -> "public_api_key_required"
   is ApiKeyNotFound -> "public_api_key_not_found"

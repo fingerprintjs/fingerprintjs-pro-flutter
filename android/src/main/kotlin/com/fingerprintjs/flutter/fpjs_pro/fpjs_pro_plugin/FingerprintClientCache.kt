@@ -15,6 +15,7 @@ internal class FingerprintClientCache(
     FingerprintFactory(context).createInstance(configuration)
   },
 ) {
+  // Fields, not a joined string. A delimiter key can collide or drop a field.
   private data class ClientKey(
     val apiKey: String,
     val region: Configuration.Region,

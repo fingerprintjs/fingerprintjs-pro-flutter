@@ -4,7 +4,7 @@ import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/method_channel_fingerprint.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_native.dart';
 import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
   setUp(() {
     fakeHostApi = FakeFingerprintHostApi();
     previousPlatform = FingerprintPlatform.instance;
-    FingerprintPlatform.instance = MethodChannelFingerprint(hostApi: fakeHostApi);
+    FingerprintPlatform.instance = FingerprintNative(hostApi: fakeHostApi);
   });
 
   tearDown(() {

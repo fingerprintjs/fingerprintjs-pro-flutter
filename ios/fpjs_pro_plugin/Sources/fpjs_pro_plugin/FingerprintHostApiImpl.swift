@@ -1,6 +1,9 @@
 import Foundation
 @preconcurrency import Fingerprint
 
+// Pigeon completion is not Sendable. Box it so the SDK callback can call it
+// under Swift 6.
+// https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Sendable-Types
 private final class CompletionBox: @unchecked Sendable {
   let completion: (Result<FingerprintNativeResult, Error>) -> Void
 

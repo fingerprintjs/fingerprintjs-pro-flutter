@@ -344,7 +344,8 @@ class FingerprintApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendabl
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol FingerprintHostApi {
   /// Builds the native Fingerprint client immediately so location can warm
-  /// before identification. get still carries config and reuses this client.
+  /// before identification. get still carries config and reuses this client,
+  /// so two Dart clients stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
   func create(config: FingerprintNativeConfig) throws
   func get(config: FingerprintNativeConfig, tags: [String?: Any?]?, linkedId: String?, timeoutMs: Int64?, completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void)
@@ -357,7 +358,8 @@ class FingerprintHostApiSetup {
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: FingerprintHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
     /// Builds the native Fingerprint client immediately so location can warm
-    /// before identification. get still carries config and reuses this client.
+    /// before identification. get still carries config and reuses this client,
+    /// so two Dart clients stay independent if create was skipped.
     /// https://docs.fingerprint.com/docs/ios-sdk
     let createChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {

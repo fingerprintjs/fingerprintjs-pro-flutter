@@ -55,7 +55,8 @@ class FingerprintNativeResult {
 @HostApi()
 abstract class FingerprintHostApi {
   /// Builds the native Fingerprint client immediately so location can warm
-  /// before identification. get still carries config and reuses this client.
+  /// before identification. get still carries config and reuses this client,
+  /// so two Dart clients stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
   void create(FingerprintNativeConfig config);
 

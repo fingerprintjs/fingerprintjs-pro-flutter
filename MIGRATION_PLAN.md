@@ -91,10 +91,10 @@ Flutter 3.47+; the 3.44 path stays supported.
 [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), partial.
 
 Add `plugin_platform_interface`, `FingerprintPlatform`,
-`MethodChannelFingerprint`, `FingerprintWeb`. Public API unchanged. Removes
+`FingerprintNative`, `FingerprintWeb`. Public API unchanged. Removes
 the web round trip, where Dart calls `invokeMethod` and the web plugin answers
 it in the same process. Comes before Pigeon so the generated code sits inside
-`MethodChannelFingerprint`.
+`FingerprintNative`.
 
 **Proves:** tests pass after replacing `FingerprintPlatform.instance`.
 

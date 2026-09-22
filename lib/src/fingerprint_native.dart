@@ -8,8 +8,8 @@ import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
 import 'package:fpjs_pro_plugin/src/tags.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
-class MethodChannelFingerprint extends FingerprintPlatform {
-  MethodChannelFingerprint({FingerprintHostApi? hostApi})
+class FingerprintNative extends FingerprintPlatform {
+  FingerprintNative({FingerprintHostApi? hostApi})
       : _hostApi = hostApi ?? FingerprintHostApi();
 
   final FingerprintHostApi _hostApi;

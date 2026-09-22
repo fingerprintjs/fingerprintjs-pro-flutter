@@ -278,7 +278,8 @@ class FingerprintHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   /// Builds the native Fingerprint client immediately so location can warm
-  /// before identification. get still carries config and reuses this client.
+  /// before identification. get still carries config and reuses this client,
+  /// so two Dart clients stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
   Future<void> create(FingerprintNativeConfig config) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create$pigeonVar_messageChannelSuffix';
