@@ -1,39 +1,56 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fpjs_pro_plugin/options.dart';
 import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_native.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late FakeFingerprintHostApi fakeHostApi;
-  late FingerprintPlatform previousPlatform;
+  late FingerprintNative platform;
 
   setUp(() {
     fakeHostApi = FakeFingerprintHostApi();
-    previousPlatform = FingerprintPlatform.instance;
-    FingerprintPlatform.instance = FingerprintNative(hostApi: fakeHostApi);
+    platform = FingerprintNative(hostApi: fakeHostApi);
   });
 
-  tearDown(() {
-    FingerprintPlatform.instance = previousPlatform;
-  });
+  FingerprintConfig config({
+    String apiKey = 'key-1',
+    Region? region,
+    List<String>? endpoints,
+    AndroidOptions? android,
+    IosOptions? ios,
+  }) {
+    return FingerprintConfig(
+      apiKey: apiKey,
+      pluginVersion: '9.9.9',
+      region: region,
+      endpoints: endpoints,
+      android: android,
+      ios: ios,
+    );
+  }
 
   group('config and call forwarding', () {
-    test('creates the native client during init', () async {
-      await FingerprintPlatform.instance.init(FingerprintConfig(
-        apiKey: 'key-1',
-        pluginVersion: '9.9.9',
-        region: Region.eu,
-        endpoint: 'https://primary.example',
-        endpointFallbacks: ['https://fallback.example'],
-        allowUseOfLocationData: true,
-        locationTimeoutMillisAndroid: 3000,
-      ));
+    test('creates the native client during create', () async {
+      await platform.create(
+        config(
+          region: Region.eu,
+          endpoints: const [
+            'https://primary.example',
+            'https://fallback.example',
+          ],
+          android: const AndroidOptions(
+            allowUseOfLocationData: true,
+            locationTimeout: Duration(milliseconds: 3000),
+          ),
+        ),
+      );
 
       expect(fakeHostApi.createdConfig?.apiKey, 'key-1');
       expect(fakeHostApi.createdConfig?.region, 'eu');
@@ -46,21 +63,24 @@ void main() {
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, 3000);
     });
 
-    test('forwards stored config and get arguments on every call', () async {
-      await FingerprintPlatform.instance.init(FingerprintConfig(
-        apiKey: 'key-1',
-        pluginVersion: '9.9.9',
+    test('forwards config and get arguments on every call', () async {
+      final request = config(
         region: Region.eu,
-        endpoint: 'https://primary.example',
-        endpointFallbacks: ['https://fallback.example'],
-        allowUseOfLocationData: true,
-        locationTimeoutMillisAndroid: 3000,
-      ));
+        endpoints: const [
+          'https://primary.example',
+          'https://fallback.example',
+        ],
+        android: const AndroidOptions(
+          allowUseOfLocationData: true,
+          locationTimeout: Duration(milliseconds: 3000),
+        ),
+      );
 
-      await FingerprintPlatform.instance.getVisitorId(
+      await platform.get(
+        request,
         tags: const {'sessionId': 1},
         linkedId: 'link-1',
-        timeoutMs: 500,
+        timeout: const Duration(milliseconds: 500),
       );
 
       expect(fakeHostApi.lastConfig?.apiKey, 'key-1');
@@ -78,102 +98,102 @@ void main() {
     });
 
     test('forwards JSON null tag values unchanged', () async {
-      await FingerprintPlatform.instance.init(FingerprintConfig(
-        apiKey: 'key-1',
-        pluginVersion: '9.9.9',
-      ));
-
-      await FingerprintPlatform.instance.getVisitorId(
-        tags: {'campaign': null, 'sessionId': 1},
-      );
+      await platform.get(config(), tags: {'campaign': null, 'sessionId': 1});
 
       expect(fakeHostApi.lastTags, {'campaign': null, 'sessionId': 1});
     });
 
-    test('forwards fallbacks when no primary endpoint is set', () async {
-      await FingerprintPlatform.instance.init(FingerprintConfig(
-        apiKey: 'key-1',
-        pluginVersion: '9.9.9',
-        region: Region.us,
-        endpointFallbacks: ['https://fallback.example'],
-      ));
+    test('uses iOS location on iOS', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
-      expect(fakeHostApi.createdConfig?.endpoint, isNull);
-      expect(fakeHostApi.createdConfig?.endpointFallbacks, [
-        'https://fallback.example',
-      ]);
+      await platform.create(
+        config(
+          android: const AndroidOptions(allowUseOfLocationData: false),
+          ios: const IosOptions(allowUseOfLocationData: true),
+        ),
+      );
+
+      expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
     });
 
-    test('failed create does not store config', () async {
+    test('create failure does not block a later get', () async {
       fakeHostApi.nextCreateError = PlatformException(
         code: 'unknown_error',
         message: 'Invalid region: xx',
       );
       await expectLater(
-        FingerprintPlatform.instance.init(FingerprintConfig(
-          apiKey: 'key-1',
-          pluginVersion: '9.9.9',
-        )),
-        throwsA(isA<FingerprintProError>()),
+        platform.create(config()),
+        throwsA(isA<FingerprintError>()),
       );
-      await expectLater(
-        FingerprintPlatform.instance.getVisitorId(),
-        throwsException,
-      );
+
+      final result = await platform.get(config());
+      expect(result.eventId, 'default-event');
     });
   });
 
   group('result mapping', () {
-    setUp(() async {
-      await FingerprintPlatform.instance.init(FingerprintConfig(
-        apiKey: 'key',
-        pluginVersion: pluginVersion,
-      ));
-    });
-
-    test('empty visitorId becomes null from getVisitorId', () async {
+    test('empty visitorId becomes null', () async {
       fakeHostApi.nextResult = FingerprintNativeResult(
         eventId: 'evt',
         visitorId: '',
         suspectScore: 10,
         sealedResult: null,
       );
-      final visitorId = await FingerprintPlatform.instance.getVisitorId();
-      expect(visitorId, isNull);
+      final result = await platform.get(config());
+      expect(result.visitorId, isNull);
+      expect(result.eventId, 'evt');
+      expect(result.suspectScore, 10);
     });
 
-    test('getVisitorData maps eventId, visitorId, suspectScore, sealedResult',
-        () async {
+    test('maps eventId, visitorId, suspectScore, sealedResult', () async {
       fakeHostApi.nextResult = FingerprintNativeResult(
         eventId: 'evt-1',
         visitorId: 'vid-1',
         suspectScore: 42,
         sealedResult: 'sealed',
       );
-      final data = await FingerprintPlatform.instance.getVisitorData();
-      expect(data.requestId, 'evt-1');
-      expect(data.visitorId, 'vid-1');
-      expect(data.confidenceScore.score, 42);
-      expect(data.sealedResult, 'sealed');
+      final result = await platform.get(config());
+      expect(result.eventId, 'evt-1');
+      expect(result.visitorId, 'vid-1');
+      expect(result.suspectScore, 42);
+      expect(result.sealedResult, 'sealed');
+      expect(result.cacheHit, isNull);
     });
   });
 
   group('errors', () {
-    setUp(() async {
-      await FingerprintPlatform.instance.init(FingerprintConfig(
-        apiKey: 'key',
-        pluginVersion: pluginVersion,
-      ));
-    });
-
-    test('maps snake_case PlatformException to FingerprintProError', () async {
+    test('maps PlatformException to FingerprintError with eventId', () async {
       fakeHostApi.nextError = PlatformException(
         code: 'public_api_key_required',
         message: 'API key required',
+        details: 'evt-9',
       );
       await expectLater(
-        FingerprintPlatform.instance.getVisitorId(),
-        throwsA(isA<ApiKeyRequiredError>()),
+        platform.get(config()),
+        throwsA(
+          isA<FingerprintError>()
+              .having((error) => error.code, 'code', 'public_api_key_required')
+              .having((error) => error.message, 'message', 'API key required')
+              .having((error) => error.eventId, 'eventId', 'evt-9'),
+        ),
+      );
+    });
+
+    test('keeps an unknown code unchanged', () async {
+      fakeHostApi.nextError = PlatformException(
+        code: 'new_server_code',
+        message: 'from a newer native SDK',
+      );
+      await expectLater(
+        platform.get(config()),
+        throwsA(
+          isA<FingerprintError>().having(
+            (error) => error.code,
+            'code',
+            'new_server_code',
+          ),
+        ),
       );
     });
   });

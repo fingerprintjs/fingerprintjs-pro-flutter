@@ -1,36 +1,54 @@
+import 'package:flutter/foundation.dart';
+import 'package:fpjs_pro_plugin/options.dart';
 import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_native.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-/// Configuration of the Fingerprint Pro client, passed to [FingerprintPlatform.init]
+/// Configuration passed to every platform [create] and [get].
 class FingerprintConfig {
   final String apiKey;
   final String pluginVersion;
-  final String? endpoint;
-  final List<String>? endpointFallbacks;
-  final String? scriptUrlPattern;
-  final List<String>? scriptUrlPatternFallbacks;
   final Region? region;
-  final bool? allowUseOfLocationData;
-  final int? locationTimeoutMillisAndroid;
-  final bool extendedResponseFormat;
+  final List<String>? endpoints;
+  final AndroidOptions? android;
+  final IosOptions? ios;
+  final WebOptions? web;
 
   const FingerprintConfig({
     required this.apiKey,
     required this.pluginVersion,
-    this.endpoint,
-    this.endpointFallbacks,
-    this.scriptUrlPattern,
-    this.scriptUrlPatternFallbacks,
     this.region,
-    this.allowUseOfLocationData,
-    this.locationTimeoutMillisAndroid,
-    this.extendedResponseFormat = false,
+    this.endpoints,
+    this.android,
+    this.ios,
+    this.web,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is FingerprintConfig &&
+      other.apiKey == apiKey &&
+      other.pluginVersion == pluginVersion &&
+      other.region == region &&
+      listEquals(other.endpoints, endpoints) &&
+      other.android == android &&
+      other.ios == ios &&
+      other.web == web;
+
+  @override
+  int get hashCode => Object.hash(
+    apiKey,
+    pluginVersion,
+    region,
+    Object.hashAll(endpoints ?? const []),
+    android,
+    ios,
+    web,
+  );
 }
 
-/// The interface each platform implementation of this plugin implements
+/// The interface each platform implementation of this plugin implements.
 abstract class FingerprintPlatform extends PlatformInterface {
   FingerprintPlatform() : super(token: _token);
 
@@ -38,7 +56,7 @@ abstract class FingerprintPlatform extends PlatformInterface {
 
   static FingerprintPlatform _instance = FingerprintNative();
 
-  /// The implementation used by [FpjsProPlugin], [FingerprintNative] by default
+  /// The implementation used by [Fingerprint], [FingerprintNative] by default.
   static FingerprintPlatform get instance => _instance;
 
   static set instance(FingerprintPlatform instance) {
@@ -46,22 +64,14 @@ abstract class FingerprintPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  /// Initializes the Fingerprint Pro client
-  Future<void> init(FingerprintConfig config);
+  /// Builds the native or web client for [config].
+  Future<void> create(FingerprintConfig config);
 
-  /// Returns the visitor identifier
-  /// Throws a [FingerprintProError] if the identification request fails
-  Future<String?> getVisitorId({
-    Map<String, dynamic>? tags,
+  /// Identifies using [config]. Creates the client if [create] never ran.
+  Future<FingerprintResult> get(
+    FingerprintConfig config, {
+    Map<String, Object?>? tags,
     String? linkedId,
-    int? timeoutMs,
-  });
-
-  /// Returns the full identification result
-  /// Throws a [FingerprintProError] if the identification request fails
-  Future<FingerprintJSProResponse> getVisitorData({
-    Map<String, dynamic>? tags,
-    String? linkedId,
-    int? timeoutMs,
+    Duration? timeout,
   });
 }

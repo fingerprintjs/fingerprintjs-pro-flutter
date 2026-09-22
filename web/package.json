@@ -1,7 +1,7 @@
 {
   "name": "web",
   "version": "0.0.0",
-  "description": "Js loader for FingerprintJS Pro agent",
+  "description": "Js loader for Fingerprint agent",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -9,7 +9,7 @@
     "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
-    "@fingerprintjs/fingerprintjs-pro": "^3.11.13"
+    "@fingerprint/agent": "^4.1.5"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.1",
@@ -17,6 +17,7 @@
     "rollup": "^3.29.5",
     "rollup-plugin-license": "^3.0.1",
     "rollup-plugin-terser": "^7.0.2",
+    "tslib": "^2.8.1",
     "typescript": "^4.9.3"
   }
 }

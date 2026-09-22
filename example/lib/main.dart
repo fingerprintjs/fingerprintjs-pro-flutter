@@ -5,9 +5,7 @@ import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/region.dart';
 import 'package:geolocator/geolocator.dart';
 
 const tags = {
@@ -51,17 +49,17 @@ class _MyAppState extends State<MyApp> {
   String _checksResult = 'Not run';
   InitializationState _initializationState = InitializationState.initializing;
   String? _initializationError;
+  Fingerprint? _client;
   final String? _apiKey = dotenv.env['API_KEY'];
   final String? _region = dotenv.env['REGION'];
   final String? _endpoint = dotenv.env['ENDPOINT'];
-  final String? _scriptUrlPattern = dotenv.env['SCRIPT_URL_PATTERN'];
   final bool _disableLocationCollection =
       dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 
   @override
   void initState() {
     super.initState();
-    _initFpjs();
+    _initFingerprint();
   }
 
   Region? _parseRegion(String? region) {
@@ -76,22 +74,25 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  Future<void> _initFpjs() async {
+  Future<void> _initFingerprint() async {
     try {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      await FpjsProPlugin.initFpjs(
-        _apiKey,
-        endpoint: _endpoint,
-        scriptUrlPattern: _scriptUrlPattern,
+      final client = Fingerprint(
+        apiKey: _apiKey,
         region: _parseRegion(_region),
-        allowUseOfLocationData: !_disableLocationCollection,
-        locationTimeoutMillisAndroid: 6000,
-        extendedResponseFormat: false,
+        endpoints: _endpoint == null || _endpoint.isEmpty ? null : [_endpoint],
+        android: AndroidOptions(
+          allowUseOfLocationData: !_disableLocationCollection,
+          locationTimeout: const Duration(milliseconds: 6000),
+        ),
+        ios: IosOptions(allowUseOfLocationData: !_disableLocationCollection),
       );
+      await client.ready;
       if (!mounted) return;
       setState(() {
+        _client = client;
         _initializationState = InitializationState.ready;
       });
     } catch (error) {
@@ -111,11 +112,6 @@ class _MyAppState extends State<MyApp> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
         if (kDebugMode) {
           print('Location permissions are denied');
         }
@@ -124,7 +120,6 @@ class _MyAppState extends State<MyApp> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
       if (kDebugMode) {
         print(
           'Location permissions are permanently denied, we cannot request permissions.',
@@ -134,26 +129,16 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// The native FingerprintJS libraries expose a method called `getVisitorId`
-  /// to stay consistent with the original Javascript library used for browser identification.
-  /// However in the mobile application context a more accurate name would be something like `getDeviceId`.
   Future<void> _getDeviceId() async {
     await requestLocationPermission();
     String deviceId;
     try {
-      deviceId =
-          await FpjsProPlugin.getVisitorId(
-            tags: tags,
-            linkedId: 'some linkedId',
-          ) ??
-          'Unknown';
+      final result = await _client!.get(tags: tags, linkedId: 'some linkedId');
+      deviceId = result.visitorId ?? 'Unknown';
     } catch (error) {
       deviceId = 'Failed to get device id: $error';
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
@@ -166,22 +151,24 @@ class _MyAppState extends State<MyApp> {
     String identificationInfo;
     try {
       const encoder = JsonEncoder.withIndent('    ');
-      final deviceData = await FpjsProPlugin.getVisitorData(
-        tags: tags,
-        linkedId: 'some linkedId',
-      );
-      final jsonDeviceData = deviceData.toJson();
-      if (deviceData.sealedResult != null &&
-          deviceData.sealedResult!.isNotEmpty) {
-        jsonDeviceData["sealedResult"] = deviceData.sealedResult?.replaceRange(
+      final result = await _client!.get(tags: tags, linkedId: 'some linkedId');
+      var sealedResult = result.sealedResult;
+      if (sealedResult != null && sealedResult.length > 10) {
+        sealedResult = sealedResult.replaceRange(
           10,
-          deviceData.sealedResult?.length,
+          sealedResult.length,
           '...',
         );
       }
-      identificationInfo = encoder.convert(jsonDeviceData);
-    } on FingerprintProError catch (error) {
-      identificationInfo = "Failed to get device info.\n$error";
+      identificationInfo = encoder.convert({
+        'eventId': result.eventId,
+        'visitorId': result.visitorId,
+        'suspectScore': result.suspectScore,
+        'sealedResult': sealedResult,
+        'cacheHit': result.cacheHit,
+      });
+    } on FingerprintError catch (error) {
+      identificationInfo = 'Failed to get device info.\n$error';
     }
     return identificationInfo;
   }
@@ -192,26 +179,17 @@ class _MyAppState extends State<MyApp> {
       _checksResult = 'Running';
     });
     try {
+      final client = _client!;
       var checks = [
-        () async => FpjsProPlugin.getVisitorId(),
-        () async => FpjsProPlugin.getVisitorData(),
-        () async => FpjsProPlugin.getVisitorId(linkedId: 'checkId'),
-        () async => FpjsProPlugin.getVisitorData(linkedId: 'checkData'),
-        () async => FpjsProPlugin.getVisitorId(tags: tags),
-        () async => FpjsProPlugin.getVisitorData(tags: tags),
-        () async =>
-            FpjsProPlugin.getVisitorId(linkedId: 'checkIdWithTag', tags: tags),
-        () async => FpjsProPlugin.getVisitorData(
-          linkedId: 'checkDataWithTag',
-          tags: tags,
-        ),
-        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
+        () => client.get(),
+        () => client.get(linkedId: 'checkId'),
+        () => client.get(tags: tags),
+        () => client.get(linkedId: 'checkIdWithTag', tags: tags),
+        () => client.get(timeout: const Duration(milliseconds: 5000)),
       ];
 
       var timeoutChecks = [
-        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5),
+        () => client.get(timeout: const Duration(milliseconds: 5)),
       ];
 
       // The timeout checks cancel a request mid-flight. On iOS the call right after
@@ -221,7 +199,7 @@ class _MyAppState extends State<MyApp> {
         try {
           await check();
           throw Exception('Expected timeout error');
-        } on FingerprintProError {
+        } on FingerprintError {
           if (!mounted) return;
           setState(() {
             _checksResult += '!';

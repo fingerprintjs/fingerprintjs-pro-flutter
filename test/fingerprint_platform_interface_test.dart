@@ -1,80 +1,65 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class FakeFingerprint extends FingerprintPlatform
-    with MockPlatformInterfaceMixin {
-  final response = FingerprintJSProResponse(
-      'test_request_id', 'test_visitor_id', ConfidenceScore(1), null);
-
-  FingerprintConfig? config;
-  Map<String, dynamic>? tags;
-  String? linkedId;
-  int? timeoutMs;
-
-  @override
-  Future<void> init(FingerprintConfig config) async => this.config = config;
-
-  @override
-  Future<String?> getVisitorId(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
-    _record(tags, linkedId, timeoutMs);
-    return response.visitorId;
-  }
-
-  @override
-  Future<FingerprintJSProResponse> getVisitorData(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
-    _record(tags, linkedId, timeoutMs);
-    return response;
-  }
-
-  void _record(Map<String, dynamic>? tags, String? linkedId, int? timeoutMs) {
-    this.tags = tags;
-    this.linkedId = linkedId;
-    this.timeoutMs = timeoutMs;
-  }
-}
-
 void main() {
-  late FakeFingerprint fake;
+  late RecordingPlatform platform;
+  late FingerprintPlatform previous;
 
   setUp(() {
-    fake = FakeFingerprint();
-    FingerprintPlatform.instance = fake;
+    platform = RecordingPlatform();
+    previous = FingerprintPlatform.instance;
+    FingerprintPlatform.instance = platform;
   });
 
-  test('initFpjs passes the configuration to the platform', () async {
-    await FpjsProPlugin.initFpjs('test_api_key',
-        endpoint: 'https://example.com', region: Region.eu);
-
-    expect(fake.config?.apiKey, 'test_api_key');
-    expect(fake.config?.pluginVersion, pluginVersion);
-    expect(fake.config?.endpoint, 'https://example.com');
-    expect(fake.config?.region, Region.eu);
-    expect(fake.config?.extendedResponseFormat, false);
+  tearDown(() {
+    FingerprintPlatform.instance = previous;
   });
 
-  test('getVisitorId passes the arguments to the platform', () async {
-    await FpjsProPlugin.initFpjs('test_api_key');
-    final visitorId = await FpjsProPlugin.getVisitorId(
-        tags: {'sessionId': 1}, linkedId: 'test_linked_id', timeoutMs: 1000);
+  test('Fingerprint.create passes configuration to the platform', () async {
+    final client = Fingerprint(
+      apiKey: 'test_api_key',
+      endpoints: const ['https://example.com'],
+      region: Region.eu,
+    );
+    await client.ready;
 
-    expect(visitorId, fake.response.visitorId);
-    expect(fake.tags, {'sessionId': 1});
-    expect(fake.linkedId, 'test_linked_id');
-    expect(fake.timeoutMs, 1000);
+    expect(platform.config?.apiKey, 'test_api_key');
+    expect(platform.config?.pluginVersion, pluginVersion);
+    expect(platform.config?.endpoints, ['https://example.com']);
+    expect(platform.config?.region, Region.eu);
   });
 
-  test('getVisitorData returns the result from the platform', () async {
-    await FpjsProPlugin.initFpjs('test_api_key');
-    final result =
-        await FpjsProPlugin.getVisitorData(linkedId: 'test_linked_id');
+  test('Fingerprint.get returns the platform result', () async {
+    final client = Fingerprint(apiKey: 'test_api_key');
+    final result = await client.get(linkedId: 'test_linked_id');
 
-    expect(result, fake.response);
-    expect(fake.linkedId, 'test_linked_id');
+    expect(result.eventId, 'test_request_id');
+    expect(result.visitorId, 'test_visitor_id');
+    expect(platform.linkedId, 'test_linked_id');
   });
+}
+
+class RecordingPlatform extends FingerprintPlatform
+    with MockPlatformInterfaceMixin {
+  FingerprintConfig? config;
+  String? linkedId;
+
+  @override
+  Future<void> create(FingerprintConfig config) async => this.config = config;
+
+  @override
+  Future<FingerprintResult> get(
+    FingerprintConfig config, {
+    Map<String, Object?>? tags,
+    String? linkedId,
+    Duration? timeout,
+  }) async {
+    this.linkedId = linkedId;
+    return FingerprintResult(
+      eventId: 'test_request_id',
+      visitorId: 'test_visitor_id',
+    );
+  }
 }

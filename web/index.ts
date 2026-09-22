@@ -1,1 +1,1 @@
-export * as FingerprintJS from '@fingerprintjs/fingerprintjs-pro'
+export * as Fingerprint from '@fingerprint/agent'
