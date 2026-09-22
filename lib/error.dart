@@ -181,7 +181,10 @@ class ClientTimeoutError extends FingerprintProError {
   ClientTimeoutError(String? message) : super('ClientTimeoutError', message);
 }
 
-/// Casts error from generic platform type to FingerprintProError
+/// Maps a platform error code to the current public [FingerprintProError] types.
+///
+/// Native Pigeon codes are snake_case. Older Android/iOS/web spellings stay listed
+/// until the public API swaps to `FingerprintError`.
 FingerprintProError unwrapError(PlatformException error) {
   switch (error.code) {
     case 'InvalidURL':

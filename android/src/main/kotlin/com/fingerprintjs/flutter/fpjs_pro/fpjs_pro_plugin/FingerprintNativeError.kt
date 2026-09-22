@@ -71,6 +71,8 @@ internal fun errorCode(error: Error): String = when (error) {
 }
 
 internal fun normalizeEventId(eventId: String?): String? {
+  // Android Error defaults eventId to "Unknown" when the SDK has no id.
+  // That is not a server event. Empty and missing are also not usable ids.
   if (eventId == null || eventId.isEmpty() || eventId == "Unknown") {
     return null
   }
@@ -78,6 +80,7 @@ internal fun normalizeEventId(eventId: String?): String? {
 }
 
 internal fun normalizeMessage(description: String?): String? {
+  // Same Android default as eventId. Do not forward "Unknown" as a message.
   if (description == null || description == "Unknown") {
     return null
   }

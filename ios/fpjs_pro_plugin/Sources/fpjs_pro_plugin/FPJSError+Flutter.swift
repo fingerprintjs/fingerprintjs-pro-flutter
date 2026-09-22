@@ -74,6 +74,8 @@ extension APIError {
 }
 
 func normalizeEventId(_ eventId: String?) -> String? {
+  // Android Error defaults a missing id to "Unknown". That is not a server
+  // event. Apply the same filter here so Dart never sees the placeholder.
   guard let eventId, !eventId.isEmpty, eventId != "Unknown" else {
     return nil
   }
