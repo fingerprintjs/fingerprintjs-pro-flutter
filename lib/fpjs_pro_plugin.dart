@@ -21,7 +21,9 @@ class Fingerprint {
   /// Public API key for this client.
   final String apiKey;
 
-  /// Workspace region. The agent picks one from the key when omitted.
+  /// Workspace region. Android and iOS default to US when omitted. Web
+  /// infers it from the API key.
+  /// https://docs.fingerprint.com/reference/js-agent-start-function
   final Region? region;
 
   /// Identification endpoints, first to last. Null uses the regional default.
