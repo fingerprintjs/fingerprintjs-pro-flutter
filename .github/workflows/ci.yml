@@ -37,6 +37,10 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      # Tests marked `@TestOn('browser')` are skipped by the run above.
+      - name: Run web tests
+        run: flutter test --platform chrome
+
       - name: Run example tests
         working-directory: example
         run: flutter test
