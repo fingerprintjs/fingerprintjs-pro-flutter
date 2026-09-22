@@ -199,6 +199,28 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
+      # Fingerprint's JSONType is iOS/tvOS only, so this cannot be `swift test` on the host.
+      - name: Run iOS tag conversion tests
+        working-directory: fpjs_pro_plugin/ios/JSONTypeConvertorTests
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          for runtime, items in devices.items():
+              if "iOS" not in runtime:
+                  continue
+              for device in items:
+                  if device.get("isAvailable") and "iPhone" in device.get("name", ""):
+                      print(device["udid"])
+                      raise SystemExit
+          raise SystemExit("no available iPhone simulator")
+          ')"
+          echo "Using simulator $udid"
+          xcodebuild test \
+            -scheme JSONTypeConvertorTests-Package \
+            -destination "platform=iOS Simulator,id=$udid"
+
       # CocoaPods first. Flutter migrates CocoaPods projects to SwiftPM, but not back, so the
       # committed project stays CocoaPods-shaped and this order needs no reset in between.
       # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager

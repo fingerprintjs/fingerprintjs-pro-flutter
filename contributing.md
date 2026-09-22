@@ -44,6 +44,8 @@ Web does not use Pigeon.
 
 For running tests just call `flutter test`.
 
+iOS JSON null tag conversion cannot run on the host (`JSONType` is iOS/tvOS only). From `ios/JSONTypeConvertorTests`, run `xcodebuild test -scheme JSONTypeConvertorTests-Package -destination 'platform=iOS Simulator,name=iPhone 16'`.
+
 ### Integration smoke test
 
 The Maestro smoke test builds the normal example app, waits for initialization,
