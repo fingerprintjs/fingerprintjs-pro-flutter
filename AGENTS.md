@@ -6,8 +6,9 @@
   - Avoid thin wrapper functions and helpers, minimize layers of indirection
 - Tests
   - Test APIs and contracts like a real consumer uses them
-  - DO NOT test internal implementation details
-  - Minimize use of mocks
+  - Avoid mocks if possible
+  - DO NOT test trivial or internal implementation details
+  - DO NOT write tautological tests that could not possibly fail
 - Comments & Docs
   - Keep short, use simple english
   - Write like a terse note to a self or teammate, no m-dashed essays

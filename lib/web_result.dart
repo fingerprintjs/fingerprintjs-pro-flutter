@@ -10,7 +10,7 @@ extension FingerprintJSProResponseWeb on FingerprintJSProResponse {
       jsObject.requestId,
       jsObject.visitorId,
       ConfidenceScore(jsObject.confidence.score),
-      jsObject.sealedResult,
+      jsObject.sealedResult ?? '',
     );
   }
 }
@@ -24,7 +24,7 @@ extension FingerprintJSProExtendedResponseWeb
       jsObject.requestId,
       jsObject.visitorId,
       ConfidenceScore(jsObject.confidence.score),
-      jsObject.sealedResult,
+      jsObject.sealedResult ?? '',
       jsObject.visitorFound,
       jsObject.ip,
       IpLocationWeb.fromJsObject(jsObject.ipLocation),
