@@ -13,17 +13,29 @@ class JSONTypeConvertor {
     if object is NSNull {
       return .null
     }
-    if let value = object as? Int {
-      return .int(value)
-    }
-    if let value = object as? Double {
-      return .double(value)
+    // Flutter bools are CFBoolean NSNumbers. `as? Int` turns them into 0/1,
+    // and `as? Bool` also matches integer NSNumbers. Check CFBoolean first.
+    // https://developer.apple.com/documentation/corefoundation/cfboolean
+    if let number = object as? NSNumber {
+      if CFGetTypeID(number) == CFBooleanGetTypeID() {
+        return .bool(number.boolValue)
+      }
+      if CFNumberIsFloatType(number) {
+        return .double(number.doubleValue)
+      }
+      return .int(number.intValue)
     }
     if let value = object as? String {
       return .string(value)
     }
     if let value = object as? Bool {
       return .bool(value)
+    }
+    if let value = object as? Int {
+      return .int(value)
+    }
+    if let value = object as? Double {
+      return .double(value)
     }
     if let array = object as? [Any] {
       return .array(array.compactMap(convert))
