@@ -1,8 +1,12 @@
 /// Validation of the `tags` argument.
 ///
-/// Same string-keyed JSON map on every platform. No size cap here. The server
-/// enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
-/// as `payload_too_large`.
+/// Same string-keyed JSON map on every platform. Checked in Dart so a bad
+/// value throws [ArgumentError] everywhere. Native code would otherwise
+/// crash on one OS and drop the value on another.
+///
+/// No size cap here. The server enforces
+/// [16 KB](https://docs.fingerprint.com/docs/tagging-information) as
+/// `payload_too_large`.
 library;
 
 /// Throws an [ArgumentError] unless [tags] is recursively JSON-compatible.
