@@ -5,12 +5,13 @@
 - Structure
   - Avoid thin wrapper functions and helpers, minimize layers of indirection
 - Tests
-  - Test APIs and contracts like a real consumer uses them
+  - Test through APIs and contracts (like a real consumer uses them)
   - Avoid mocks if possible
   - DO NOT test trivial or internal implementation details
-  - DO NOT write tautological tests that could not possibly fail
+  - DO NOT write tautological tests (test must be able to fail by messing up the implementation)
 - Comments & Docs
   - Keep short, use simple english
+  - Focus on WHY (WHAT, HOW must be obvious from the code)
   - Write like a terse note to a self or teammate, no m-dashed essays
   - Prefer bullet points over long `;` chains
   - Avoid ambiguous jargon (seam, boundary, gate, envelope, wire shapes, ...), be plain, precise, specific
@@ -18,6 +19,7 @@
   - Module files begin with short overview comment explaining purpose and links to relevant docs
   - Any non-obvious design decision, requirement, or claim gets a short explanatory note + exact docs link
     - close to affected code + commit message body (always)
+    - only use public sources, never internal GitHub/Notion/Slack links
     - in PR description (if significant)
 - Changesets
   - Brief, only for changes affecting SDK consumers (public API, behavior)
