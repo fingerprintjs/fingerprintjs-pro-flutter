@@ -27,7 +27,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Failed to initialize Fingerprint agent:'),
+      find.textContaining('Failed to create Fingerprint client:'),
       findsOneWidget,
     );
     expect(_button(tester, runChecksButtonKey).onPressed, isNull);
@@ -43,7 +43,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Fingerprint agent ready'), findsOneWidget);
+    expect(find.text('Fingerprint client created'), findsOneWidget);
     expect(platform.config?.android?.allowUseOfLocationData, isTrue);
     expect(_button(tester, runChecksButtonKey).onPressed, isNotNull);
     expect(_button(tester, identifyButtonKey).onPressed, isNotNull);
@@ -62,7 +62,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Fingerprint agent ready'), findsOneWidget);
+    expect(find.text('Fingerprint client created'), findsOneWidget);
     expect(platform.config?.android?.allowUseOfLocationData, isFalse);
     expect(platform.config?.ios?.allowUseOfLocationData, isFalse);
   });

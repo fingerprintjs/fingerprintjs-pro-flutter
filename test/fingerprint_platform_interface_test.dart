@@ -23,7 +23,7 @@ void main() {
       endpoints: const ['https://example.com'],
       region: Region.eu,
     );
-    await client.ready;
+    await client.get();
 
     expect(platform.config?.apiKey, 'test_api_key');
     expect(platform.config?.pluginVersion, pluginVersion);

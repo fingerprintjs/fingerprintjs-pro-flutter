@@ -22,7 +22,7 @@ const runChecksButtonKey = ValueKey('run-checks-button');
 const identifyButtonKey = ValueKey('identify-button');
 const visitorDataButtonKey = ValueKey('visitor-data-button');
 
-enum InitializationState { initializing, ready, error }
+enum InitializationState { initializing, created, error }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _initFingerprint();
+    _createClient();
   }
 
   Region? _parseRegion(String? region) {
@@ -74,12 +74,12 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  Future<void> _initFingerprint() async {
+  void _createClient() {
     try {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      final client = Fingerprint(
+      _client = Fingerprint(
         apiKey: _apiKey,
         region: _parseRegion(_region),
         endpoints: _endpoint == null || _endpoint.isEmpty ? null : [_endpoint],
@@ -89,18 +89,10 @@ class _MyAppState extends State<MyApp> {
         ),
         ios: IosOptions(allowUseOfLocationData: !_disableLocationCollection),
       );
-      await client.ready;
-      if (!mounted) return;
-      setState(() {
-        _client = client;
-        _initializationState = InitializationState.ready;
-      });
+      _initializationState = InitializationState.created;
     } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _initializationState = InitializationState.error;
-        _initializationError = 'Failed to initialize Fingerprint agent: $error';
-      });
+      _initializationState = InitializationState.error;
+      _initializationError = 'Failed to create Fingerprint client: $error';
     }
   }
 
@@ -228,9 +220,9 @@ class _MyAppState extends State<MyApp> {
   String get _initializationStatus {
     switch (_initializationState) {
       case InitializationState.initializing:
-        return 'Initializing Fingerprint agent...';
-      case InitializationState.ready:
-        return 'Fingerprint agent ready';
+        return 'Creating Fingerprint client...';
+      case InitializationState.created:
+        return 'Fingerprint client created';
       case InitializationState.error:
         return _initializationError!;
     }
@@ -238,7 +230,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final isReady = _initializationState == InitializationState.ready;
+    final isCreated = _initializationState == InitializationState.created;
 
     return MaterialApp(
       home: Scaffold(
@@ -250,20 +242,20 @@ class _MyAppState extends State<MyApp> {
               Text(_initializationStatus),
               ElevatedButton(
                 key: runChecksButtonKey,
-                onPressed: isReady ? _runChecks : null,
+                onPressed: isCreated ? _runChecks : null,
                 child: const Text('Run tests!'),
               ),
               const Text('Checks result:'),
               Text(_checksResult),
               ElevatedButton(
                 key: identifyButtonKey,
-                onPressed: isReady ? _getDeviceId : null,
+                onPressed: isCreated ? _getDeviceId : null,
                 child: const Text('Identify!'),
               ),
               const Text('The device id is:'),
               Text(_deviceId),
               _VisitorDataDialog(
-                enabled: isReady,
+                enabled: isCreated,
                 loadVisitorData: _getDeviceData,
               ),
             ],

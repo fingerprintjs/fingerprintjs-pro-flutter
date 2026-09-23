@@ -46,7 +46,8 @@ For running tests just call `flutter test`.
 
 ### Integration smoke test
 
-The Maestro smoke test builds the normal example app, waits for initialization,
+The Maestro smoke test builds the normal example app, waits for the Dart client
+to be created,
 runs all built-in checks, identifies a visitor, and verifies that the visitor-data
 JSON contains the same `visitorId`. Mobile and web use the same flow.
 

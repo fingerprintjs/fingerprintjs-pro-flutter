@@ -27,7 +27,7 @@ void main() {
         locationTimeout: Duration(seconds: 3),
       ),
     );
-    await client.ready;
+    await client.get();
 
     expect(platform.created, hasLength(1));
     expect(platform.created.single.apiKey, 'key-1');
@@ -72,7 +72,7 @@ void main() {
     expect(platform.gets.single.timeout, const Duration(milliseconds: 500));
   });
 
-  test('get surfaces a create failure without calling get', () async {
+  test('get surfaces a create failure without identifying', () async {
     platform.createError = FingerprintError(
       code: FingerprintError.apiKeyInvalid,
     );

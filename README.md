@@ -97,11 +97,7 @@ final client = Fingerprint(
 
 Android and iOS default to US when `region` is omitted. Web infers it from the API key. Set `region` for EU and AP workspaces on Android and iOS. See [regions](https://docs.fingerprint.com/docs/regions).
 
-`get` waits for that start. Await `ready` to surface a start failure without identifying:
-
-```dart
-await client.ready;
-```
+`get` waits for that start. Native create builds the local client. Web `start` returns immediately; load failures surface from `get`.
 
 To avoid ad blockers, proxy identification through a [proxy integration](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers). Pass identification URLs as `endpoints`, first to last:
 
@@ -156,7 +152,7 @@ final result = await client.get(
 );
 ```
 
-`tags` is a string-keyed map of JSON values, including null. The same map is sent on every platform. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a server limit reported as `payload_too_large`.
+`tags` is a string-keyed map of JSON values, including null. The same map is sent on every platform. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) applies.
 
 ### Specifying a custom timeout
 

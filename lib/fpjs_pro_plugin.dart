@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fpjs_pro_plugin/options.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
@@ -14,7 +16,8 @@ const pluginVersion = '4.13.1';
 /// Identification client. Create one per public API key and configuration.
 ///
 /// The constructor starts the native or web client. [get] waits for that
-/// start. Every get carries the full config, so two clients stay independent.
+/// start and is where create or load failures surface. Every get carries the
+/// full config, so two clients stay independent.
 /// https://docs.fingerprint.com/docs/ios-sdk
 /// https://docs.fingerprint.com/docs/android-quickstart
 class Fingerprint {
@@ -67,14 +70,11 @@ class Fingerprint {
       ios: ios,
       web: web,
     );
-    _created = FingerprintPlatform.instance.create(_config);
+    // Native create is local client construction so location can warm.
+    // Web start() is sync; the bundle still loads in the background.
+    // ignore() so a create failure is not unhandled if get is never called.
+    _created = FingerprintPlatform.instance.create(_config)..ignore();
   }
-
-  /// Completes when the platform client has been created.
-  ///
-  /// [get] waits for this. Await it to surface a start failure without
-  /// identifying.
-  Future<void> get ready => _created;
 
   /// Identifies the current visitor or device.
   ///
