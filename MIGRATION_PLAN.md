@@ -109,7 +109,7 @@ wired to stubs asserts only that codegen ran. Split by provable unit.
 |---|---|---|
 | **4a** | `FingerprintResult`, `FingerprintError`, known error constants, tag validation. Pure Dart, public API unchanged. | Result mapping, tag validation and open error codes pass unit tests with no native or web code. |
 | **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, `init` creates a native client that later gets reuse, error codes survive a minified build. |
-| **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app. | No tuple or v3 web implementation remains; two-client independence, tag forwarding, mocked web agent, and the example app on all three platforms. |
+| **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app, README. | No tuple or v3 web implementation remains; two-client independence, tag forwarding, mocked web agent, the example app on all three platforms, and the README matching the new API. |
 
 The public API never ships over a v3 web implementation. That binds at 4c.
 
@@ -211,13 +211,13 @@ conversion including cache hit and a missing Zero Trust visitor ID, and errors.
 
 ### Example app
 
-Moves to the new API in 4c, with the deletions. Not documentation work for PR
-6: CI builds the example on every PR, and `example/lib/main.dart` uses
-`extendedResponseFormat` and the static
-`FpjsProPlugin.getVisitorId`/`getVisitorData`. It is also the only end-to-end
-proof that the rewritten API works on a real device against a real endpoint,
-so it is an acceptance criterion for the rewrite. PR 5 renames its import,
-PR 6 documents it.
+Moves to the new API in 4c, with the deletions. CI builds the example on
+every PR, and `example/lib/main.dart` used `extendedResponseFormat` and the
+static `FpjsProPlugin.getVisitorId`/`getVisitorData`. It is the end-to-end
+proof that the rewritten API works on a real device against a real endpoint.
+The README documents that API in 4c so the constructor, `get`, result, and
+error types can be reviewed as a consumer would read them. PR 5 renames the
+package import. PR 6 is the post-rename migration guide.
 
 CI also runs Pigeon and fails if it changes tracked generated files.
 
@@ -247,8 +247,8 @@ run succeeds, and the example resolves the renamed package.
 
 ## PR 6. Docs and migration guide
 
-No ticket. The example already runs the new API under the new name, so this PR
-documents that path rather than performing it. Cover every renamed import, the
+No ticket. The README already documents the new API. This PR writes the
+migration guide after the package rename: every renamed import, the
 static-to-instance conversion, removed extended response fields, the error
 model change, updated platform floors, and the web asset path as a numbered
 step.

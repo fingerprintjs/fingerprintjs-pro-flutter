@@ -28,10 +28,12 @@ application. The plugin allows you to call the underlying native Fingerprint age
   - [How to install](#how-to-install)
     - [Web platform (Optional)](#web-platform-optional)
   - [Usage](#usage)
-    - [1. Configure and initialize the plugin](#1-configure-and-initialize-the-plugin)
+    - [1. Create a client](#1-create-a-client)
     - [2. Identify visitors](#2-identify-visitors)
     - [Linking and tagging information](#linking-and-tagging-information)
     - [Specifying a custom timeout](#specifying-a-custom-timeout)
+    - [Location data](#location-data)
+    - [Web options](#web-options)
   - [Additional Resources](#additional-resources)
   - [Support and feedback](#support-and-feedback)
   - [License](#license)
@@ -45,7 +47,7 @@ application. The plugin allows you to call the underlying native Fingerprint age
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
 
 ## Dependencies
-- [Fingerprint JavaScript agent](https://www.npmjs.com/package/@fingerprintjs/fingerprintjs-pro)
+- [Fingerprint JavaScript agent](https://www.npmjs.com/package/@fingerprint/agent)
 - [Fingerprint iOS](https://github.com/fingerprintjs/fingerprint-ios)
 - [Fingerprint Android](https://github.com/fingerprintjs/fingerprintjs-pro-android)
 
@@ -67,7 +69,7 @@ Run `flutter pub get` to download and install the package.
 
 ### Web platform (Optional)
 
-To use this plugin on the web, add the JavaScript agent loader `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
+To use this plugin on the web, add the bundled v4 agent `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
 
 ```html
 <head>
@@ -78,163 +80,134 @@ To use this plugin on the web, add the JavaScript agent loader `<script>` tag to
 
 ## Usage
 
-To identify visitors, you need to [sign up for a Fingerprint account](https://dashboard.fingerprintjs.com/signup/) (there is a free trial available).
+[Sign up](https://dashboard.fingerprint.com/signup/) and copy the public API key from **App Settings** > **API Keys**.
 
-- Go to [the Fingerprint Pro dashboard](https://dashboard.fingerprint.com/).
-- Navigate to **App Settings** > **API Keys** to find your _Public_ API Key.
+### 1. Create a client
 
-### 1. Configure and initialize the plugin
-
-Initialize the Fingerprint Flutter plugin inside a [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html), for example, in the `initState` method. 
-
-Use the [Public API key](https://docs.fingerprint.com/docs/quick-start-guide#2-get-your-api-key) and [region](https://docs.fingerprint.com/docs/regions) of your Fingerprint workspace (US region is used by default).
+Create one `Fingerprint` per API key and configuration. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/region.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatefulWidget {
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-// Initialization
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    doInit();
-  }
-  
-  void doInit() async {
-    await FpjsProPlugin.initFpjs(
-      '<PUBLIC_API_KEY>', // insert your API key here
-      region: Region.us // or Region.eu, Region.ap
-    );
-  }
-  // ...
-}
+final client = Fingerprint(
+  apiKey: '<PUBLIC_API_KEY>',
+  region: Region.eu, // or Region.us, Region.ap
+);
 ```
 
-To avoid ad blockers, we recommend proxying requests from your application to Fingerprint servers through one of our proxy integrations. See [Evading ad blockers with proxy integrations](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers) for more information.
+Android and iOS default to US when `region` is omitted. Web infers it from the API key. Set `region` for EU and AP workspaces on Android and iOS. See [regions](https://docs.fingerprint.com/docs/regions).
 
-To use a proxy integration, you can configure `endpoint`, `scriptUrlPattern`, and their fallbacks.
+`get` waits for that start. Await `ready` to surface a start failure without identifying:
 
 ```dart
- void doInit() async {
-    await FpjsProPlugin.initFpjs(
-      '<PUBLIC_API_KEY>',
-      region: Region.us,
-      // Your proxy integration identification endpoint
-      endpoint: 'https://metrics.yourwebsite.com',
-      endpointFallbacks: ['https://api.fpjs.io'], // region-specific fallback
-      // Your proxy integration script URL pattern
-      // Only necessary for the web platform
-      scriptUrlPattern: 'https://metrics.yourwebsite.com/web/v<version>/<apiKey>/loader_v<loaderVersion>.js',
-      scriptUrlPatternFallbacks: [
-        'https://fpjscdn.net/v<version>/<apiKey>/loader_v<loaderVersion>.js',
-      ],
-    );
-  }
+await client.ready;
 ```
+
+To avoid ad blockers, proxy identification through a [proxy integration](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers). Pass identification URLs as `endpoints`, first to last:
+
+```dart
+final client = Fingerprint(
+  apiKey: '<PUBLIC_API_KEY>',
+  region: Region.us,
+  endpoints: [
+    'https://metrics.yourwebsite.com',
+    'https://api.fpjs.io',
+  ],
+);
+```
+
+On web the agent is the bundled `web/index.js` script, not a CDN loader. There is no `scriptUrlPattern`.
 
 ### 2. Identify visitors
 
-Use `getVisitorId` to get just the visitor ID, or `getVisitorData` to get the identification response object.
+`get` returns a `FingerprintResult` and throws `FingerprintError`.
 
 ```dart
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/error.dart';
-// ...
-
-class _MyAppState extends State<MyApp> {
-  void identify() async {
-    try {
-      var visitorId = await FpjsProPlugin.getVisitorId();
-      var visitorData = await FpjsProPlugin.getVisitorData();
-
-      print('Visitor ID: $visitorId');
-      print('Visitor data: $visitorData');
-    } on FingerprintProError catch (e) {
-      // Process the error
-      print('Error identifying visitor: $e');
-      // See lib/error.dart to get more information about error types
-    }
-  }
+try {
+  final result = await client.get();
+  print(result.visitorId);
+  print(result.eventId);
+  print(result.suspectScore);
+  print(result.sealedResult);
+  print(result.cacheHit); // web only, otherwise null
+} on FingerprintError catch (error) {
+  print(error.code);
+  print(error.message);
+  print(error.eventId);
 }
 ```
 
+`visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent). The client no longer returns extended device fields.
 
-By default, `getVisitorData()` will return a short response (`FingerprintJSProResponse`).
-Pass `extendedResponseFormat: true` to the `initFpjs` function to get an extended response (`FingerprintJSProExtendedResponse`).
-
-```dart
-void doInit() async {
-  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', extendedResponseFormat: true);
-}
-```
+Known identification codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`. Unfamiliar codes are kept as-is.
 
 ### Linking and tagging information
 
-The `visitorId` provided by Fingerprint Identification is especially useful when combined with information you already know about your users, for example, account IDs, order IDs, etc. To learn more about various applications of the `linkedId` and `tag`, see [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
+Pass data you already have, such as account or order IDs, as `linkedId` and `tags`. See [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
 
 ```dart
-void identify() async {
-  const tags = {
+final result = await client.get(
+  linkedId: 'user_1234',
+  tags: {
     'userAction': 'login',
-    'analyticsId': 'UA-5555-1111-1'
-  };
-  const linkedId = 'user_1234';
-
-  visitorId = await FpjsProPlugin.getVisitorId(linkedId: linkedId, tags: tags);
-  deviceData = await FpjsProPlugin.getVisitorData(linkedId: linkedId, tags: tags);
-}
+    'analyticsId': 'UA-5555-1111-1',
+    'campaign': null,
+  },
+);
 ```
+
+`tags` is a string-keyed map of JSON values, including null. The same map is sent on every platform. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a server limit reported as `payload_too_large`.
 
 ### Specifying a custom timeout
 
-*Default timeout value:*
-- iOS: 60 seconds
-- Android: not specified
-- Web: 10 seconds
+Default timeout:
 
-You can override the default timeout with a custom value of your choice. If the `getVisitorId()` or `getVisitorData()` call does not complete within the specified (or default) timeout, you will receive a `ClientTimeoutError` error.
-
-```dart
-void identify() async {
-  visitorId = await FpjsProPlugin.getVisitorId(timeoutMs: 10000);
-  deviceData = await FpjsProPlugin.getVisitorData(timeoutMs: 10000);
-}
-```
-
-### Proximity Detection
-
-Proximity detection is a complementary, location-based signal available only on mobile platforms.
-More info you can find in [Android SDK documentation](https://docs.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) or in
-[iOS SDK documentation](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection).
-
-The Fingerprint SDK will only collect location data if the `allowUseOfLocationData` option is set to `true`.
+- iOS: 60 seconds ([iOS SDK](https://docs.fingerprint.com/docs/ios-sdk))
+- Android: none ([Android SDK](https://docs.fingerprint.com/docs/android-sdk))
+- Web: 10 seconds ([JS agent](https://docs.fingerprint.com/reference/js-agent-get-function))
 
 ```dart
-void doInit() async {
-  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', allowUseOfLocationData: true);
-}
+final result = await client.get(timeout: const Duration(seconds: 10));
 ```
 
-For Android platform it's possible to configure the location retrieval timeout by setting the `locationTimeoutMillisAndroid` option to a desired value. By default, it's set to 5 seconds.
-The SDK will delay identification up to the specified timeout to collect the device location. If it cannot collect the location information within the specified time, identification continues without location information.
+A timeout throws `FingerprintError` with `code` `client_timeout`.
+
+### Location data
+
+Location is collected only when `allowUseOfLocationData` is true on the matching platform options.
 
 ```dart
-void doInit() async {
-  await FpjsProPlugin.initFpjs('<PUBLIC_API_KEY>', allowUseOfLocationData: true, 
-      locationTimeoutMillisAndroid: 10000);
-}
+final client = Fingerprint(
+  apiKey: '<PUBLIC_API_KEY>',
+  android: const AndroidOptions(
+    allowUseOfLocationData: true,
+    locationTimeout: Duration(seconds: 10),
+  ),
+  ios: const IosOptions(allowUseOfLocationData: true),
+);
 ```
+
+On Android, identification waits up to `locationTimeout` for a fix (default 5 seconds), then continues without location. See [Android](https://docs.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) and [iOS](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection) proximity detection.
+
+### Web options
+
+`WebOptions` are ignored on Android and iOS. Cache is off unless `cache` is set.
+
+```dart
+final client = Fingerprint(
+  apiKey: '<PUBLIC_API_KEY>',
+  web: const WebOptions(
+    storageKeyPrefix: 'fp_',
+    urlHashing: WebUrlHashing(path: true, query: true),
+    cache: WebCache(
+      storage: WebCacheStorage.sessionStorage,
+      duration: WebCacheDuration.optimizeCost, // 1 hour. aggressive is 12 hours.
+    ),
+  ),
+);
+```
+
+A custom cache duration must be a whole number of seconds, greater than zero and at most 12 hours: `WebCacheDuration.custom(const Duration(hours: 2))`. See the [JS agent start options](https://docs.fingerprint.com/reference/js-agent-start-function).
 
 ## Additional Resources
 - [Fingerprint Pro documentation](https://docs.fingerprint.com)
