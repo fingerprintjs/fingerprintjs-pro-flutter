@@ -13,6 +13,5 @@ analyzer:
     undefined_lint: ignore
     unrecognized_error_code: ignore
     invalid_runtime_check_with_js_interop_types: error
-
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
