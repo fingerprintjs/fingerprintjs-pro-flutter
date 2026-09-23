@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/src/tags.dart';
 
@@ -35,6 +37,19 @@ void main() {
     test('accepts an empty root map and a nested empty list', () {
       expect(() => validateTags(<String, Object?>{}), returnsNormally);
       expect(() => validateTags({'items': <Object?>[]}), returnsNormally);
+    });
+
+    test('rejects a typed list, which Pigeon would drop on iOS', () {
+      expect(
+        () => validateTags({'bytes': Uint8List.fromList(const [1, 2])}),
+        throwsA(
+          isA<ArgumentError>().having(
+            (error) => error.message,
+            'message',
+            contains('JSON-compatible'),
+          ),
+        ),
+      );
     });
 
     test('rejects a nested value with no JSON form', () {
