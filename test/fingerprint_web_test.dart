@@ -147,6 +147,16 @@ void main() {
       expect(fake.startCount, 2);
       expect(fake.startApiKeys, ['key-1', 'key-2']);
     });
+
+    test('same key with different web options starts two agents', () async {
+      final first = config(web: const WebOptions(storageKeyPrefix: 'a_'));
+      final second = config(web: const WebOptions(storageKeyPrefix: 'b_'));
+      expect(first, isNot(second));
+      await platform.create(first);
+      await platform.create(second);
+
+      expect(fake.startCount, 2);
+    });
   });
 
   group('get', () {

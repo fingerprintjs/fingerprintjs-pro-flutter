@@ -126,6 +126,7 @@ void main() {
       expect(fakeHostApi.createdConfig?.endpoint, isNull);
       expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, isNull);
+      expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isFalse);
     });
 
     test('forwards a single endpoint without fallbacks', () async {
