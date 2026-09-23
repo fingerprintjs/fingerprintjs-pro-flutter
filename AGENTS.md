@@ -5,12 +5,13 @@
 - Structure
   - Avoid thin wrapper functions and helpers, minimize layers of indirection
 - Tests
-  - Test APIs and contracts like a real consumer uses them
+  - Test through APIs and contracts (like a real consumer uses them)
   - Avoid mocks if possible
   - DO NOT test trivial or internal implementation details
-  - DO NOT write tautological tests that could not possibly fail
+  - DO NOT write tautological tests (test must be able to fail by messing up the implementation)
 - Comments & Docs
   - Keep short, use simple english
+  - Focus on WHY (WHAT, HOW must be obvious from the code)
   - Write like a terse note to a self or teammate, no m-dashed essays
   - Prefer bullet points over long `;` chains
   - Avoid ambiguous jargon (seam, boundary, gate, envelope, wire shapes, ...), be plain, precise, specific
