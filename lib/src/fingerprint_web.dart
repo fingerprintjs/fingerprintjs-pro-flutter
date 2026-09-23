@@ -165,8 +165,13 @@ FingerprintError _wrapJsError(Object error) {
     if (code.isA<JSString>()) {
       final message = error.getProperty('message'.toJS);
       final eventId = error.getProperty('event_id'.toJS);
+      // The agent splits network failures. Native uses one code.
+      var errorCode = (code as JSString).toDart;
+      if (errorCode == 'network_connection' || errorCode == 'network_abort') {
+        errorCode = FingerprintError.networkError;
+      }
       return FingerprintError(
-        code: (code as JSString).toDart,
+        code: errorCode,
         message: message.isA<JSString>() ? (message as JSString).toDart : null,
         eventId: eventId.isA<JSString>() ? (eventId as JSString).toDart : null,
       );

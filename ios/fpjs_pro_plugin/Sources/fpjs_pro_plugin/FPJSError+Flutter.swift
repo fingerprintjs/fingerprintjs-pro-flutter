@@ -61,14 +61,8 @@ extension APIError {
     case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
     case .proxyIntegrationSecretEnvironmentMismatch:
       return "proxy_integration_secret_environment_mismatch"
-    case .secretApiKeyRequired: return "secret_api_key_required"
-    case .secretApiKeyNotFound: return "secret_api_key_not_found"
-    case .stateNotReady: return "state_not_ready"
-    case .eventNotFound: return "event_not_found"
-    case .rulesetNotFound: return "ruleset_not_found"
-    case .subscriptionNotFound: return "subscription_not_found"
-    @unknown default:
-      return camelCaseToSnakeCase(code.rawValue)
+    default:
+      return "unknown_error"
     }
   }
 }
@@ -80,19 +74,4 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
-}
-
-private func camelCaseToSnakeCase(_ value: String) -> String {
-  var result = ""
-  for character in value {
-    if character.isUppercase {
-      if !result.isEmpty {
-        result.append("_")
-      }
-      result.append(character.lowercased())
-    } else {
-      result.append(character)
-    }
-  }
-  return result
 }

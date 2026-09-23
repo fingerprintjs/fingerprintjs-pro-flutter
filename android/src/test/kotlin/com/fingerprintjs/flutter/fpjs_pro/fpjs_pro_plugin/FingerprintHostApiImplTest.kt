@@ -6,6 +6,7 @@ import com.fingerprint.android.Configuration
 import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
+import com.fingerprint.android.NetworkUnavailableError
 import com.fingerprint.android.RequestTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -44,6 +45,7 @@ class FingerprintHostApiImplTest {
       ApiKeyRequired("e1", "msg") to "public_api_key_required",
       Failed("e2", "fail") to "failed",
       RequestTimeout("e3", "timeout") to "request_read_timeout",
+      NetworkUnavailableError() to "network_error",
     )
     for ((nativeError, expectedCode) in cases) {
       val cache = FingerprintClientCache(context) { _, _ ->

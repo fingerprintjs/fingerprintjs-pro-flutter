@@ -176,6 +176,26 @@ void main() {
       );
     });
 
+    test('collapses web network codes into network_error', () async {
+      for (final code in ['network_connection', 'network_abort']) {
+        fake.nextError = {
+          'code': code,
+          'message': 'Network failed',
+          'event_id': 'evt-err',
+        };
+        await expectLater(
+          platform.get(config()),
+          throwsA(
+            isA<FingerprintError>().having(
+              (error) => error.code,
+              'code',
+              FingerprintError.networkError,
+            ),
+          ),
+        );
+      }
+    });
+
     test('get before create still starts the agent', () async {
       final result = await platform.get(config());
       expect(fake.startCount, 1);
