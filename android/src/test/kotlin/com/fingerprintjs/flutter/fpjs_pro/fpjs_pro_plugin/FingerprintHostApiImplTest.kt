@@ -76,6 +76,32 @@ class FingerprintHostApiImplTest {
     assertEquals(null, tags["campaign"])
     assertEquals(1, tags["sessionId"])
   }
+
+  @Test
+  fun getForwardsTimeoutThatFitsInt() {
+    val client = CapturingFingerprint()
+    val cache = FingerprintClientCache(context) { _, _ -> client }
+    FingerprintHostApiImpl(context, cache).get(
+      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      null,
+      null,
+      500L,
+    ) {}
+    assertEquals(500, client.timeoutMs)
+  }
+
+  @Test
+  fun getClampsTimeoutOutsideInt() {
+    val client = CapturingFingerprint()
+    val cache = FingerprintClientCache(context) { _, _ -> client }
+    FingerprintHostApiImpl(context, cache).get(
+      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      null,
+      null,
+      Int.MAX_VALUE.toLong() + 1,
+    ) {}
+    assertEquals(Int.MAX_VALUE, client.timeoutMs)
+  }
 }
 
 private class FakeFingerprint(
@@ -93,6 +119,7 @@ private class FakeFingerprint(
 
 private class CapturingFingerprint : Fingerprint by mock(Fingerprint::class.java) {
   var tags: Map<String, Any>? = null
+  var timeoutMs: Int? = null
 
   override fun getVisitorId(
     tags: Map<String, Any>,
@@ -100,6 +127,17 @@ private class CapturingFingerprint : Fingerprint by mock(Fingerprint::class.java
     listener: (FingerprintResponse) -> Unit,
     errorListener: (com.fingerprint.android.Error) -> Unit,
   ) {
+    this.tags = tags
+  }
+
+  override fun getVisitorId(
+    timeoutMillis: Int,
+    tags: Map<String, Any>,
+    linkedId: String,
+    listener: (FingerprintResponse) -> Unit,
+    errorListener: (com.fingerprint.android.Error) -> Unit,
+  ) {
+    this.timeoutMs = timeoutMillis
     this.tags = tags
   }
 }

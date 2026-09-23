@@ -46,7 +46,10 @@ internal class FingerprintHostApiImpl(
       callback(Result.failure(toFlutterError(error)))
     }
     if (timeoutMs != null) {
-      client.getVisitorId(timeoutMs.toInt(), tagMap, linked, listener, errorListener)
+      // Android getVisitorId takes Int. Long.toInt() wraps. Clamp so a huge timeout becomes Int.MAX_VALUE, not negative.
+      val timeoutInt =
+        timeoutMs.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+      client.getVisitorId(timeoutInt, tagMap, linked, listener, errorListener)
     } else {
       client.getVisitorId(tagMap, linked, listener, errorListener)
     }
