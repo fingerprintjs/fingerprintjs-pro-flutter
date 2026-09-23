@@ -132,6 +132,43 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
+  fun createUsesCustomEndpoint() {
+    val built = captureConfiguration(
+      nativeConfig(endpoint = "https://proxy.example"),
+    )
+    assertEquals("https://proxy.example", built.endpointUrl)
+  }
+
+  @Test
+  fun createForwardsLocationFlag() {
+    val built = captureConfiguration(
+      nativeConfig(allowUseOfLocationData = true),
+    )
+    assertEquals(true, built.allowUseOfLocationData)
+  }
+
+  @Test
+  fun createUsesProvidedLocationTimeout() {
+    val built = captureConfiguration(
+      nativeConfig(locationTimeoutMillis = 1000L),
+    )
+    assertEquals(1000L, built.locationTimeoutMillis)
+  }
+
+  @Test
+  fun getForwardsLinkedId() {
+    val client = CapturingFingerprint()
+    val cache = FingerprintClientCache(context) { _, _ -> client }
+    FingerprintHostApiImpl(context, cache).get(
+      nativeConfig(),
+      null,
+      "order-1",
+      null,
+    ) {}
+    assertEquals("order-1", client.linkedId)
+  }
+
+  @Test
   fun createParsesRegionCaseInsensitively() {
     val cases = listOf(
       "eu" to Configuration.Region.EU,
@@ -224,6 +261,7 @@ class FingerprintHostApiImplTest {
   private fun nativeConfig(
     region: String? = "us",
     endpoint: String? = null,
+    allowUseOfLocationData: Boolean = false,
     locationTimeoutMillis: Long? = 5000L,
   ) = FingerprintNativeConfig(
     "key-a",
@@ -231,7 +269,7 @@ class FingerprintHostApiImplTest {
     endpoint,
     null,
     "1.0.0",
-    false,
+    allowUseOfLocationData,
     locationTimeoutMillis,
   )
 }
