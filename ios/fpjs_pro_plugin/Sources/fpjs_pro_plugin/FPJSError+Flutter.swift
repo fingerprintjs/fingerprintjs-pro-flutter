@@ -66,8 +66,10 @@ extension APIError {
     case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
     case .proxyIntegrationSecretEnvironmentMismatch:
       return "proxy_integration_secret_environment_mismatch"
+    // Identification-only constants live in Dart. Unlisted codes still go
+    // through so a newer iOS SDK is debuggable.
     default:
-      return "unknown_error"
+      return camelCaseToSnakeCase(code.rawValue)
     }
   }
 }
@@ -79,4 +81,19 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
+}
+
+private func camelCaseToSnakeCase(_ value: String) -> String {
+  var result = ""
+  for character in value {
+    if character.isUppercase {
+      if !result.isEmpty {
+        result.append("_")
+      }
+      result.append(character.lowercased())
+    } else {
+      result.append(character)
+    }
+  }
+  return result
 }

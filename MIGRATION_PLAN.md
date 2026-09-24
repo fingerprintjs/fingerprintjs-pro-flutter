@@ -153,8 +153,10 @@ Every platform throws one `FingerprintError`. The platform adapters translate
 native names to canonical snake_case codes and normalize platform-only values.
 The error class keeps unfamiliar codes unchanged. Its known constants include
 only errors identification clients can return. Server API-only codes are
-excluded: `secret_api_key_*`, `state_not_ready`, `subscription_not_found`,
-`ruleset_not_found`, `request_not_found`, and `event_not_found`.
+not Dart constants (`secret_api_key_*`, `state_not_ready`,
+`subscription_not_found`, `ruleset_not_found`, `request_not_found`,
+`event_not_found`), but adapters still forward them if they arrive. iOS maps
+unlisted `APIError.Code` to snake_case `rawValue`.
 `request_timeout` is Android's class name for `request_read_timeout`, not a
 v4 API code.
 
