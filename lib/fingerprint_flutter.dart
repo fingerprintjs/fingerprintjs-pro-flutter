@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:fpjs_pro_plugin/options.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter/options.dart';
+import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 
-export 'package:fpjs_pro_plugin/error.dart';
-export 'package:fpjs_pro_plugin/options.dart';
-export 'package:fpjs_pro_plugin/region.dart';
-export 'package:fpjs_pro_plugin/result.dart';
+export 'package:fingerprint_flutter/error.dart';
+export 'package:fingerprint_flutter/options.dart';
+export 'package:fingerprint_flutter/region.dart';
+export 'package:fingerprint_flutter/result.dart';
 
 // Update it on each release
 const pluginVersion = '4.13.1';
@@ -95,7 +95,10 @@ List<String>? _normalizeEndpoints(List<String>? endpoints) {
   if (endpoints == null) {
     return null;
   }
-  final kept = [for (final url in endpoints) if (url.isNotEmpty) url];
+  final kept = [
+    for (final url in endpoints)
+      if (url.isNotEmpty) url,
+  ];
   if (kept.isEmpty) {
     return null;
   }

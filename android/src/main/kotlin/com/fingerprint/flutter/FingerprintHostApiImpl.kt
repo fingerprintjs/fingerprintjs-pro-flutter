@@ -1,5 +1,5 @@
 // Pigeon HostApi: identification via Android Fingerprint SDK 4.x.
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
+package com.fingerprint.flutter
 
 import android.content.Context
 import com.fingerprint.android.Configuration
@@ -68,7 +68,7 @@ internal class FingerprintHostApiImpl(
       region,
       endpointUrl,
       fallbacks,
-      listOf(Pair("fingerprint-pro-flutter", config.pluginVersion)),
+      listOf(Pair("fingerprint-flutter", config.pluginVersion)),
       config.allowUseOfLocationData,
       locationTimeout,
     )

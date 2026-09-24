@@ -2,21 +2,21 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:fpjs_pro_plugin/options.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
-import 'package:fpjs_pro_plugin/src/js_agent_interop.dart';
-import 'package:fpjs_pro_plugin/src/tags.dart';
+import 'package:fingerprint_flutter/options.dart';
+import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_error.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter/src/js_agent_interop.dart';
+import 'package:fingerprint_flutter/src/tags.dart';
 
 /// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
-  FingerprintWeb({FingerprintJSAgent Function(JSObject options)? start})
-    : _start = start ?? ((options) => FingerprintJS.start(options));
+  FingerprintWeb({FingerprintAgent Function(JSObject options)? start})
+    : _start = start ?? ((options) => FingerprintLoader.start(options));
 
-  final FingerprintJSAgent Function(JSObject options) _start;
-  final _agents = <FingerprintConfig, FingerprintJSAgent>{};
+  final FingerprintAgent Function(JSObject options) _start;
+  final _agents = <FingerprintConfig, FingerprintAgent>{};
 
   static void registerWith(Registrar registrar) {
     FingerprintPlatform.instance = FingerprintWeb();
@@ -55,7 +55,7 @@ class FingerprintWeb extends FingerprintPlatform {
     }
   }
 
-  FingerprintJSAgent _agentFor(FingerprintConfig config) {
+  FingerprintAgent _agentFor(FingerprintConfig config) {
     final existing = _agents[config];
     if (existing != null) {
       return existing;
@@ -73,7 +73,7 @@ class FingerprintWeb extends FingerprintPlatform {
 JSObject _toStartOptions(FingerprintConfig config) {
   final options = <String, Object>{
     'apiKey': config.apiKey,
-    'integrationInfo': ['fingerprint-pro-flutter/${config.pluginVersion}/web'],
+    'integrationInfo': ['fingerprint-flutter/${config.pluginVersion}/web'],
     if (config.region != null) 'region': config.region!.stringValue,
     if (config.endpoints != null) 'endpoints': config.endpoints!,
   };

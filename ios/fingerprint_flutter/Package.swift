@@ -3,13 +3,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "fpjs_pro_plugin",
+    name: "fingerprint_flutter",
     platforms: [
         .iOS("15.0"),
         .tvOS("15.0")
     ],
     products: [
-        .library(name: "fpjs-pro-plugin", targets: ["fpjs_pro_plugin"])
+        .library(name: "fingerprint_flutter", targets: ["fingerprint_flutter"])
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
@@ -17,7 +17,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "fpjs_pro_plugin",
+            name: "fingerprint_flutter",
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "Fingerprint", package: "fingerprint-ios")

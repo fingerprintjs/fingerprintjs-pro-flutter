@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:fpjs_pro_plugin/options.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_native.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter/options.dart';
+import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_native.dart';
+import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// Configuration passed to every platform [create] and [get].

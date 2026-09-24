@@ -9,19 +9,19 @@
 </p>
 <p align="center">
   <a href="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/actions/workflows/ci.yml"><img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/actions/workflows/ci.yml/badge.svg" alt="Build status"></a>
-  <a href="https://pub.dev/packages/fpjs_pro_plugin"><img src="https://img.shields.io/pub/v/fpjs_pro_plugin.svg"/></a>
+  <a href="https://pub.dev/packages/fingerprint_flutter"><img src="https://img.shields.io/pub/v/fingerprint_flutter.svg"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/:license-mit-blue.svg?style=flat"/></a>
   <a href="https://discord.gg/39EpE2neBg"><img src="https://img.shields.io/discord/852099967190433792?style=logo&label=Discord&logo=Discord&logoColor=white" alt="Discord server"></a>
 </p>
 
-# Fingerprint Pro Flutter
+# Fingerprint Flutter
 
 [Fingerprint](https://fingerprint.com/) is a device intelligence platform offering visitor
 identification and device intelligence with industry-leading accuracy. Fingerprint Flutter SDK is an easy way to integrate Fingerprint into your Flutter
 application. The plugin allows you to call the underlying native Fingerprint agents (Android, iOS, and Web) and identify devices.
 
 ## Table of contents
-- [Fingerprint Pro Flutter](#fingerprint-pro-flutter)
+- [Fingerprint Flutter](#fingerprint-flutter)
   - [Table of contents](#table-of-contents)
   - [Requirements](#requirements)
   - [Dependencies](#dependencies)
@@ -55,14 +55,14 @@ iOS supports Swift Package Manager and CocoaPods. Flutter 3.44+ uses Swift Packa
 
 ## How to install
 
-Add `fpjs_pro_plugin` to the `pubspec.yaml` file in your Flutter app:
+Add `fingerprint_flutter` to the `pubspec.yaml` file in your Flutter app:
 
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
   ...
-  fpjs_pro_plugin: ^4.13.1
+  fingerprint_flutter: ^4.13.1
 ```
 
 Run `flutter pub get` to download and install the package.
@@ -74,7 +74,7 @@ To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `
 ```html
 <head>
   <!-- ... -->
-  <script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
+  <script src="assets/packages/fingerprint_flutter/web/index.js" defer></script>
 </head>
 ```
 
@@ -87,7 +87,7 @@ To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `
 Create one `Fingerprint` per API key and configuration at app startup. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
 
 ```dart
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 
 final client = Fingerprint(
   apiKey: '<PUBLIC_API_KEY>',
@@ -207,7 +207,7 @@ final client = Fingerprint(
 A custom cache duration must be a whole number of seconds, greater than zero and at most 12 hours: `WebCacheDuration.custom(const Duration(hours: 2))`. See the [JS agent start options](https://docs.fingerprint.com/reference/js-agent-start-function).
 
 ## Additional Resources
-- [Fingerprint Pro documentation](https://docs.fingerprint.com)
+- [Fingerprint documentation](https://docs.fingerprint.com)
 - [Server API](https://docs.fingerprint.com/reference/server-api)
 
 ## Support and feedback

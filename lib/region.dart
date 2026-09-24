@@ -1,4 +1,4 @@
-/// Region in which FingerprintJS Pro subscription is created
+/// Fingerprint workspace region.
 enum Region { eu, us, ap }
 
 /// Returns a string value of a region to pass to the native library through a [MethodChannel]

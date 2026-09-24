@@ -7,16 +7,17 @@
 
 import 'package:pigeon/pigeon.dart';
 
-@ConfigurePigeon(PigeonOptions(
-  dartOut: 'lib/src/pigeon/fingerprint_api.g.dart',
-  dartPackageName: 'fpjs_pro_plugin',
-  kotlinOut:
-      'android/src/main/kotlin/com/fingerprintjs/flutter/fpjs_pro/fpjs_pro_plugin/FingerprintApi.g.kt',
-  kotlinOptions: KotlinOptions(
-    package: 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin',
+@ConfigurePigeon(
+  PigeonOptions(
+    dartOut: 'lib/src/pigeon/fingerprint_api.g.dart',
+    dartPackageName: 'fingerprint_flutter',
+    kotlinOut:
+        'android/src/main/kotlin/com/fingerprint/flutter/FingerprintApi.g.kt',
+    kotlinOptions: KotlinOptions(package: 'com.fingerprint.flutter'),
+    swiftOut:
+        'ios/fingerprint_flutter/Sources/fingerprint_flutter/FingerprintApi.g.swift',
   ),
-  swiftOut: 'ios/fpjs_pro_plugin/Sources/fpjs_pro_plugin/FingerprintApi.g.swift',
-))
+)
 class FingerprintNativeConfig {
   FingerprintNativeConfig({
     required this.apiKey,

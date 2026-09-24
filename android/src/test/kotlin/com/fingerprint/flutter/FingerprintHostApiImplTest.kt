@@ -1,4 +1,4 @@
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
+package com.fingerprint.flutter
 
 import android.content.Context
 import com.fingerprint.android.ApiKeyRequired

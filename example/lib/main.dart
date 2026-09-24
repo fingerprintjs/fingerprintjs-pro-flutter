@@ -5,7 +5,7 @@ import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
+import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
 const tags = {
@@ -234,7 +234,7 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('FPJS Pro Flutter plugin')),
+        appBar: AppBar(title: const Text('Fingerprint Flutter')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

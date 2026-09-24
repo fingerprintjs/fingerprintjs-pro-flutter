@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/src/tags.dart';
+import 'package:fingerprint_flutter/src/tags.dart';
 
 /// A value with no JSON form.
 class _NotJson {
@@ -41,7 +41,9 @@ void main() {
 
     test('rejects a typed list, which Pigeon would drop on iOS', () {
       expect(
-        () => validateTags({'bytes': Uint8List.fromList(const [1, 2])}),
+        () => validateTags({
+          'bytes': Uint8List.fromList(const [1, 2]),
+        }),
         throwsA(
           isA<ArgumentError>().having(
             (error) => error.message,

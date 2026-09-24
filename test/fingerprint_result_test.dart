@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fingerprint_flutter/result.dart';
 
 void main() {
   group('FingerprintResult', () {

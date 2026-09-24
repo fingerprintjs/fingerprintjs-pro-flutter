@@ -1,4 +1,4 @@
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
+package com.fingerprint.flutter
 
 import android.content.Context
 import com.fingerprint.android.Configuration
@@ -84,7 +84,7 @@ class FingerprintClientCacheTest {
     region,
     endpointUrl,
     fallbacks,
-    listOf(Pair("fingerprint-pro-flutter", pluginVersion)),
+    listOf(Pair("fingerprint-flutter", pluginVersion)),
     allowUseOfLocationData,
     locationTimeoutMillis,
   )

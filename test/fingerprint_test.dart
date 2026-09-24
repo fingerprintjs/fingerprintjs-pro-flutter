@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/fingerprint_flutter.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 void main() {

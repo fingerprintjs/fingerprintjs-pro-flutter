@@ -25,4 +25,4 @@ plugins {
 // Docs say to include the app, but it doesn't seem needed for a library
 // include ":app"
 
-rootProject.name = 'fpjs_pro_plugin'
+rootProject.name = 'fingerprint_flutter'

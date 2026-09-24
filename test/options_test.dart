@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/options.dart';
+import 'package:fingerprint_flutter/options.dart';
 
 void main() {
   test('rejects a cache duration above 12 hours', () {

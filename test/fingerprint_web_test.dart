@@ -5,12 +5,12 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/options.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_web.dart';
-import 'package:fpjs_pro_plugin/src/js_agent_interop.dart';
+import 'package:fingerprint_flutter/error.dart';
+import 'package:fingerprint_flutter/options.dart';
+import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/src/fingerprint_web.dart';
+import 'package:fingerprint_flutter/src/js_agent_interop.dart';
 
 void main() {
   late FakeAgent fake;
@@ -49,7 +49,7 @@ void main() {
 
       expect(fake.startOptions['apiKey'], 'key-1');
       expect(fake.startOptions['integrationInfo'], [
-        'fingerprint-pro-flutter/9.9.9/web',
+        'fingerprint-flutter/9.9.9/web',
       ]);
       expect(fake.startOptions['region'], 'eu');
       expect(fake.startOptions['endpoints'], [
@@ -215,13 +215,13 @@ class FakeAgent {
   };
   Map<String, Object?>? nextError;
 
-  FingerprintJSAgent start(JSObject options) {
+  FingerprintAgent start(JSObject options) {
     startCount += 1;
     startOptions = (options.dartify() as Map).cast<Object?, Object?>();
     startApiKeys.add(startOptions['apiKey'] as String);
     final agent = JSObject();
     agent['get'] = _get.toJS;
-    return FingerprintJSAgent(agent);
+    return FingerprintAgent(agent);
   }
 
   JSPromise<JSObject> _get([JSObject? options]) {

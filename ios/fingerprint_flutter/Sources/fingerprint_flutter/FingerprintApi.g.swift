@@ -366,7 +366,7 @@ class FingerprintHostApiSetup {
     /// before identification. get still carries config and reuses this client,
     /// so two Dart clients stay independent if create was skipped.
     /// https://docs.fingerprint.com/docs/ios-sdk
-    let createChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    let createChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       createChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
@@ -381,7 +381,7 @@ class FingerprintHostApiSetup {
     } else {
       createChannel.setMessageHandler(nil)
     }
-    let getChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    let getChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
