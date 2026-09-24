@@ -117,6 +117,8 @@ void main() {
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
     });
 
+    // Shared platform singleton. A failed create must not latch and
+    // poison a later get, which can create the native client itself.
     test('create failure does not block a later get', () async {
       fakeHostApi.nextCreateError = PlatformException(
         code: 'unknown_error',

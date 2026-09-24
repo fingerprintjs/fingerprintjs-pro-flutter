@@ -72,6 +72,8 @@ void main() {
     expect(platform.gets.single.timeout, const Duration(milliseconds: 500));
   });
 
+  // Constructor ignores create so an unused client is not an unhandled async
+  // error. get() still rethrows, and must not identify.
   test('get surfaces a create failure without identifying', () async {
     platform.createError = FingerprintError(
       code: FingerprintError.apiKeyInvalid,
@@ -91,32 +93,41 @@ void main() {
     expect(platform.gets, isEmpty);
   });
 
-  test('treats an empty endpoints list as the regional default', () async {
-    final client = Fingerprint(apiKey: 'key-1', endpoints: const []);
-    await client.get();
+  test(
+    'treats an empty endpoints list as null, uses the regional default',
+    () async {
+      final client = Fingerprint(apiKey: 'key-1', endpoints: const []);
+      await client.get();
 
-    expect(client.endpoints, isNull);
-    expect(platform.created.single.endpoints, isNull);
-  });
+      expect(client.endpoints, isNull);
+      expect(platform.created.single.endpoints, isNull);
+    },
+  );
 
-  test('drops empty endpoint strings before splitting primary and fallbacks', () async {
-    final client = Fingerprint(
-      apiKey: 'key-1',
-      endpoints: const ['', 'https://proxy.example', ''],
-    );
-    await client.get();
+  test(
+    'drops empty endpoint strings before splitting primary and fallbacks',
+    () async {
+      final client = Fingerprint(
+        apiKey: 'key-1',
+        endpoints: const ['', 'https://proxy.example', ''],
+      );
+      await client.get();
 
-    expect(client.endpoints, ['https://proxy.example']);
-    expect(platform.created.single.endpoints, ['https://proxy.example']);
-  });
+      expect(client.endpoints, ['https://proxy.example']);
+      expect(platform.created.single.endpoints, ['https://proxy.example']);
+    },
+  );
 
-  test('treats a list of empty endpoint strings as the regional default', () async {
-    final client = Fingerprint(apiKey: 'key-1', endpoints: const ['', '']);
-    await client.get();
+  test(
+    'treats a list of empty endpoint strings as null, uses the regional default',
+    () async {
+      final client = Fingerprint(apiKey: 'key-1', endpoints: const ['', '']);
+      await client.get();
 
-    expect(client.endpoints, isNull);
-    expect(platform.created.single.endpoints, isNull);
-  });
+      expect(client.endpoints, isNull);
+      expect(platform.created.single.endpoints, isNull);
+    },
+  );
 }
 
 class RecordingPlatform extends FingerprintPlatform

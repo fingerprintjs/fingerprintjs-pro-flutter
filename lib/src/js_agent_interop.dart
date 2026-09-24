@@ -25,8 +25,9 @@ extension type JSGetResult(JSObject _) implements JSObject {
   external String? get visitorId;
 
   @JS('suspect_score')
-  external JSAny? get suspectScore;
+  external int? get suspectScore;
 
+  // Omitted, a base64 string, or BinaryOutput. No Dart union type.
   @JS('sealed_result')
   external JSAny? get sealedResult;
 
