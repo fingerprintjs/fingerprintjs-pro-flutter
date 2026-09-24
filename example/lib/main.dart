@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
   Fingerprint? _client;
   final String? _apiKey = dotenv.env['API_KEY'];
   final String? _region = dotenv.env['REGION'];
-  final String? _endpoint = dotenv.env['ENDPOINTS'];
+  final String? _endpoints = dotenv.env['ENDPOINTS'];
   final bool _disableLocationCollection =
       dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 
@@ -82,7 +82,7 @@ class _MyAppState extends State<MyApp> {
       _client = Fingerprint(
         apiKey: _apiKey,
         region: _parseRegion(_region),
-        endpoints: _endpoint == null || _endpoint.isEmpty ? null : [_endpoint],
+        endpoints: _endpoints == null || _endpoints.isEmpty ? null : [_endpoints],
         android: AndroidOptions(
           allowUseOfLocationData: !_disableLocationCollection,
           locationTimeout: const Duration(milliseconds: 6000),
