@@ -45,7 +45,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _deviceId = 'Unknown';
+  String _visitorId = 'Unknown';
   String _checksResult = 'Not run';
   InitializationState _initializationState = InitializationState.initializing;
   String? _initializationError;
@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _createClient();
+    _createFingerprintClient();
   }
 
   Region? _parseRegion(String? region) {
@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  void _createClient() {
+  void _createFingerprintClient() {
     try {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
@@ -82,7 +82,9 @@ class _MyAppState extends State<MyApp> {
       _client = Fingerprint(
         apiKey: _apiKey,
         region: _parseRegion(_region),
-        endpoints: _endpoints == null || _endpoints.isEmpty ? null : [_endpoints],
+        endpoints: _endpoints == null || _endpoints.isEmpty
+            ? null
+            : [_endpoints],
         android: AndroidOptions(
           allowUseOfLocationData: !_disableLocationCollection,
           locationTimeout: const Duration(milliseconds: 6000),
@@ -121,29 +123,28 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _getDeviceId() async {
+  Future<FingerprintResult> _identify() async {
     await requestLocationPermission();
-    String deviceId;
+    return _client!.get(tags: tags, linkedId: 'some linkedId');
+  }
+
+  Future<void> _showVisitorId() async {
+    String visitorId;
     try {
-      final result = await _client!.get(tags: tags, linkedId: 'some linkedId');
-      deviceId = result.visitorId ?? 'Unknown';
+      visitorId = (await _identify()).visitorId ?? 'Unknown';
     } catch (error) {
-      deviceId = 'Failed to get device id: $error';
+      visitorId = 'Failed to get device id: $error';
     }
 
     if (!mounted) return;
-
     setState(() {
-      _deviceId = deviceId;
+      _visitorId = visitorId;
     });
   }
 
-  Future<String> _getDeviceData() async {
-    await requestLocationPermission();
-    String identificationInfo;
+  Future<String> _visitorDataText() async {
     try {
-      const encoder = JsonEncoder.withIndent('    ');
-      final result = await _client!.get(tags: tags, linkedId: 'some linkedId');
+      final result = await _identify();
       var sealedResult = result.sealedResult;
       if (sealedResult != null && sealedResult.length > 10) {
         sealedResult = sealedResult.replaceRange(
@@ -152,7 +153,7 @@ class _MyAppState extends State<MyApp> {
           '...',
         );
       }
-      identificationInfo = encoder.convert({
+      return const JsonEncoder.withIndent('    ').convert({
         'eventId': result.eventId,
         'visitorId': result.visitorId,
         'suspectScore': result.suspectScore,
@@ -160,9 +161,8 @@ class _MyAppState extends State<MyApp> {
         'cacheHit': result.cacheHit,
       });
     } on FingerprintError catch (error) {
-      identificationInfo = 'Failed to get device info.\n$error';
+      return 'Failed to get device info.\n$error';
     }
-    return identificationInfo;
   }
 
   Future<void> _runChecks() async {
@@ -249,14 +249,14 @@ class _MyAppState extends State<MyApp> {
               Text(_checksResult),
               ElevatedButton(
                 key: identifyButtonKey,
-                onPressed: isCreated ? _getDeviceId : null,
+                onPressed: isCreated ? _showVisitorId : null,
                 child: const Text('Identify!'),
               ),
               const Text('The device id is:'),
-              Text(_deviceId),
+              Text(_visitorId),
               _VisitorDataDialog(
                 enabled: isCreated,
-                loadVisitorData: _getDeviceData,
+                loadVisitorData: _visitorDataText,
               ),
             ],
           ),
