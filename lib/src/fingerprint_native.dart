@@ -1,0 +1,96 @@
+import 'package:flutter/services.dart';
+import 'package:fpjs_pro_plugin/error.dart';
+import 'package:fpjs_pro_plugin/region.dart';
+import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
+import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
+import 'package:fpjs_pro_plugin/src/tags.dart';
+
+/// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
+class FingerprintNative extends FingerprintPlatform {
+  FingerprintNative({FingerprintHostApi? hostApi})
+      : _hostApi = hostApi ?? FingerprintHostApi();
+
+  final FingerprintHostApi _hostApi;
+  FingerprintConfig? _config;
+
+  @override
+  Future<void> init(FingerprintConfig config) async {
+    try {
+      await _hostApi.create(_toNativeConfig(config));
+    } on PlatformException catch (exception) {
+      throw unwrapError(exception);
+    }
+    _config = config;
+  }
+
+  @override
+  Future<String?> getVisitorId({
+    Map<String, dynamic>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  }) async {
+    final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
+    // Native/Pigeon send "" when the id is hidden. Dart uses null.
+    return result.visitorId.isEmpty ? null : result.visitorId;
+  }
+
+  @override
+  Future<FingerprintJSProResponse> getVisitorData({
+    Map<String, dynamic>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  }) async {
+    // Pigeon result -> Dart FingerprintResult -> old public FingerprintJSProResponse.
+    final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
+    final normalized = FingerprintResult(
+      eventId: result.eventId,
+      visitorId: result.visitorId,
+      suspectScore: result.suspectScore,
+      sealedResult: result.sealedResult,
+    );
+    return FingerprintJSProResponse(
+      normalized.eventId,
+      normalized.visitorId ?? '',
+      ConfidenceScore(normalized.suspectScore ?? 0),
+      normalized.sealedResult,
+    );
+  }
+
+  Future<FingerprintNativeResult> _getNative({
+    Map<String, dynamic>? tags,
+    String? linkedId,
+    int? timeoutMs,
+  }) async {
+    final config = _config;
+    if (config == null) {
+      throw Exception(
+        'You need to initialize the FPJS Client first by calling the "initFpjs" method',
+      );
+    }
+    validateTags(tags);
+    try {
+      return await _hostApi.get(
+        _toNativeConfig(config),
+        tags,
+        linkedId,
+        timeoutMs,
+      );
+    } on PlatformException catch (exception) {
+      throw unwrapError(exception);
+    }
+  }
+
+  FingerprintNativeConfig _toNativeConfig(FingerprintConfig config) {
+    return FingerprintNativeConfig(
+      apiKey: config.apiKey,
+      region: config.region?.stringValue,
+      endpoint: config.endpoint,
+      endpointFallbacks: config.endpointFallbacks,
+      pluginVersion: config.pluginVersion,
+      allowUseOfLocationData: config.allowUseOfLocationData ?? false,
+      locationTimeoutMillis: config.locationTimeoutMillisAndroid,
+    );
+  }
+}

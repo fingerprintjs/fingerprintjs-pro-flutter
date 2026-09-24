@@ -91,10 +91,10 @@ Flutter 3.47+; the 3.44 path stays supported.
 [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), partial.
 
 Add `plugin_platform_interface`, `FingerprintPlatform`,
-`MethodChannelFingerprint`, `FingerprintWeb`. Public API unchanged. Removes
+`FingerprintNative`, `FingerprintWeb`. Public API unchanged. Removes
 the web round trip, where Dart calls `invokeMethod` and the web plugin answers
 it in the same process. Comes before Pigeon so the generated code sits inside
-`MethodChannelFingerprint`.
+`FingerprintNative`.
 
 **Proves:** tests pass after replacing `FingerprintPlatform.instance`.
 
@@ -108,7 +108,7 @@ wired to stubs asserts only that codegen ran. Split by provable unit.
 | | Scope | Proves |
 |---|---|---|
 | **4a** | `FingerprintResult`, `FingerprintError`, known error constants, tag validation. Pure Dart, public API unchanged. | Result mapping, tag validation and open error codes pass unit tests with no native or web code. |
-| **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, one client serves repeated calls, error codes survive a minified build. |
+| **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, `init` creates a native client that later gets reuse, error codes survive a minified build. |
 | **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app. | No tuple or v3 web implementation remains; two-client independence, tag forwarding, mocked web agent, and the example app on all three platforms. |
 
 The public API never ships over a v3 web implementation. That binds at 4c.
@@ -134,9 +134,9 @@ The public API never ships over a v3 web implementation. That binds at 4c.
   `extends` avoids inheriting an implementation the type does not need
   ([Dart core](https://dart.dev/libraries/dart-core#exceptions)).
 - `tags` accepts a string-keyed map containing recursively JSON-compatible
-  values. The same map is forwarded on every platform. This matches the
-  existing Flutter contract and the map required by Android and iOS. Reject
-  only what cannot reach the server: non-JSON Dart objects, non-string nested
+  values. The same map is forwarded on every platform, including JSON null.
+  iOS converts through `JSONType` (`JSONType.null` for null). Reject only
+  what cannot reach the server: non-JSON Dart objects, non-string nested
   keys, non-finite numbers, and cyclic collections.
 - No client-side tag size cap. The
   [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) is a
@@ -166,10 +166,15 @@ v4 API code.
 - Forward `eventId` from iOS `APIError.eventId` and Android `Error.eventId`.
   Today's plugin drops both. Strip Android's `"Unknown"` sentinel.
 - Read iOS `FPError.description`, not `localizedDescription`. `FPError`
-  implements `CustomStringConvertible`, not `LocalizedError`.
+  implements `CustomStringConvertible`, not `LocalizedError`. For
+  `networkError` and `jsonParsingError`, use the inner error's
+  `localizedDescription` instead. That inner value is usually `URLError`.
 - An iOS `APIError` with no code is `unknown_error`, not `failed`.
 - Pigeon can carry `visitorId` as `String`. Empty becomes null on
   `FingerprintResult`.
+- Keep JSON null tags: Android HashMap (SDK type is `Map<String, Any>`),
+  iOS `JSONType.null`. Nested iOS maps may arrive as `[AnyHashable: Any]`;
+  convert by string key.
 
 ### Native client lifecycle
 
@@ -177,19 +182,18 @@ Two separate decisions; only the first is an invariant.
 
 **Messages are stateless.** Every get carries the full config and nothing
 refers to a previously established native client, so two Dart clients with
-different configs stay independent and no `init`/`get` ordering can fail.
+different configs stay independent and identification cannot fail because
+`create` was skipped.
 
-**Clients are not.** Each platform holds a `Map<configKey, NativeClient>`
-keyed by a hash of the resolved config, created on first use. This keeps
-independence without a client handle or disposal protocol, which Dart
-finalizers cannot reliably close.
-
-Reuse is a correctness requirement, not only latency: the iOS SDK documents
-that with `allowUseOfLocationData` the client should be created early and kept
-for the app's lifetime for location precision, so a per-call client would pay
-`locationTimeoutMillis` every call. Android documents nothing either way and
-its artifact is obfuscated. 4b asserts reuse rather than assuming it, and the
-Android warm-state question goes to the native SDK team.
+**Clients are created at Dart init.** `init` (and later the `Fingerprint`
+constructor) calls native `create`, which inserts into
+`Map<configKey, NativeClient>`. `get` uses the same cache and still creates
+if `create` never ran. iOS documents that with `allowUseOfLocationData` the
+client should be created at app start and kept for the process lifetime, so
+the first identification is not the first time the native client exists.
+https://docs.fingerprint.com/docs/ios-sdk
+Android's quickstart creates the client in `onCreate` before UI.
+https://docs.fingerprint.com/docs/android-quickstart
 
 ### Web (4c)
 
