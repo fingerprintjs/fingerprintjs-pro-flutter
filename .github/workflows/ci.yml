@@ -27,6 +27,11 @@ jobs:
       - name: Restore packages
         run: flutter pub get
 
+      - name: Verify Pigeon codegen is up to date
+        run: |
+          dart run pigeon --input pigeons/fingerprint_api.dart
+          git diff --exit-code -- lib/src/pigeon android/src/main/kotlin ios/fpjs_pro_plugin/Sources
+
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
         shell: bash
@@ -134,6 +139,10 @@ jobs:
       - name: Build example (android)
         working-directory: example
         run: flutter build apk
+
+      - name: Run Android plugin unit tests
+        working-directory: example/android
+        run: ./gradlew :fpjs_pro_plugin:testDebugUnitTest
 
       - name: Verify Kotlin bytecode target
         working-directory: example

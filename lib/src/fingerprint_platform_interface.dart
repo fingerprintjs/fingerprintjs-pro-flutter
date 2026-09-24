@@ -1,6 +1,6 @@
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/result.dart';
-import 'package:fpjs_pro_plugin/src/method_channel_fingerprint.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_native.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// Configuration of the Fingerprint Pro client, passed to [FingerprintPlatform.init]
@@ -36,9 +36,9 @@ abstract class FingerprintPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FingerprintPlatform _instance = MethodChannelFingerprint();
+  static FingerprintPlatform _instance = FingerprintNative();
 
-  /// The implementation used by [FpjsProPlugin], the method channel one by default
+  /// The implementation used by [FpjsProPlugin], [FingerprintNative] by default
   static FingerprintPlatform get instance => _instance;
 
   static set instance(FingerprintPlatform instance) {

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-/// Result of getting a visitor id.
+/// Old public Dart result. `requestId` is eventId, `confidenceScore` is suspectScore.
 ///
-/// `visitorId` can be empty string when the visitor can't be identified.
-/// It happens only with bots and hackers that modify their browsers.
+/// `visitorId` stays a non-null String here (`''` when hidden). The Dart shape
+/// with nullable `visitorId` is `FingerprintResult`.
 class FingerprintJSProResponse {
   /// The current request identifier. It's different for every request.
   final String requestId;

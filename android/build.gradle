@@ -41,4 +41,7 @@ kotlin {
 
 dependencies {
     implementation "com.fingerprint.android:sdk:$fingerprint_native_sdk_version"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "org.mockito:mockito-core:5.14.2"
 }

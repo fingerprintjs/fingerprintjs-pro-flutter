@@ -14,6 +14,32 @@ To build the iOS example with Swift Package Manager, clone this repo into a fold
 
 This is temporary. Drop this note and the CI `path:` workaround once [flutter#188647](https://github.com/flutter/flutter/pull/188647) reaches stable.
 
+## Architecture
+
+The package is one Dart API over three platforms:
+
+- Android and iOS use the Fingerprint native SDKs
+- Web uses the Fingerprint JS agent
+
+App authors should only import public types from `lib/`. Each platform implements the same Dart interface.
+
+### Pigeon
+
+Android and iOS cannot call Dart types directly. [Pigeon](https://pub.dev/packages/pigeon) is the typed contract between Dart and those SDKs. The source of truth is `pigeons/fingerprint_api.dart`. Pigeon generates Dart, Kotlin, and Swift from that file. Do not edit the generated files.
+
+To change what crosses to Android and iOS:
+
+1. Edit `pigeons/fingerprint_api.dart`.
+2. Run `dart run pigeon --input pigeons/fingerprint_api.dart`.
+3. Implement the new methods on both native sides.
+4. Commit the generated files with the hand-written changes.
+
+CI runs Pigeon again and fails if the generated files do not match.
+
+Keep Android and iOS behavior aligned even when the two SDKs look different. Identification results and error codes should mean the same thing on both.
+
+Web does not use Pigeon.
+
 ## Testing
 
 For running tests just call `flutter test`.
