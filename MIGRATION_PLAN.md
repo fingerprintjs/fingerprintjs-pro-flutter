@@ -202,8 +202,10 @@ The current pin is `@fingerprintjs/fingerprintjs-pro` 3.12.x, which has no v4.
 4c is a package swap. Add `urlHashing`, `storageKeyPrefix`, and an optional
 `cache` configuration: required storage
 (`sessionStorage`, `localStorage`, `agent`), a duration (`optimize-cost`,
-`aggressive`, or a custom `Duration` up to 12 hours), and an optional key
-prefix. Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
+`aggressive`, or a custom whole-second `Duration` up to 12 hours), and an
+optional key prefix. The agent takes a number of seconds, max 43200.
+https://docs.fingerprint.com/reference/js-agent-start-function
+Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
 Remove `extendedResult` and `scriptUrlPattern`. No `remoteControlDetection`:
 it is absent from the
 [React Native v4 web contract](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/blob/1fcc272c943e362a12fe1c0f21429a5f47c22e81/sdk/src/types.ts).
