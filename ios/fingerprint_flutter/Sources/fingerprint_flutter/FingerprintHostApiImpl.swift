@@ -79,7 +79,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     return Configuration(
       apiKey: config.apiKey,
       region: region,
-      integrationInfo: [("fingerprint-flutter", config.pluginVersion)],
+      integrationInfo: [("fingerprint-pro-flutter", config.pluginVersion)],
       allowUseOfLocationData: config.allowUseOfLocationData
     )
   }

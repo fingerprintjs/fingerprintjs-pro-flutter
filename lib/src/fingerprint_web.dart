@@ -73,7 +73,7 @@ class FingerprintWeb extends FingerprintPlatform {
 JSObject _toStartOptions(FingerprintConfig config) {
   final options = <String, Object>{
     'apiKey': config.apiKey,
-    'integrationInfo': ['fingerprint-flutter/${config.pluginVersion}/web'],
+    'integrationInfo': ['fingerprint-pro-flutter/${config.pluginVersion}/web'],
     if (config.region != null) 'region': config.region!.stringValue,
     if (config.endpoints != null) 'endpoints': config.endpoints!,
   };

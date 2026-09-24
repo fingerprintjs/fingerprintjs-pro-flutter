@@ -49,7 +49,7 @@ void main() {
 
       expect(fake.startOptions['apiKey'], 'key-1');
       expect(fake.startOptions['integrationInfo'], [
-        'fingerprint-flutter/9.9.9/web',
+        'fingerprint-pro-flutter/9.9.9/web',
       ]);
       expect(fake.startOptions['region'], 'eu');
       expect(fake.startOptions['endpoints'], [

@@ -68,7 +68,7 @@ internal class FingerprintHostApiImpl(
       region,
       endpointUrl,
       fallbacks,
-      listOf(Pair("fingerprint-flutter", config.pluginVersion)),
+      listOf(Pair("fingerprint-pro-flutter", config.pluginVersion)),
       config.allowUseOfLocationData,
       locationTimeout,
     )

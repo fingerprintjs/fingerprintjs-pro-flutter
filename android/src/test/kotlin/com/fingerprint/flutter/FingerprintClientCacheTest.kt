@@ -84,7 +84,7 @@ class FingerprintClientCacheTest {
     region,
     endpointUrl,
     fallbacks,
-    listOf(Pair("fingerprint-flutter", pluginVersion)),
+    listOf(Pair("fingerprint-pro-flutter", pluginVersion)),
     allowUseOfLocationData,
     locationTimeoutMillis,
   )
