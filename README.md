@@ -95,7 +95,7 @@ final client = Fingerprint(
 );
 ```
 
-Android and iOS default to US when `region` is omitted. Web infers it from the API key. Set `region` for EU and AP workspaces on Android and iOS. See [regions](https://docs.fingerprint.com/docs/regions).
+Default to US when `region` is omitted. See [regions](https://docs.fingerprint.com/docs/regions).
 
 `get` waits for that start. Native create builds the local client. Web `start` returns immediately; load failures surface from `get`.
 
@@ -107,15 +107,16 @@ final client = Fingerprint(
   region: Region.us,
   endpoints: [
     'https://metrics.yourwebsite.com',
+    // Pass your regional Identification API URL default as fallback
+    'https://api.fpjs.io'
   ],
 );
 ```
 
-On web, `web/index.js` is a bundled loader. There is no `scriptUrlPattern`.
 
 ### 2. Identify visitors
 
-`get` returns a `FingerprintResult` and throws `FingerprintError`.
+`get` waits for the client to be ready, returns a `FingerprintResult` or throws `FingerprintError`.
 
 ```dart
 try {
@@ -132,9 +133,11 @@ try {
 }
 ```
 
-`visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
+* `visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). 
+* `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. 
+* Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
 
-Known identification codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`. Unfamiliar codes are kept as-is.
+* Known error codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`.
 
 ### Linking and tagging information
 
@@ -156,9 +159,9 @@ final result = await client.get(
 
 Default timeout:
 
-- iOS: 60 seconds ([iOS SDK](https://docs.fingerprint.com/docs/ios-sdk))
-- Android: none ([Android SDK](https://docs.fingerprint.com/docs/android-sdk))
-- Web: 10 seconds ([JS agent](https://docs.fingerprint.com/reference/js-agent-get-function))
+- iOS: 60 seconds ([iOS SDK](https://docs.fingerprint.com/docs/ios-sdk#specifying-a-custom-timeout))
+- Android: none ([Android SDK](https://docs.fingerprint.com/docs/android-sdk#specifying-a-custom-timeout))
+- Web: 10 seconds ([JS agent](https://docs.fingerprint.com/reference/js-agent-get-function#timeout))
 
 ```dart
 final result = await client.get(timeout: const Duration(seconds: 10));
