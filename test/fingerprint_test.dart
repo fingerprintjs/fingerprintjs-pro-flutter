@@ -91,11 +91,12 @@ void main() {
     expect(platform.gets, isEmpty);
   });
 
-  test('rejects an empty endpoints list', () {
-    expect(
-      () => Fingerprint(apiKey: 'key-1', endpoints: const []),
-      throwsArgumentError,
-    );
+  test('treats an empty endpoints list as the regional default', () async {
+    final client = Fingerprint(apiKey: 'key-1', endpoints: const []);
+    await client.get();
+
+    expect(client.endpoints, isNull);
+    expect(platform.created.single.endpoints, isNull);
   });
 }
 

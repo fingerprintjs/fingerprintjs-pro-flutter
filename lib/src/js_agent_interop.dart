@@ -4,7 +4,7 @@ library;
 
 import 'dart:js_interop';
 
-/// `FingerprintJSFlutter.Fingerprint` from the bundled agent.
+/// `FingerprintJSFlutter.Fingerprint` from the bundled loader.
 @JS('Fingerprint')
 extension type FingerprintJS._(JSObject _) implements JSObject {
   external static FingerprintJSAgent start(JSObject options);

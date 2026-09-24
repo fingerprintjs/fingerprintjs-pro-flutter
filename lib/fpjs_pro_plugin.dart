@@ -29,7 +29,9 @@ class Fingerprint {
   /// https://docs.fingerprint.com/reference/js-agent-start-function
   final Region? region;
 
-  /// Identification endpoints, first to last. Null uses the regional default.
+  /// Identification endpoints, first to last. Null or empty uses the regional
+  /// default.
+  /// https://docs.fingerprint.com/reference/js-agent-start-function
   final List<String>? endpoints;
 
   /// Android-only settings. Ignored on iOS and web.
@@ -51,16 +53,9 @@ class Fingerprint {
     this.android,
     this.ios,
     this.web,
-  }) : endpoints = endpoints == null
+  }) : endpoints = endpoints == null || endpoints.isEmpty
            ? null
            : List<String>.unmodifiable(endpoints) {
-    if (this.endpoints != null && this.endpoints!.isEmpty) {
-      throw ArgumentError.value(
-        this.endpoints,
-        'endpoints',
-        'Use null for the default endpoints, not an empty list',
-      );
-    }
     _config = FingerprintConfig(
       apiKey: apiKey,
       pluginVersion: pluginVersion,

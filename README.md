@@ -69,7 +69,7 @@ Run `flutter pub get` to download and install the package.
 
 ### Web platform (Optional)
 
-To use this plugin on the web, add the bundled v4 agent `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
+To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
 
 ```html
 <head>
@@ -84,7 +84,7 @@ To use this plugin on the web, add the bundled v4 agent `<script>` tag to the `<
 
 ### 1. Create a client
 
-Create one `Fingerprint` per API key and configuration. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
+Create one `Fingerprint` per API key and configuration at app startup. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -107,12 +107,11 @@ final client = Fingerprint(
   region: Region.us,
   endpoints: [
     'https://metrics.yourwebsite.com',
-    'https://api.fpjs.io',
   ],
 );
 ```
 
-On web the agent is the bundled `web/index.js` script, not a CDN loader. There is no `scriptUrlPattern`.
+On web, `web/index.js` is a bundled loader. There is no `scriptUrlPattern`.
 
 ### 2. Identify visitors
 
@@ -133,26 +132,25 @@ try {
 }
 ```
 
-`visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent). The client no longer returns extended device fields.
+`visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
 
 Known identification codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`. Unfamiliar codes are kept as-is.
 
 ### Linking and tagging information
 
-Pass data you already have, such as account or order IDs, as `linkedId` and `tags`. See [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
+Pass information about the visitor you already have, such as account or order IDs, as `linkedId` and `tags`. See [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
 
 ```dart
 final result = await client.get(
   linkedId: 'user_1234',
   tags: {
     'userAction': 'login',
-    'analyticsId': 'UA-5555-1111-1',
-    'campaign': null,
+    'analyticsId': 'UA-5555-1111-1'
   },
 );
 ```
 
-`tags` is a string-keyed map of JSON values, including null. The same map is sent on every platform. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) applies.
+`tags` is a string-keyed map of JSON values. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) applies.
 
 ### Specifying a custom timeout
 
