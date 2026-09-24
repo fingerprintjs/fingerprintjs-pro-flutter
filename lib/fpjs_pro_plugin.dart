@@ -29,7 +29,9 @@ class Fingerprint {
   /// https://docs.fingerprint.com/reference/js-agent-start-function
   final Region? region;
 
-  /// Identification endpoints, first to last. Null uses the regional default.
+  /// Identification endpoints, first to last. Null, empty, or only empty
+  /// strings uses the regional default. Empty strings in the list are dropped.
+  /// https://docs.fingerprint.com/reference/js-agent-start-function
   final List<String>? endpoints;
 
   /// Android-only settings. Ignored on iOS and web.
@@ -51,16 +53,7 @@ class Fingerprint {
     this.android,
     this.ios,
     this.web,
-  }) : endpoints = endpoints == null
-           ? null
-           : List<String>.unmodifiable(endpoints) {
-    if (this.endpoints != null && this.endpoints!.isEmpty) {
-      throw ArgumentError.value(
-        this.endpoints,
-        'endpoints',
-        'Use null for the default endpoints, not an empty list',
-      );
-    }
+  }) : endpoints = _normalizeEndpoints(endpoints) {
     _config = FingerprintConfig(
       apiKey: apiKey,
       pluginVersion: pluginVersion,
@@ -94,4 +87,17 @@ class Fingerprint {
       timeout: timeout,
     );
   }
+}
+
+/// Empty strings would become a missing native primary and invent the region
+/// URL as the first try. Drop them, then treat an empty list as null.
+List<String>? _normalizeEndpoints(List<String>? endpoints) {
+  if (endpoints == null) {
+    return null;
+  }
+  final kept = [for (final url in endpoints) if (url.isNotEmpty) url];
+  if (kept.isEmpty) {
+    return null;
+  }
+  return List<String>.unmodifiable(kept);
 }

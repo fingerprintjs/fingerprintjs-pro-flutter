@@ -1,7 +1,7 @@
 {
   "name": "web",
   "version": "0.0.0",
-  "description": "Js loader for Fingerprint agent",
+  "description": "Fingerprint JavaScript agent loader",
   "main": "index.js",
   "license": "MIT",
   "private": true,

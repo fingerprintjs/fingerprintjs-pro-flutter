@@ -69,7 +69,7 @@ Run `flutter pub get` to download and install the package.
 
 ### Web platform (Optional)
 
-To use this plugin on the web, add the bundled v4 agent `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
+To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `<head>` of your HTML template inside the `web/index.html` file:
 
 ```html
 <head>
@@ -84,7 +84,7 @@ To use this plugin on the web, add the bundled v4 agent `<script>` tag to the `<
 
 ### 1. Create a client
 
-Create one `Fingerprint` per API key and configuration. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
+Create one `Fingerprint` per API key and configuration at app startup. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
 
 ```dart
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
@@ -95,7 +95,7 @@ final client = Fingerprint(
 );
 ```
 
-Android and iOS default to US when `region` is omitted. Web infers it from the API key. Set `region` for EU and AP workspaces on Android and iOS. See [regions](https://docs.fingerprint.com/docs/regions).
+Default to US when `region` is omitted. See [regions](https://docs.fingerprint.com/docs/regions).
 
 `get` waits for that start. Native create builds the local client. Web `start` returns immediately; load failures surface from `get`.
 
@@ -107,16 +107,16 @@ final client = Fingerprint(
   region: Region.us,
   endpoints: [
     'https://metrics.yourwebsite.com',
-    'https://api.fpjs.io',
+    // Pass your regional Identification API URL default as fallback
+    'https://api.fpjs.io'
   ],
 );
 ```
 
-On web the agent is the bundled `web/index.js` script, not a CDN loader. There is no `scriptUrlPattern`.
 
 ### 2. Identify visitors
 
-`get` returns a `FingerprintResult` and throws `FingerprintError`.
+`get` waits for the client to be ready, returns a `FingerprintResult` or throws `FingerprintError`.
 
 ```dart
 try {
@@ -133,34 +133,35 @@ try {
 }
 ```
 
-`visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent). The client no longer returns extended device fields.
+* `visitorId` is null when hidden ([Zero Trust](https://dev.fingerprint.com/docs/zero-trust-mode)). 
+* `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. 
+* Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
 
-Known identification codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`. Unfamiliar codes are kept as-is.
+* Known error codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`.
 
 ### Linking and tagging information
 
-Pass data you already have, such as account or order IDs, as `linkedId` and `tags`. See [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
+Pass information about the visitor you already have, such as account or order IDs, as `linkedId` and `tags`. See [Linking and tagging information](https://docs.fingerprint.com/docs/tagging-information).
 
 ```dart
 final result = await client.get(
   linkedId: 'user_1234',
   tags: {
     'userAction': 'login',
-    'analyticsId': 'UA-5555-1111-1',
-    'campaign': null,
+    'analyticsId': 'UA-5555-1111-1'
   },
 );
 ```
 
-`tags` is a string-keyed map of JSON values, including null. The same map is sent on every platform. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) applies.
+`tags` is a string-keyed map of JSON values. The [16 KB limit](https://docs.fingerprint.com/docs/tagging-information) applies.
 
 ### Specifying a custom timeout
 
 Default timeout:
 
-- iOS: 60 seconds ([iOS SDK](https://docs.fingerprint.com/docs/ios-sdk))
-- Android: none ([Android SDK](https://docs.fingerprint.com/docs/android-sdk))
-- Web: 10 seconds ([JS agent](https://docs.fingerprint.com/reference/js-agent-get-function))
+- iOS: 60 seconds ([iOS SDK](https://docs.fingerprint.com/docs/ios-sdk#specifying-a-custom-timeout))
+- Android: none ([Android SDK](https://docs.fingerprint.com/docs/android-sdk#specifying-a-custom-timeout))
+- Web: 10 seconds ([JS agent](https://docs.fingerprint.com/reference/js-agent-get-function#timeout))
 
 ```dart
 final result = await client.get(timeout: const Duration(seconds: 10));

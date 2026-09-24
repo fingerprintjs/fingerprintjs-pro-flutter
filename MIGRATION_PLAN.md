@@ -153,8 +153,10 @@ Every platform throws one `FingerprintError`. The platform adapters translate
 native names to canonical snake_case codes and normalize platform-only values.
 The error class keeps unfamiliar codes unchanged. Its known constants include
 only errors identification clients can return. Server API-only codes are
-excluded: `secret_api_key_*`, `state_not_ready`, `subscription_not_found`,
-`ruleset_not_found`, `request_not_found`, and `event_not_found`.
+not Dart constants (`secret_api_key_*`, `state_not_ready`,
+`subscription_not_found`, `ruleset_not_found`, `request_not_found`,
+`event_not_found`), but adapters still forward them if they arrive. iOS maps
+unlisted `APIError.Code` to snake_case `rawValue`.
 `request_timeout` is Android's class name for `request_read_timeout`, not a
 v4 API code.
 
@@ -166,7 +168,9 @@ v4 API code.
 - Forward `eventId` from iOS `APIError.eventId` and Android `Error.eventId`.
   Today's plugin drops both. Strip Android's `"Unknown"` sentinel.
 - Read iOS `FPError.description`, not `localizedDescription`. `FPError`
-  implements `CustomStringConvertible`, not `LocalizedError`.
+  implements `CustomStringConvertible`, not `LocalizedError`. For
+  `networkError` and `jsonParsingError`, use the inner error's
+  `localizedDescription` instead. That inner value is usually `URLError`.
 - An iOS `APIError` with no code is `unknown_error`, not `failed`.
 - Pigeon can carry `visitorId` as `String`. Empty becomes null on
   `FingerprintResult`.
@@ -200,8 +204,10 @@ The current pin is `@fingerprintjs/fingerprintjs-pro` 3.12.x, which has no v4.
 4c is a package swap. Add `urlHashing`, `storageKeyPrefix`, and an optional
 `cache` configuration: required storage
 (`sessionStorage`, `localStorage`, `agent`), a duration (`optimize-cost`,
-`aggressive`, or a custom `Duration` up to 12 hours), and an optional key
-prefix. Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
+`aggressive`, or a custom whole-second `Duration` up to 12 hours), and an
+optional key prefix. The agent takes a number of seconds, max 43200.
+https://docs.fingerprint.com/reference/js-agent-start-function
+Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
 Remove `extendedResult` and `scriptUrlPattern`. No `remoteControlDetection`:
 it is absent from the
 [React Native v4 web contract](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/blob/1fcc272c943e362a12fe1c0f21429a5f47c22e81/sdk/src/types.ts).

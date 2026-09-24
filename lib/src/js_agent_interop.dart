@@ -4,7 +4,7 @@ library;
 
 import 'dart:js_interop';
 
-/// `FingerprintJSFlutter.Fingerprint` from the bundled agent.
+/// `FingerprintJSFlutter.Fingerprint` from the bundled loader.
 @JS('Fingerprint')
 extension type FingerprintJS._(JSObject _) implements JSObject {
   external static FingerprintJSAgent start(JSObject options);
@@ -25,8 +25,9 @@ extension type JSGetResult(JSObject _) implements JSObject {
   external String? get visitorId;
 
   @JS('suspect_score')
-  external JSAny? get suspectScore;
+  external int? get suspectScore;
 
+  // Omitted, a base64 string, or BinaryOutput. No Dart union type.
   @JS('sealed_result')
   external JSAny? get sealedResult;
 

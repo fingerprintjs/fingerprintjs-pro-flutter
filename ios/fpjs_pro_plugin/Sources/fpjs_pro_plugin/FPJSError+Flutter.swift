@@ -4,6 +4,9 @@ import Foundation
 extension FPError {
   /// Snake_case code and message for Pigeon [PigeonError].
   func pigeonFields() -> (code: String, message: String?, eventId: String?) {
+    // FPError is not LocalizedError. localizedDescription is Foundation's
+    // generic "couldn't be completed" string.
+    // https://developer.apple.com/documentation/foundation/localizederror
     let description = self.description
     switch self {
     case .invalidURL:
@@ -15,10 +18,12 @@ extension FPError {
       let message = apiError.errorDetails?.message ?? description
       let eventId = normalizeEventId(apiError.eventId)
       return (code, message, eventId)
-    case .networkError:
-      return ("network_error", description, nil)
-    case .jsonParsingError:
-      return ("json_parsing_error", description, nil)
+    // Inner value is usually URLError. Its localizedDescription is the
+    // user-facing text. FPError.description is a debug dump of that NSError.
+    case .networkError(let error):
+      return ("network_error", error.localizedDescription, nil)
+    case .jsonParsingError(let error):
+      return ("json_parsing_error", error.localizedDescription, nil)
     case .invalidResponseType:
       return ("invalid_response_type", description, nil)
     case .clientTimeout:
@@ -61,8 +66,10 @@ extension APIError {
     case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
     case .proxyIntegrationSecretEnvironmentMismatch:
       return "proxy_integration_secret_environment_mismatch"
+    // Identification-only constants live in Dart. Unlisted codes still go
+    // through so a newer iOS SDK is debuggable.
     default:
-      return "unknown_error"
+      return camelCaseToSnakeCase(code.rawValue)
     }
   }
 }
@@ -74,4 +81,19 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
+}
+
+private func camelCaseToSnakeCase(_ value: String) -> String {
+  var result = ""
+  for character in value {
+    if character.isUppercase {
+      if !result.isEmpty {
+        result.append("_")
+      }
+      result.append(character.lowercased())
+    } else {
+      result.append(character)
+    }
+  }
+  return result
 }

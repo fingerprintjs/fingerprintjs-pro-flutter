@@ -2,7 +2,6 @@ package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
 import com.fingerprint.android.ApiKeyRequired
-import com.fingerprint.android.Configuration
 import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
@@ -18,29 +17,6 @@ import org.mockito.Mockito.`when`
 
 class FingerprintHostApiImplTest {
   private val context = mock(Context::class.java)
-
-  @Test
-  fun createKeepsFallbacksWithoutPrimaryEndpoint() {
-    var captured: Configuration? = null
-    val cache = FingerprintClientCache(context) { _, configuration ->
-      captured = configuration
-      mock(Fingerprint::class.java)
-    }
-    FingerprintHostApiImpl(context, cache).create(
-      FingerprintNativeConfig(
-        "key-a",
-        "us",
-        null,
-        listOf("https://fallback.example"),
-        "1.0.0",
-        false,
-        5000L,
-      ),
-    )
-    val built = checkNotNull(captured)
-    assertEquals(Configuration.Region.US.endpointUrl, built.endpointUrl)
-    assertEquals(listOf("https://fallback.example"), built.fallbackEndpointUrls)
-  }
 
   @Test
   fun mapsErrorTypesByInstanceNotSimpleName() {

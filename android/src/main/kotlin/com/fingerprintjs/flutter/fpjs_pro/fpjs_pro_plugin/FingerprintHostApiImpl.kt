@@ -60,9 +60,6 @@ internal class FingerprintHostApiImpl(
 
   private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
     val region = parseRegion(config.region)
-    // Empty primary still uses the region URL. Fallbacks are independent, so
-    // they survive when only endpointFallbacks is set.
-    // https://docs.fingerprint.com/docs/android-sdk
     val endpointUrl = config.endpoint?.takeIf { it.isNotEmpty() } ?: region.endpointUrl
     val fallbacks = config.endpointFallbacks?.filter { it.isNotEmpty() } ?: emptyList()
     val locationTimeout = config.locationTimeoutMillis ?: 5000L
