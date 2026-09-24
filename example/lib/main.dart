@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
   Fingerprint? _client;
   final String? _apiKey = dotenv.env['API_KEY'];
   final String? _region = dotenv.env['REGION'];
-  final String? _endpoint = dotenv.env['ENDPOINT'];
+  final String? _endpoint = dotenv.env['ENDPOINTS'];
   final bool _disableLocationCollection =
       dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 

@@ -82,7 +82,7 @@ The E2E smoke test workflow reads these repository secrets:
 
 - `API_KEY` (required)
 - `REGION` (optional; defaults to `us`)
-- `ENDPOINT` (optional)
+- `ENDPOINTS` (optional)
 - `SCRIPT_URL_PATTERN` (optional)
 
 GitHub withholds secrets from pull requests opened from a fork, so the Web,

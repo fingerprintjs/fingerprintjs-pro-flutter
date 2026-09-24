@@ -35,13 +35,13 @@ cp .env .env.local
 The project will not compile if the `.env.local` file is not present.
 
 2. Add your environment variables to `.env.local`. `API_KEY` is required.
-`REGION` is optional and defaults to `us`. `ENDPOINT` is only needed for
+`REGION` is optional and defaults to `us`. `ENDPOINTS` is only needed for
 workspaces using custom endpoints.
 
 ```bash
 API_KEY=your_api_key
 REGION=eu
-# ENDPOINT=https://your-endpoint.example
+# ENDPOINTS=https://your-endpoint.example
 ```
 
 ### 3. Run the example project

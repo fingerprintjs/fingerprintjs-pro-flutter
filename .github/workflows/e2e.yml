@@ -45,7 +45,7 @@ jobs:
     env:
       API_KEY: ${{ secrets.API_KEY }}
       REGION: ${{ secrets.REGION }}
-      ENDPOINT: ${{ secrets.ENDPOINT }}
+      ENDPOINTS: ${{ secrets.ENDPOINTS }}
       SCRIPT_URL_PATTERN: ${{ secrets.SCRIPT_URL_PATTERN }}
       DISABLE_LOCATION_COLLECTION: ${{ matrix.platform != 'web' }}
       MAESTRO_CLI_NO_ANALYTICS: 1
