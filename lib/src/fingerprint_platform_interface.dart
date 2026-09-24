@@ -25,6 +25,7 @@ class FingerprintConfig {
     this.web,
   });
 
+  // Value equality so two configs with the same fields compare equal.
   @override
   bool operator ==(Object other) =>
       other is FingerprintConfig &&

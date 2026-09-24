@@ -42,7 +42,7 @@ class FingerprintWeb extends FingerprintPlatform {
         linkedId: linkedId,
         timeout: timeout,
       );
-      // `get(null)` is not `get()`. JS default params only apply to undefined.
+      // Omit the argument when options is null.
       // https://docs.fingerprint.com/reference/js-agent-get-function
       final result =
           await (options == null ? agent.get() : agent.get(options)).toDart;
