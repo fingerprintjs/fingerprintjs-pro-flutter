@@ -37,25 +37,29 @@ void main() {
     });
 
     test('compares by value', () {
-      final result = FingerprintResult(
-        eventId: 'event-1',
-        visitorId: 'visitor-1',
-        suspectScore: 1,
-      );
-      final same = FingerprintResult(
-        eventId: 'event-1',
-        visitorId: 'visitor-1',
-        suspectScore: 1,
-      );
-      final different = FingerprintResult(
-        eventId: 'event-1',
-        visitorId: 'visitor-1',
-        suspectScore: 2,
-      );
+      FingerprintResult result({
+        String eventId = 'event-1',
+        String? visitorId = 'visitor-1',
+        int? suspectScore = 1,
+        String? sealedResult = 'sealed',
+        bool? cacheHit = true,
+      }) {
+        return FingerprintResult(
+          eventId: eventId,
+          visitorId: visitorId,
+          suspectScore: suspectScore,
+          sealedResult: sealedResult,
+          cacheHit: cacheHit,
+        );
+      }
 
-      expect(result, same);
-      expect(result.hashCode, same.hashCode);
-      expect(result, isNot(different));
+      expect(result(), result());
+      expect(result().hashCode, result().hashCode);
+      expect(result(), isNot(result(eventId: 'other')));
+      expect(result(), isNot(result(visitorId: 'other')));
+      expect(result(), isNot(result(suspectScore: 2)));
+      expect(result(), isNot(result(sealedResult: 'other')));
+      expect(result(), isNot(result(cacheHit: false)));
     });
 
     test('compares a normalized result equal to its normalized form', () {

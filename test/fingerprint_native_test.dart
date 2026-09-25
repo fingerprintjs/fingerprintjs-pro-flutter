@@ -117,6 +117,58 @@ void main() {
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
     });
 
+    test('leaves region and endpoints unset when omitted', () async {
+      await platform.create(config());
+
+      expect(fakeHostApi.createdConfig?.region, isNull);
+      expect(fakeHostApi.createdConfig?.endpoint, isNull);
+      expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
+      expect(fakeHostApi.createdConfig?.locationTimeoutMillis, isNull);
+      expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isFalse);
+    });
+
+    test('forwards a single endpoint without fallbacks', () async {
+      await platform.create(
+        config(endpoints: const ['https://primary.example']),
+      );
+
+      expect(fakeHostApi.createdConfig?.endpoint, 'https://primary.example');
+      expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
+    });
+
+    test('omits timeout when get does not pass one', () async {
+      await platform.get(config());
+
+      expect(fakeHostApi.lastTimeoutMs, isNull);
+    });
+
+    test('uses Android location on Android', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      await platform.create(
+        config(
+          android: const AndroidOptions(allowUseOfLocationData: false),
+          ios: const IosOptions(allowUseOfLocationData: true),
+        ),
+      );
+
+      expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isFalse);
+    });
+
+    test('rejects invalid tags before the host is called', () async {
+      await expectLater(
+        platform.get(
+          config(),
+          tags: {
+            'bytes': Uint8List.fromList(const [1, 2]),
+          },
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(fakeHostApi.lastConfig, isNull);
+    });
+
     // Shared platform singleton. A failed create must not latch and
     // poison a later get, which can create the native client itself.
     test('create failure does not block a later get', () async {

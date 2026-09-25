@@ -21,4 +21,11 @@ class FingerprintNativeErrorTest {
     assertEquals("need key", flutterError.message)
     assertEquals("evt-123", flutterError.details)
   }
+
+  @Test
+  fun stripsEmptyEventId() {
+    val flutterError = toFlutterError(ApiKeyRequired("", "need key"))
+    assertEquals("need key", flutterError.message)
+    assertNull(flutterError.details)
+  }
 }
