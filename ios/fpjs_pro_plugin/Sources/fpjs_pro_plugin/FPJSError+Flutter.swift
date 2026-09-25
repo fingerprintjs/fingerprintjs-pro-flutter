@@ -1,5 +1,5 @@
-import Foundation
 @preconcurrency import Fingerprint
+import Foundation
 
 extension FPError {
   /// Snake_case code and message for Pigeon [PigeonError].
@@ -15,7 +15,7 @@ extension FPError {
       return ("invalid_url_params", description, nil)
     case .apiError(let apiError):
       let code = apiError.pigeonCode()
-      let message = apiError.errorDetails?.message ?? description
+      let message = normalizeMessage(apiError.errorDetails?.message ?? description)
       let eventId = normalizeEventId(apiError.eventId)
       return (code, message, eventId)
     // Inner value is usually URLError. Its localizedDescription is the
@@ -85,6 +85,14 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
+}
+
+func normalizeMessage(_ message: String?) -> String? {
+  // The native SDK uses "Unknown" when no useful message is available.
+  guard let message, message != "Unknown" else {
+    return nil
+  }
+  return message
 }
 
 private func camelCaseToSnakeCase(_ value: String) -> String {

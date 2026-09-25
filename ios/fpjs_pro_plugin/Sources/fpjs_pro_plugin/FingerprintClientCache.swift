@@ -1,5 +1,5 @@
-import Foundation
 @preconcurrency import Fingerprint
+import Foundation
 
 /// One [FingerprintClientProviding] per resolved configuration.
 final class FingerprintClientCache: @unchecked Sendable {
@@ -38,16 +38,28 @@ final class FingerprintClientCache: @unchecked Sendable {
   }
 
   private var clients: [ClientKey: FingerprintClientProviding] = [:]
+  private let createClient: (Configuration) -> FingerprintClientProviding
   private let lock = NSLock()
 
-  func getOrCreate(configuration: Configuration, pluginVersion: String) -> FingerprintClientProviding {
+  init(
+    createClient: @escaping (Configuration) -> FingerprintClientProviding = {
+      FingerprintFactory.getInstance($0)
+    }
+  ) {
+    self.createClient = createClient
+  }
+
+  func getOrCreate(
+    configuration: Configuration,
+    pluginVersion: String
+  ) -> FingerprintClientProviding {
     lock.lock()
     defer { lock.unlock() }
     let key = ClientKey(configuration: configuration, pluginVersion: pluginVersion)
     if let existing = clients[key] {
       return existing
     }
-    let client = FingerprintFactory.getInstance(configuration)
+    let client = createClient(configuration)
     clients[key] = client
     return client
   }
