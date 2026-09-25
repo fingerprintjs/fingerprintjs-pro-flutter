@@ -28,7 +28,7 @@ module.exports = {
     plugins: [nodeResolve(), typescript()],
     output: [
       {
-        name: 'FingerprintJSFlutter',
+        name: 'FingerprintFlutter',
         exports: 'named',
         file: 'index.js',
         format: 'iife',

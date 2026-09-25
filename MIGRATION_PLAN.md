@@ -15,12 +15,12 @@ Use this major release for established API, state, and build-compatibility
 improvements. No temporary compatibility APIs to make intermediate PRs
 smaller. Each PR needs a clear target state, consumer impact, and proof. Defer
 only unrelated or speculative work, not known breakage such as
-[#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117).
+[#117](https://github.com/fingerprintjs/flutter/issues/117).
 
 | # | PR | Tickets | Status |
 |---|---|---|---|
-| 1 | Requirements and native agent deps ([#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147)) | [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401) | Merged |
-| 2 | Built-in Kotlin and AGP 9 compatibility | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117) | To do |
+| 1 | Requirements and native agent deps ([#147](https://github.com/fingerprintjs/flutter/pull/147)) | [INTER-2401](https://fingerprintjs.atlassian.net/browse/INTER-2401) | Merged |
+| 2 | Built-in Kotlin and AGP 9 compatibility | [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398), [#117](https://github.com/fingerprintjs/flutter/issues/117) | To do |
 | 3 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
 | 4a | Dart foundations: result, errors, tags | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319) | To do |
 | 4b | Pigeon contract and native implementations | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
@@ -43,7 +43,7 @@ Ticket notes:
 
 ## PR 1. Requirements and native agent deps
 
-Merged in [#147](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/pull/147).
+Merged in [#147](https://github.com/fingerprintjs/flutter/pull/147).
 
 Flutter 3.44, Dart 3.12, Android API 24, iOS/tvOS 15, Xcode 16, Swift 6.
 Android v4 `4.0.0`, iOS `Fingerprint-iOS`/`fingerprint-ios`, Pigeon 28.1.0.
@@ -68,7 +68,7 @@ Two defects it leaves for PR 4:
 ## PR 2. Built-in Kotlin and AGP 9 compatibility
 
 [INTER-2398](https://fingerprintjs.atlassian.net/browse/INTER-2398),
-[#117](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/117).
+[#117](https://github.com/fingerprintjs/flutter/issues/117).
 
 Fixes a live consumer defect: under AGP 9 an app can fail because this plugin
 applies the legacy Kotlin Gradle Plugin. Flutter's
@@ -232,7 +232,8 @@ CI also runs Pigeon and fails if it changes tracked generated files.
 [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400).
 
 Repo to `flutter`, package to `fingerprint_flutter`, `FpjsProPlugin` to
-`Fingerprint`. The upstream repo is not renamed yet, so this covers both.
+`Fingerprint`. GitHub is renamed to `fingerprintjs/flutter` when this
+lands on `main`.
 
 Rename the package, library, podspec, `Package.swift`, Kotlin path, example,
 and release configuration. Update root `package.json`,

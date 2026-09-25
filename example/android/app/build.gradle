@@ -31,7 +31,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example"
+        applicationId "com.fingerprint.flutter.example"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         compileSdkVersion 36
@@ -47,7 +47,7 @@ android {
         }
     }
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example'
+        namespace 'com.fingerprint.flutter.example'
     }
 }
 

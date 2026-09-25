@@ -1,9 +1,9 @@
 import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
-import 'package:fpjs_pro_plugin_example/main.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter_example/main.dart';
 
 void main() {
   late RecordingFingerprint platform;

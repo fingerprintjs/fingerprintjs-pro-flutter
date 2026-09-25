@@ -1,17 +1,17 @@
 /// JavaScript interop for the v4 [@fingerprint/agent](https://docs.fingerprint.com/reference/js-agent-start-function).
-@JS('FingerprintJSFlutter')
+@JS('FingerprintFlutter')
 library;
 
 import 'dart:js_interop';
 
-/// `FingerprintJSFlutter.Fingerprint` from the bundled loader.
+/// `FingerprintFlutter.Fingerprint` from the bundled loader.
 @JS('Fingerprint')
-extension type FingerprintJS._(JSObject _) implements JSObject {
-  external static FingerprintJSAgent start(JSObject options);
+extension type FingerprintLoader._(JSObject _) implements JSObject {
+  external static FingerprintAgent start(JSObject options);
 }
 
-/// Agent instance returned by [FingerprintJS.start].
-extension type FingerprintJSAgent(JSObject _) implements JSObject {
+/// Agent instance returned by [FingerprintLoader.start].
+extension type FingerprintAgent(JSObject _) implements JSObject {
   external JSPromise<JSObject> get([JSObject? options]);
 }
 

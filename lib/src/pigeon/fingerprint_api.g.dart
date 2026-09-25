@@ -286,7 +286,7 @@ class FingerprintHostApi {
   /// so two Dart clients stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
   Future<void> create(FingerprintNativeConfig config) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -304,7 +304,7 @@ class FingerprintHostApi {
   }
 
   Future<FingerprintNativeResult> get(FingerprintNativeConfig config, Map<String?, Object?>? tags, String? linkedId, int? timeoutMs) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

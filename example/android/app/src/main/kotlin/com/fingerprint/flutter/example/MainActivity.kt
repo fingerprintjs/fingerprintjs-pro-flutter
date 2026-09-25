@@ -1,4 +1,4 @@
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example
+package com.fingerprint.flutter.example
 
 import io.flutter.embedding.android.FlutterActivity
 

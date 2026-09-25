@@ -3,10 +3,10 @@
   "changelog": [
     "@fingerprintjs/changesets-native-dependency-format",
     {
-      "repo": "fingerprintjs/fingerprintjs-pro-flutter",
+      "repo": "fingerprintjs/flutter",
       "androidPath": "android",
-      "iosPodspecPath": "ios/fpjs_pro_plugin.podspec",
-      "packageName": "fingerprintjs-pro-flutter"
+      "iosPodspecPath": "ios/fingerprint_flutter.podspec",
+      "packageName": "fingerprint_flutter"
     }
   ],
   "commit": false,

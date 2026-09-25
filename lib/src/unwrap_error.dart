@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
+import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 
 /// Builds a [FingerprintError] from a Pigeon [PlatformException].
 ///
