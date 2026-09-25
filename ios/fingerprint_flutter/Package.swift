@@ -1,5 +1,8 @@
 // swift-tools-version: 6.0
 
+// Swift package for the Flutter iOS plugin.
+// Flutter replaces underscores with hyphens when it references plugin products.
+// https://github.com/flutter/flutter/blob/3.47.5/packages/flutter_tools/lib/src/commands/build_swift_package.dart#L1143-L1147
 import PackageDescription
 
 let package = Package(
@@ -9,7 +12,7 @@ let package = Package(
         .tvOS("15.0")
     ],
     products: [
-        .library(name: "fingerprint_flutter", targets: ["fingerprint_flutter"])
+        .library(name: "fingerprint-flutter", targets: ["fingerprint_flutter"])
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
