@@ -7,18 +7,18 @@ import XCTest
 
 final class JSONTypeConvertorTests: XCTestCase {
   func testConvertsJSONNull() {
-    XCTAssertEqual(JSONTypeConvertor.convert(nil), .null)
-    XCTAssertEqual(JSONTypeConvertor.convert(NSNull()), .null)
+    XCTAssertEqual(jsonType(from: nil), .null)
+    XCTAssertEqual(jsonType(from: NSNull()), .null)
 
     XCTAssertEqual(
-      JSONTypeConvertor.convert(["campaign": nil as Any?, "sessionId": 1]),
+      jsonType(from: ["campaign": nil as Any?, "sessionId": 1]),
       .object([
         "campaign": .null,
         "sessionId": .int(1),
       ])
     )
     XCTAssertEqual(
-      JSONTypeConvertor.convert(["campaign": NSNull(), "sessionId": 1]),
+      jsonType(from: ["campaign": NSNull(), "sessionId": 1]),
       .object([
         "campaign": .null,
         "sessionId": .int(1),
@@ -27,10 +27,10 @@ final class JSONTypeConvertorTests: XCTestCase {
   }
 
   func testConvertsFlutterNSNumberBoolsAndInts() {
-    XCTAssertEqual(JSONTypeConvertor.convert(kCFBooleanTrue), .bool(true))
-    XCTAssertEqual(JSONTypeConvertor.convert(kCFBooleanFalse), .bool(false))
-    XCTAssertEqual(JSONTypeConvertor.convert(NSNumber(value: 1)), .int(1))
-    XCTAssertEqual(JSONTypeConvertor.convert(NSNumber(value: 0)), .int(0))
+    XCTAssertEqual(jsonType(from: kCFBooleanTrue), .bool(true))
+    XCTAssertEqual(jsonType(from: kCFBooleanFalse), .bool(false))
+    XCTAssertEqual(jsonType(from: NSNumber(value: 1)), .int(1))
+    XCTAssertEqual(jsonType(from: NSNumber(value: 0)), .int(0))
   }
 
   func testConvertsNestedAnyHashableMaps() {
@@ -38,7 +38,7 @@ final class JSONTypeConvertorTests: XCTestCase {
     let outer: [AnyHashable: Any] = ["meta": inner, "ok": true]
 
     XCTAssertEqual(
-      JSONTypeConvertor.convert(outer),
+      jsonType(from: outer),
       .object([
         "meta": .object(["campaign": .null]),
         "ok": .bool(true),

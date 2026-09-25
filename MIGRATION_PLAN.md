@@ -166,7 +166,9 @@ v4 API code.
 - Forward `eventId` from iOS `APIError.eventId` and Android `Error.eventId`.
   Today's plugin drops both. Strip Android's `"Unknown"` sentinel.
 - Read iOS `FPError.description`, not `localizedDescription`. `FPError`
-  implements `CustomStringConvertible`, not `LocalizedError`.
+  implements `CustomStringConvertible`, not `LocalizedError`. For
+  `networkError` and `jsonParsingError`, use the inner error's
+  `localizedDescription` instead. That inner value is usually `URLError`.
 - An iOS `APIError` with no code is `unknown_error`, not `failed`.
 - Pigeon can carry `visitorId` as `String`. Empty becomes null on
   `FingerprintResult`.
