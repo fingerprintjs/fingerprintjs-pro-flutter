@@ -8,7 +8,7 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/actions/workflows/ci.yml"><img src="https://github.com/fingerprintjs/fingerprintjs-pro-flutter/actions/workflows/ci.yml/badge.svg" alt="Build status"></a>
+  <a href="https://github.com/fingerprintjs/flutter/actions/workflows/ci.yml"><img src="https://github.com/fingerprintjs/flutter/actions/workflows/ci.yml/badge.svg" alt="Build status"></a>
   <a href="https://pub.dev/packages/fingerprint_flutter"><img src="https://img.shields.io/pub/v/fingerprint_flutter.svg"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/:license-mit-blue.svg?style=flat"/></a>
   <a href="https://discord.gg/39EpE2neBg"><img src="https://img.shields.io/discord/852099967190433792?style=logo&label=Discord&logo=Discord&logoColor=white" alt="Discord server"></a>
@@ -213,9 +213,9 @@ A custom cache duration must be a whole number of seconds, greater than zero and
 ## Support and feedback
 
 To report problems, ask questions, or provide feedback, please
-use [Issues](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues). If you need private support, please
+use [Issues](https://github.com/fingerprintjs/flutter/issues). If you need private support, please
 email us at `oss-support@fingerprint.com`.
 
 ## License
 
-This project is licensed under the [MIT license](https://github.com/fingerprintjs/fingerprintjs-pro-flutter/blob/main/LICENSE).
+This project is licensed under the [MIT license](https://github.com/fingerprintjs/flutter/blob/main/LICENSE).

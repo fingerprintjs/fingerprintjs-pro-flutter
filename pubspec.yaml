@@ -2,7 +2,7 @@ name: fingerprint_flutter
 description: Flutter plugin for the Fingerprint identification SDKs.
 version: 4.13.1
 homepage: https://fingerprint.com
-repository: https://github.com/fingerprintjs/fingerprintjs-pro-flutter
+repository: https://github.com/fingerprintjs/flutter
 
 environment:
   sdk: ">=3.12.0 <4.0.0"

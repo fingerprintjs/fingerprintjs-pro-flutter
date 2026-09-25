@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.version          = '4.13.1'
   s.summary          = 'Flutter plugin for Fingerprint.'
   s.description      = 'Flutter plugin for Fingerprint.'
-  s.homepage         = 'https://github.com/fingerprintjs/fingerprintjs-pro-flutter'
+  s.homepage         = 'https://github.com/fingerprintjs/flutter'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'FingerprintJS, Inc' => 'support@fingerprint.com' }
   s.source           = { :path => '.' }
