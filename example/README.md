@@ -35,13 +35,14 @@ cp .env .env.local
 The project will not compile if the `.env.local` file is not present.
 
 2. Add your environment variables to `.env.local`. `API_KEY` is required.
-`REGION` is optional and defaults to `us`. `ENDPOINTS` is only needed for
-workspaces using custom endpoints.
+`REGION` is optional and defaults to `us`. `ENDPOINTS` is optional. Use it
+for a [proxy integration](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers).
+List every identification URL you want tried, comma-separated. we recommend including the default [regional](https://docs.fingerprint.com/docs/regions) endpoint last, as a fallback.
 
 ```bash
 API_KEY=your_api_key
 REGION=eu
-# ENDPOINTS=https://your-endpoint.example
+# ENDPOINTS=https://metrics.yourwebsite.com,https://api.fpjs.io
 ```
 
 ### 3. Run the example project
