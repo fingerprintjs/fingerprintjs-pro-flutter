@@ -20,7 +20,7 @@
 identification and device intelligence with industry-leading accuracy. Fingerprint Flutter SDK is an easy way to integrate Fingerprint into your Flutter
 application. The plugin allows you to call the underlying native Fingerprint agents (Android, iOS, and Web) and identify devices.
 
-This package replaces `fpjs_pro_plugin`. If you are upgrading from 4.x, see the 5.0.0 changelog.
+This package replaces `fpjs_pro_plugin`. If you are upgrading from 4.x, see the [5.0.0 changelog](https://github.com/fingerprintjs/flutter/blob/main/CHANGELOG.md#500).
 
 ## Table of contents
 - [Fingerprint Flutter](#fingerprint-flutter)
