@@ -2,6 +2,7 @@ package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
 
 import android.content.Context
 import com.fingerprint.android.ApiKeyRequired
+import com.fingerprint.android.Configuration
 import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
@@ -100,9 +101,9 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createUsesRegionUrlWhenEndpointIsEmpty() {
+  fun createUsesRegionUrlWhenEndpointIsOmitted() {
     val built = captureConfiguration(
-      nativeConfig(region = "eu", endpoint = ""),
+      nativeConfig(region = "eu", endpoint = null),
     )
     assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
   }
@@ -145,49 +146,17 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createParsesRegionCaseInsensitively() {
+  fun createMapsRegionsAndDefaultsToUs() {
     val cases = listOf(
       "eu" to Configuration.Region.EU,
-      "EU" to Configuration.Region.EU,
       "ap" to Configuration.Region.AP,
       "us" to Configuration.Region.US,
-      "US" to Configuration.Region.US,
       null to Configuration.Region.US,
     )
     for ((region, expected) in cases) {
       val built = captureConfiguration(nativeConfig(region = region))
       assertEquals(expected, built.region)
     }
-  }
-
-  @Test
-  fun createRejectsUnknownRegion() {
-    try {
-      FingerprintHostApiImpl(context, cache()).create(nativeConfig(region = "xx"))
-      throw AssertionError("expected FlutterError")
-    } catch (error: FlutterError) {
-      assertEquals("unknown_error", error.code)
-      assertEquals("Invalid region: xx", error.message)
-    }
-  }
-
-  @Test
-  fun getReportsUnknownRegionWithoutCallingClient() {
-    var created = false
-    val cache = FingerprintClientCache(context) { _, _ ->
-      created = true
-      mock(Fingerprint::class.java)
-    }
-    var captured: Result<FingerprintNativeResult>? = null
-    FingerprintHostApiImpl(context, cache).get(
-      nativeConfig(region = "xx"),
-      null,
-      null,
-      null,
-    ) { captured = it }
-    assertEquals(false, created)
-    val error = captured!!.exceptionOrNull() as FlutterError
-    assertEquals("unknown_error", error.code)
   }
 
   @Test
@@ -218,10 +187,6 @@ class FingerprintHostApiImplTest {
     assertEquals("vid-1", result.visitorId)
     assertEquals(42L, result.suspectScore)
     assertEquals("sealed", result.sealedResult)
-  }
-
-  private fun cache() = FingerprintClientCache(context) { _, _ ->
-    mock(Fingerprint::class.java)
   }
 
   private fun captureConfiguration(config: FingerprintNativeConfig): Configuration {

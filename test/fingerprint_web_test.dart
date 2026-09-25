@@ -191,10 +191,13 @@ void main() {
       expect(fake.getOptions['linkedId'], 'link-1');
     });
 
-    test('reuses one agent for the same config', () async {
-      final request = config();
-      await platform.get(request);
-      await platform.get(request);
+    test('reuses one agent for equal configs', () async {
+      final first = config();
+      final second = config();
+      expect(first, second);
+
+      await platform.get(first);
+      await platform.get(second);
 
       expect(fake.startCount, 1);
     });
