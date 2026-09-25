@@ -26,7 +26,8 @@ Migrated the SDK to Fingerprint API v4. This is a breaking change on every platf
 **API**
 
 - Static `FpjsProPlugin.initFpjs` / `getVisitorId` / `getVisitorData` are replaced by an instance `Fingerprint` client with `get({tags, linkedId, timeout})`.
-- The constructor is synchronous and starts the client. Identification failures surface on `get`.
+- The constructor only stores options. Call `start()` to build the native client or start the web agent. `get()` calls `start()` if you skip it. Identification failures surface on `get`.
+- On Android and iOS, `start()` needs the Flutter binding. Call `WidgetsFlutterBinding.ensureInitialized()` first if you start before `runApp()`.
 - Timeouts are `Duration`. `endpoint` + `endpointFallbacks` become one `endpoints` list. Platform options nest under `android`, `ios`, and `web`.
 - `scriptUrlPattern`, `scriptUrlPatternFallbacks`, and `extendedResponseFormat` are removed.
 

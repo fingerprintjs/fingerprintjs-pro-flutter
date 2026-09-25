@@ -87,20 +87,28 @@ To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `
 
 ### 1. Create a client
 
-Create one `Fingerprint` client per API key and configuration at app startup. 
+Create one `Fingerprint` client per API key and configuration. The `region` option defaults to `Region.us` when omitted. See [regions](https://docs.fingerprint.com/docs/regions).
 
 ```dart
+import 'package:flutter/widgets.dart';
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 
-final client = Fingerprint(
-  apiKey: '<PUBLIC_API_KEY>',
-  region: Region.eu, // or Region.us, Region.ap
-);
+late final Fingerprint client;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  client = Fingerprint(
+    apiKey: '<PUBLIC_API_KEY>',
+    region: Region.eu, // or Region.us, Region.ap
+  );
+  await client.start();
+  runApp(const MyApp());
+}
 ```
 
-* `region` defaults to `Region.us` when omitted. See [regions](https://docs.fingerprint.com/docs/regions).
-
-* The constructor is synchronous: it starts the client and returns immediately, you do not need to await it. It builds the native client on Android and iOS, and starts downloading the JavaScript agent on web. Initialization failures only surface when you call `get` to identify a visitor.
+* The constructor only stores options. `start()` builds the native client, or starts downloading the JavaScript agent on web.
+* `get()` calls `start()` if you skip it, then identifies. Create failures surface on `start()` or `get()`.
+* On Android and iOS, `start()` needs the Flutter binding. Call `WidgetsFlutterBinding.ensureInitialized()` first if you start before `runApp()`. After `runApp()`, the binding already exists.
 
 ### Custom endpoints
 
