@@ -1,8 +1,8 @@
 import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/result.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 import 'package:fpjs_pro_plugin_example/main.dart';
 
 void main() {
@@ -27,7 +27,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Failed to initialize Fingerprint agent:'),
+      find.textContaining('Failed to create Fingerprint client:'),
       findsOneWidget,
     );
     expect(_button(tester, runChecksButtonKey).onPressed, isNull);
@@ -43,8 +43,8 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Fingerprint agent ready'), findsOneWidget);
-    expect(platform.config?.allowUseOfLocationData, isTrue);
+    expect(find.text('Fingerprint client created'), findsOneWidget);
+    expect(platform.config?.android?.allowUseOfLocationData, isTrue);
     expect(_button(tester, runChecksButtonKey).onPressed, isNotNull);
     expect(_button(tester, identifyButtonKey).onPressed, isNotNull);
     expect(_button(tester, visitorDataButtonKey).onPressed, isNotNull);
@@ -62,8 +62,9 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Fingerprint agent ready'), findsOneWidget);
-    expect(platform.config?.allowUseOfLocationData, isFalse);
+    expect(find.text('Fingerprint client created'), findsOneWidget);
+    expect(platform.config?.android?.allowUseOfLocationData, isFalse);
+    expect(platform.config?.ios?.allowUseOfLocationData, isFalse);
   });
 }
 
@@ -75,30 +76,17 @@ class RecordingFingerprint extends FingerprintPlatform {
   FingerprintConfig? config;
 
   @override
-  Future<void> init(FingerprintConfig config) async {
+  Future<void> create(FingerprintConfig config) async {
     this.config = config;
   }
 
   @override
-  Future<String?> getVisitorId({
-    Map<String, dynamic>? tags,
+  Future<FingerprintResult> get(
+    FingerprintConfig config, {
+    Map<String, Object?>? tags,
     String? linkedId,
-    int? timeoutMs,
+    Duration? timeout,
   }) async {
-    return 'test-visitor';
-  }
-
-  @override
-  Future<FingerprintJSProResponse> getVisitorData({
-    Map<String, dynamic>? tags,
-    String? linkedId,
-    int? timeoutMs,
-  }) async {
-    return FingerprintJSProResponse(
-      'test-event',
-      'test-visitor',
-      ConfidenceScore(0),
-      null,
-    );
+    return FingerprintResult(eventId: 'test-event', visitorId: 'test-visitor');
   }
 }

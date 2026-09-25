@@ -5,9 +5,7 @@ import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
-import 'package:fpjs_pro_plugin/region.dart';
 import 'package:geolocator/geolocator.dart';
 
 const tags = {
@@ -24,7 +22,7 @@ const runChecksButtonKey = ValueKey('run-checks-button');
 const identifyButtonKey = ValueKey('identify-button');
 const visitorDataButtonKey = ValueKey('visitor-data-button');
 
-enum InitializationState { initializing, ready, error }
+enum InitializationState { initializing, created, error }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,21 +45,32 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _deviceId = 'Unknown';
+  String _visitorId = 'Unknown';
   String _checksResult = 'Not run';
   InitializationState _initializationState = InitializationState.initializing;
   String? _initializationError;
+  Fingerprint? _client;
   final String? _apiKey = dotenv.env['API_KEY'];
   final String? _region = dotenv.env['REGION'];
-  final String? _endpoint = dotenv.env['ENDPOINT'];
-  final String? _scriptUrlPattern = dotenv.env['SCRIPT_URL_PATTERN'];
+  final String? _endpoints = dotenv.env['ENDPOINTS'];
   final bool _disableLocationCollection =
       dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 
   @override
   void initState() {
     super.initState();
-    _initFpjs();
+    _createFingerprintClient();
+  }
+
+  List<String>? _parseEndpoints(String? raw) {
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+    final kept = [
+      for (final url in raw.split(','))
+        if (url.trim().isNotEmpty) url.trim(),
+    ];
+    return kept.isEmpty ? null : kept;
   }
 
   Region? _parseRegion(String? region) {
@@ -76,30 +85,25 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  Future<void> _initFpjs() async {
+  void _createFingerprintClient() {
     try {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      await FpjsProPlugin.initFpjs(
-        _apiKey,
-        endpoint: _endpoint,
-        scriptUrlPattern: _scriptUrlPattern,
+      _client = Fingerprint(
+        apiKey: _apiKey,
         region: _parseRegion(_region),
-        allowUseOfLocationData: !_disableLocationCollection,
-        locationTimeoutMillisAndroid: 6000,
-        extendedResponseFormat: false,
+        endpoints: _parseEndpoints(_endpoints),
+        android: AndroidOptions(
+          allowUseOfLocationData: !_disableLocationCollection,
+          locationTimeout: const Duration(milliseconds: 6000),
+        ),
+        ios: IosOptions(allowUseOfLocationData: !_disableLocationCollection),
       );
-      if (!mounted) return;
-      setState(() {
-        _initializationState = InitializationState.ready;
-      });
+      _initializationState = InitializationState.created;
     } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _initializationState = InitializationState.error;
-        _initializationError = 'Failed to initialize Fingerprint agent: $error';
-      });
+      _initializationState = InitializationState.error;
+      _initializationError = 'Failed to create Fingerprint client: $error';
     }
   }
 
@@ -111,11 +115,6 @@ class _MyAppState extends State<MyApp> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
         if (kDebugMode) {
           print('Location permissions are denied');
         }
@@ -124,7 +123,6 @@ class _MyAppState extends State<MyApp> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
       if (kDebugMode) {
         print(
           'Location permissions are permanently denied, we cannot request permissions.',
@@ -134,56 +132,46 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// The native FingerprintJS libraries expose a method called `getVisitorId`
-  /// to stay consistent with the original Javascript library used for browser identification.
-  /// However in the mobile application context a more accurate name would be something like `getDeviceId`.
-  Future<void> _getDeviceId() async {
+  Future<FingerprintResult> _identify() async {
     await requestLocationPermission();
-    String deviceId;
+    return _client!.get(tags: tags, linkedId: 'some linkedId');
+  }
+
+  Future<void> _showVisitorId() async {
+    String visitorId;
     try {
-      deviceId =
-          await FpjsProPlugin.getVisitorId(
-            tags: tags,
-            linkedId: 'some linkedId',
-          ) ??
-          'Unknown';
+      visitorId = (await _identify()).visitorId ?? 'Unknown';
     } catch (error) {
-      deviceId = 'Failed to get device id: $error';
+      visitorId = 'Failed to get device id: $error';
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
-
     setState(() {
-      _deviceId = deviceId;
+      _visitorId = visitorId;
     });
   }
 
-  Future<String> _getDeviceData() async {
-    await requestLocationPermission();
-    String identificationInfo;
+  Future<String> _visitorDataText() async {
     try {
-      const encoder = JsonEncoder.withIndent('    ');
-      final deviceData = await FpjsProPlugin.getVisitorData(
-        tags: tags,
-        linkedId: 'some linkedId',
-      );
-      final jsonDeviceData = deviceData.toJson();
-      if (deviceData.sealedResult != null &&
-          deviceData.sealedResult!.isNotEmpty) {
-        jsonDeviceData["sealedResult"] = deviceData.sealedResult?.replaceRange(
+      final result = await _identify();
+      var sealedResult = result.sealedResult;
+      if (sealedResult != null && sealedResult.length > 10) {
+        sealedResult = sealedResult.replaceRange(
           10,
-          deviceData.sealedResult?.length,
+          sealedResult.length,
           '...',
         );
       }
-      identificationInfo = encoder.convert(jsonDeviceData);
-    } on FingerprintProError catch (error) {
-      identificationInfo = "Failed to get device info.\n$error";
+      return const JsonEncoder.withIndent('    ').convert({
+        'eventId': result.eventId,
+        'visitorId': result.visitorId,
+        'suspectScore': result.suspectScore,
+        'sealedResult': sealedResult,
+        'cacheHit': result.cacheHit,
+      });
+    } on FingerprintError catch (error) {
+      return 'Failed to get device info.\n$error';
     }
-    return identificationInfo;
   }
 
   Future<void> _runChecks() async {
@@ -192,26 +180,17 @@ class _MyAppState extends State<MyApp> {
       _checksResult = 'Running';
     });
     try {
+      final client = _client!;
       var checks = [
-        () async => FpjsProPlugin.getVisitorId(),
-        () async => FpjsProPlugin.getVisitorData(),
-        () async => FpjsProPlugin.getVisitorId(linkedId: 'checkId'),
-        () async => FpjsProPlugin.getVisitorData(linkedId: 'checkData'),
-        () async => FpjsProPlugin.getVisitorId(tags: tags),
-        () async => FpjsProPlugin.getVisitorData(tags: tags),
-        () async =>
-            FpjsProPlugin.getVisitorId(linkedId: 'checkIdWithTag', tags: tags),
-        () async => FpjsProPlugin.getVisitorData(
-          linkedId: 'checkDataWithTag',
-          tags: tags,
-        ),
-        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5000),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5000),
+        () => client.get(),
+        () => client.get(linkedId: 'checkId'),
+        () => client.get(tags: tags),
+        () => client.get(linkedId: 'checkIdWithTag', tags: tags),
+        () => client.get(timeout: const Duration(milliseconds: 5000)),
       ];
 
       var timeoutChecks = [
-        () async => FpjsProPlugin.getVisitorId(timeoutMs: 5),
-        () async => FpjsProPlugin.getVisitorData(timeoutMs: 5),
+        () => client.get(timeout: const Duration(milliseconds: 5)),
       ];
 
       // The timeout checks cancel a request mid-flight. On iOS the call right after
@@ -221,7 +200,7 @@ class _MyAppState extends State<MyApp> {
         try {
           await check();
           throw Exception('Expected timeout error');
-        } on FingerprintProError {
+        } on FingerprintError {
           if (!mounted) return;
           setState(() {
             _checksResult += '!';
@@ -250,9 +229,9 @@ class _MyAppState extends State<MyApp> {
   String get _initializationStatus {
     switch (_initializationState) {
       case InitializationState.initializing:
-        return 'Initializing Fingerprint agent...';
-      case InitializationState.ready:
-        return 'Fingerprint agent ready';
+        return 'Creating Fingerprint client...';
+      case InitializationState.created:
+        return 'Fingerprint client created';
       case InitializationState.error:
         return _initializationError!;
     }
@@ -260,7 +239,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final isReady = _initializationState == InitializationState.ready;
+    final isCreated = _initializationState == InitializationState.created;
 
     return MaterialApp(
       home: Scaffold(
@@ -272,21 +251,21 @@ class _MyAppState extends State<MyApp> {
               Text(_initializationStatus),
               ElevatedButton(
                 key: runChecksButtonKey,
-                onPressed: isReady ? _runChecks : null,
+                onPressed: isCreated ? _runChecks : null,
                 child: const Text('Run tests!'),
               ),
               const Text('Checks result:'),
               Text(_checksResult),
               ElevatedButton(
                 key: identifyButtonKey,
-                onPressed: isReady ? _getDeviceId : null,
+                onPressed: isCreated ? _showVisitorId : null,
                 child: const Text('Identify!'),
               ),
               const Text('The device id is:'),
-              Text(_deviceId),
+              Text(_visitorId),
               _VisitorDataDialog(
-                enabled: isReady,
-                loadVisitorData: _getDeviceData,
+                enabled: isCreated,
+                loadVisitorData: _visitorDataText,
               ),
             ],
           ),

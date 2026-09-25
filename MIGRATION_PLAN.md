@@ -24,7 +24,7 @@ only unrelated or speculative work, not known breakage such as
 | 3 | Platform interface | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318) | To do |
 | 4a | Dart foundations: result, errors, tags | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2319](https://fingerprintjs.atlassian.net/browse/INTER-2319) | To do |
 | 4b | Pigeon contract and native implementations | [INTER-2318](https://fingerprintjs.atlassian.net/browse/INTER-2318), [INTER-2386](https://fingerprintjs.atlassian.net/browse/INTER-2386), [INTER-2387](https://fingerprintjs.atlassian.net/browse/INTER-2387) | To do |
-| 4c | Public API swap and web v4 | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396) | To do |
+| 4c | Public API swap and web v4 | [INTER-2320](https://fingerprintjs.atlassian.net/browse/INTER-2320), [INTER-2396](https://fingerprintjs.atlassian.net/browse/INTER-2396) | In progress |
 | 5 | Rename repo and package | [INTER-2400](https://fingerprintjs.atlassian.net/browse/INTER-2400) | To do |
 | 6 | Docs and migration guide | none | To do |
 | 7 | Release 5.0.0 | none | To do |
@@ -109,7 +109,7 @@ wired to stubs asserts only that codegen ran. Split by provable unit.
 |---|---|---|
 | **4a** | `FingerprintResult`, `FingerprintError`, known error constants, tag validation. Pure Dart, public API unchanged. | Result mapping, tag validation and open error codes pass unit tests with no native or web code. |
 | **4b** | Pigeon bindings, Kotlin and Swift implementations, config-keyed client memoization. Public API still unchanged. | Generated code is reproducible, Android and iOS deliver results and errors through the new contract, `init` creates a native client that later gets reuse, error codes survive a minified build. |
-| **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app. | No tuple or v3 web implementation remains; two-client independence, tag forwarding, mocked web agent, and the example app on all three platforms. |
+| **4c** | New `Fingerprint` API, v4 web rewrite, deletions, example app, README. | No tuple or v3 web implementation remains; two-client independence, tag forwarding, mocked web agent, the example app on all three platforms, and the README matching the new API. |
 
 The public API never ships over a v3 web implementation. That binds at 4c.
 
@@ -153,8 +153,10 @@ Every platform throws one `FingerprintError`. The platform adapters translate
 native names to canonical snake_case codes and normalize platform-only values.
 The error class keeps unfamiliar codes unchanged. Its known constants include
 only errors identification clients can return. Server API-only codes are
-excluded: `secret_api_key_*`, `state_not_ready`, `subscription_not_found`,
-`ruleset_not_found`, `request_not_found`, and `event_not_found`.
+not Dart constants (`secret_api_key_*`, `state_not_ready`,
+`subscription_not_found`, `ruleset_not_found`, `request_not_found`,
+`event_not_found`), but adapters still forward them if they arrive. iOS maps
+unlisted `APIError.Code` to snake_case `rawValue`.
 `request_timeout` is Android's class name for `request_read_timeout`, not a
 v4 API code.
 
@@ -202,8 +204,10 @@ The current pin is `@fingerprintjs/fingerprintjs-pro` 3.12.x, which has no v4.
 4c is a package swap. Add `urlHashing`, `storageKeyPrefix`, and an optional
 `cache` configuration: required storage
 (`sessionStorage`, `localStorage`, `agent`), a duration (`optimize-cost`,
-`aggressive`, or a custom `Duration` up to 12 hours), and an optional key
-prefix. Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
+`aggressive`, or a custom whole-second `Duration` up to 12 hours), and an
+optional key prefix. The agent takes a number of seconds, max 43200.
+https://docs.fingerprint.com/reference/js-agent-start-function
+Map the agent's `cache_hit` to `cacheHit`; it is not a start option.
 Remove `extendedResult` and `scriptUrlPattern`. No `remoteControlDetection`:
 it is absent from the
 [React Native v4 web contract](https://github.com/fingerprintjs/fingerprintjs-pro-react-native/blob/1fcc272c943e362a12fe1c0f21429a5f47c22e81/sdk/src/types.ts).
@@ -213,13 +217,13 @@ conversion including cache hit and a missing Zero Trust visitor ID, and errors.
 
 ### Example app
 
-Moves to the new API in 4c, with the deletions. Not documentation work for PR
-6: CI builds the example on every PR, and `example/lib/main.dart` uses
-`extendedResponseFormat` and the static
-`FpjsProPlugin.getVisitorId`/`getVisitorData`. It is also the only end-to-end
-proof that the rewritten API works on a real device against a real endpoint,
-so it is an acceptance criterion for the rewrite. PR 5 renames its import,
-PR 6 documents it.
+Moves to the new API in 4c, with the deletions. CI builds the example on
+every PR, and `example/lib/main.dart` used `extendedResponseFormat` and the
+static `FpjsProPlugin.getVisitorId`/`getVisitorData`. It is the end-to-end
+proof that the rewritten API works on a real device against a real endpoint.
+The README documents that API in 4c so the constructor, `get`, result, and
+error types can be reviewed as a consumer would read them. PR 5 renames the
+package import. PR 6 is the post-rename migration guide.
 
 CI also runs Pigeon and fails if it changes tracked generated files.
 
@@ -249,8 +253,8 @@ run succeeds, and the example resolves the renamed package.
 
 ## PR 6. Docs and migration guide
 
-No ticket. The example already runs the new API under the new name, so this PR
-documents that path rather than performing it. Cover every renamed import, the
+No ticket. The README already documents the new API. This PR writes the
+migration guide after the package rename: every renamed import, the
 static-to-instance conversion, removed extended response fields, the error
 model change, updated platform floors, and the web asset path as a numbered
 step.

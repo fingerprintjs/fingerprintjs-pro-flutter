@@ -2,9 +2,9 @@
 appId: ${APP_ID}
 ---
 - extendedWaitUntil:
-    visible: '(?s)Fingerprint agent ready|Failed to initialize.*'
+    visible: '(?s)Fingerprint client created|Failed to create.*'
     timeout: 90000
-- assertVisible: 'Fingerprint agent ready'
+- assertVisible: 'Fingerprint client created'
 - tapOn: 'Run tests!'
 - extendedWaitUntil:
     visible: '(?s)Success!|Failed:.*'

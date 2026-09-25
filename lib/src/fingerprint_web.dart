@@ -1,102 +1,174 @@
 import 'dart:js_interop';
-
-// In order to *not* need this ignore, consider extracting the "web" version
-// of your plugin as a separate package, instead of inlining it in the same
-// package as the core of your plugin.
-// ignore: avoid_web_libraries_in_flutter
+import 'dart:js_interop_unsafe';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/js_agent_interop.dart';
+import 'package:fpjs_pro_plugin/options.dart';
 import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/web_error.dart';
-import 'package:fpjs_pro_plugin/web_result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
+import 'package:fpjs_pro_plugin/src/js_agent_interop.dart';
+import 'package:fpjs_pro_plugin/src/tags.dart';
 
-/// An implementation of [FingerprintPlatform] that talks to the JS agent
+/// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
-  Future<FingerprintJSAgent>? _agent;
-  var _isExtendedResult = false;
+  FingerprintWeb({FingerprintJSAgent Function(JSObject options)? start})
+    : _start = start ?? ((options) => FingerprintJS.start(options));
+
+  final FingerprintJSAgent Function(JSObject options) _start;
+  final _agents = <FingerprintConfig, FingerprintJSAgent>{};
 
   static void registerWith(Registrar registrar) {
     FingerprintPlatform.instance = FingerprintWeb();
   }
 
   @override
-  Future<void> init(FingerprintConfig config) async {
-    final options = FingerprintJSOptions(
-      apiKey: config.apiKey,
-      integrationInfo: _toJSStringArray(
-          ['fingerprint-pro-flutter/${config.pluginVersion}/web']),
-    );
-    if (config.region != null) {
-      options.region = config.region!.stringValue;
-    }
-    if (config.endpoint != null) {
-      options.endpoint =
-          _toJSStringArray([config.endpoint!, ...?config.endpointFallbacks]);
-    }
-    if (config.scriptUrlPattern != null) {
-      options.scriptUrlPattern = _toJSStringArray(
-          [config.scriptUrlPattern!, ...?config.scriptUrlPatternFallbacks]);
-    }
-    try {
-      final agent = FingerprintJS.load(options).toDart;
-      await agent;
-      _agent = agent;
-      _isExtendedResult = config.extendedResponseFormat;
-    } catch (e) {
-      throw _wrapJsAgentError(e);
-    }
+  Future<void> create(FingerprintConfig config) async {
+    _agentFor(config);
   }
 
   @override
-  Future<String?> getVisitorId(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
+  Future<FingerprintResult> get(
+    FingerprintConfig config, {
+    Map<String, Object?>? tags,
+    String? linkedId,
+    Duration? timeout,
+  }) async {
+    validateTags(tags);
     try {
-      final result = await _get(tags, linkedId, timeoutMs, false);
-      return result.visitorId;
-    } catch (e) {
-      throw _wrapJsAgentError(e);
+      final agent = _agentFor(config);
+      final options = _toGetOptions(
+        tags: tags,
+        linkedId: linkedId,
+        timeout: timeout,
+      );
+      // Omit the argument when options is null.
+      // https://docs.fingerprint.com/reference/js-agent-get-function
+      final result =
+          await (options == null ? agent.get() : agent.get(options)).toDart;
+      return _toResult(result);
+    } catch (error) {
+      if (error is FingerprintError) {
+        rethrow;
+      }
+      throw _wrapJsError(error);
     }
   }
 
-  @override
-  Future<FingerprintJSProResponse> getVisitorData(
-      {Map<String, dynamic>? tags, String? linkedId, int? timeoutMs}) async {
-    try {
-      final result = await _get(tags, linkedId, timeoutMs, _isExtendedResult);
-      return _isExtendedResult
-          ? FingerprintJSProExtendedResponseWeb.fromJsObject(
-              result as IdentificationExtendedResult)
-          : FingerprintJSProResponseWeb.fromJsObject(result);
-    } catch (e) {
-      throw _wrapJsAgentError(e);
+  FingerprintJSAgent _agentFor(FingerprintConfig config) {
+    final existing = _agents[config];
+    if (existing != null) {
+      return existing;
     }
-  }
-
-  Future<IdentificationResult> _get(Map<String, dynamic>? tags,
-      String? linkedId, int? timeoutMs, bool extendedResult) async {
-    final agent = await _agent!;
-    return agent
-        .get(FingerprintJSGetOptions(
-            linkedId: linkedId,
-            tag: tags?.jsify() as JSObject?,
-            timeout: timeoutMs,
-            extendedResult: extendedResult))
-        .toDart;
+    try {
+      final agent = _start(_toStartOptions(config));
+      _agents[config] = agent;
+      return agent;
+    } catch (error) {
+      throw _wrapJsError(error);
+    }
   }
 }
 
-JSArray<JSString> _toJSStringArray(List<String> values) =>
-    values.map((value) => value.toJS).toList().toJS;
-
-FingerprintProError _wrapJsAgentError(Object error) {
-  // `isA` cannot narrow an extension type without a JS class behind it.
-  // ignore: invalid_runtime_check_with_js_interop_types
-  if (error is WebException) {
-    return unwrapWebError(error);
+JSObject _toStartOptions(FingerprintConfig config) {
+  final options = <String, Object>{
+    'apiKey': config.apiKey,
+    'integrationInfo': ['fingerprint-pro-flutter/${config.pluginVersion}/web'],
+    if (config.region != null) 'region': config.region!.stringValue,
+    if (config.endpoints != null) 'endpoints': config.endpoints!,
+  };
+  final web = config.web;
+  if (web?.storageKeyPrefix != null) {
+    options['storageKeyPrefix'] = web!.storageKeyPrefix!;
   }
-  return UnknownError(error.toString());
+  final hashing = web?.urlHashing;
+  if (hashing != null) {
+    options['urlHashing'] = {
+      if (hashing.path != null) 'path': hashing.path!,
+      if (hashing.query != null) 'query': hashing.query!,
+      if (hashing.fragment != null) 'fragment': hashing.fragment!,
+    };
+  }
+  final cache = web?.cache;
+  if (cache != null) {
+    options['cache'] = {
+      'storage': cache.storage.name,
+      'duration': _cacheDuration(cache.duration),
+      if (cache.keyPrefix != null) 'cachePrefix': cache.keyPrefix!,
+    };
+  }
+  return options.jsify() as JSObject;
+}
+
+JSObject? _toGetOptions({
+  Map<String, Object?>? tags,
+  String? linkedId,
+  Duration? timeout,
+}) {
+  if (tags == null && linkedId == null && timeout == null) {
+    return null;
+  }
+  return {
+        'tags': ?tags,
+        'linkedId': ?linkedId,
+        'timeout': ?timeout?.inMilliseconds,
+      }.jsify()
+      as JSObject;
+}
+
+Object _cacheDuration(WebCacheDuration duration) {
+  if (duration == WebCacheDuration.optimizeCost) {
+    return 'optimize-cost';
+  }
+  if (duration == WebCacheDuration.aggressive) {
+    return 'aggressive';
+  }
+  return duration.seconds!;
+}
+
+FingerprintResult _toResult(JSObject js) {
+  final result = JSGetResult(js);
+  return FingerprintResult(
+    eventId: result.eventId,
+    visitorId: result.visitorId,
+    suspectScore: result.suspectScore,
+    sealedResult: _sealedResult(result.sealedResult),
+    cacheHit: result.cacheHit?.toDart,
+  );
+}
+
+String? _sealedResult(JSAny? value) {
+  if (value == null || value.isUndefinedOrNull) {
+    return null;
+  }
+  if (value.isA<JSString>()) {
+    return (value as JSString).toDart;
+  }
+  return JSBinaryOutput(value as JSObject).base64();
+}
+
+FingerprintError _wrapJsError(Object error) {
+  // JS errors have no Dart class. `isA` cannot narrow them.
+  // ignore: invalid_runtime_check_with_js_interop_types
+  if (error is JSObject) {
+    final code = error.getProperty('code'.toJS);
+    if (code.isA<JSString>()) {
+      final message = error.getProperty('message'.toJS);
+      final eventId = error.getProperty('event_id'.toJS);
+      // The agent splits network failures. Native uses one code.
+      var errorCode = (code as JSString).toDart;
+      if (errorCode == 'network_connection' || errorCode == 'network_abort') {
+        errorCode = FingerprintError.networkError;
+      }
+      return FingerprintError(
+        code: errorCode,
+        message: message.isA<JSString>() ? (message as JSString).toDart : null,
+        eventId: eventId.isA<JSString>() ? (eventId as JSString).toDart : null,
+      );
+    }
+  }
+  return FingerprintError(
+    code: FingerprintError.unknownError,
+    message: error.toString(),
+  );
 }

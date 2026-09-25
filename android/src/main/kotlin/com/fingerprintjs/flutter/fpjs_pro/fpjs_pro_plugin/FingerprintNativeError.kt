@@ -20,16 +20,10 @@ import com.fingerprint.android.NetworkUnavailableError
 import com.fingerprint.android.PayloadTooLarge
 import com.fingerprint.android.ProxyIntegrationSecretEnvironmentMismatch
 import com.fingerprint.android.RequestCannotBeParsed
-import com.fingerprint.android.RequestNotFound
 import com.fingerprint.android.RequestTimeout
 import com.fingerprint.android.ResponseCannotBeParsed
-import com.fingerprint.android.RulesetNotFound
-import com.fingerprint.android.SecretApiKeyNotFound
-import com.fingerprint.android.SecretApiKeyRequired
 import com.fingerprint.android.ServiceUnavailable
-import com.fingerprint.android.StateNotReady
 import com.fingerprint.android.SubscriptionNotActive
-import com.fingerprint.android.SubscriptionNotFound
 import com.fingerprint.android.SubscriptionRestricted
 import com.fingerprint.android.TooManyRequest
 import com.fingerprint.android.UnknownError
@@ -58,16 +52,12 @@ internal fun errorCode(error: Error): String = when (error) {
   is ProxyIntegrationSecretEnvironmentMismatch ->
     "proxy_integration_secret_environment_mismatch"
   is ResponseCannotBeParsed -> "response_cannot_be_parsed"
+  // Android splits offline vs request failure. iOS and web use one code.
   is NetworkError -> "network_error"
-  is NetworkUnavailableError -> "network_unavailable_error"
+  is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
   is UnknownError -> "unknown_error"
-  is SecretApiKeyRequired -> "secret_api_key_required"
-  is SecretApiKeyNotFound -> "secret_api_key_not_found"
-  is RequestNotFound -> "request_not_found"
-  is StateNotReady -> "state_not_ready"
-  is RulesetNotFound -> "ruleset_not_found"
-  is SubscriptionNotFound -> "subscription_not_found"
+  else -> "unknown_error"
 }
 
 internal fun normalizeEventId(eventId: String?): String? {

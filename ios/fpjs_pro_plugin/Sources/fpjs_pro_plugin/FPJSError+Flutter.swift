@@ -66,13 +66,9 @@ extension APIError {
     case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
     case .proxyIntegrationSecretEnvironmentMismatch:
       return "proxy_integration_secret_environment_mismatch"
-    case .secretApiKeyRequired: return "secret_api_key_required"
-    case .secretApiKeyNotFound: return "secret_api_key_not_found"
-    case .stateNotReady: return "state_not_ready"
-    case .eventNotFound: return "event_not_found"
-    case .rulesetNotFound: return "ruleset_not_found"
-    case .subscriptionNotFound: return "subscription_not_found"
-    @unknown default:
+    // Identification-only constants live in Dart. Unlisted codes still go
+    // through so a newer iOS SDK is debuggable.
+    default:
       return camelCaseToSnakeCase(code.rawValue)
     }
   }
