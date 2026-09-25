@@ -33,6 +33,7 @@ application. The plugin allows you to call the underlying native Fingerprint age
     - [Linking and tagging information](#linking-and-tagging-information)
     - [Specifying a custom timeout](#specifying-a-custom-timeout)
   - [Additional Resources](#additional-resources)
+  - [Version support](#version-support)
   - [Support and feedback](#support-and-feedback)
   - [License](#license)
 
@@ -239,6 +240,12 @@ void doInit() async {
 ## Additional Resources
 - [Fingerprint Pro documentation](https://docs.fingerprint.com)
 - [Server API](https://docs.fingerprint.com/reference/server-api)
+
+## Version support
+
+| SDK major version | Android SDK | iOS SDK | JS Agent version | Status | End of support |
+|---|---|---|---|---|---|
+| v4.x (current) | v2.x | v2.x | [v3](https://docs.fingerprint.com/reference/v3/javascript-agent) | Supported | - |
 
 ## Support and feedback
 
