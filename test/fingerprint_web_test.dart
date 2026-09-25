@@ -105,6 +105,14 @@ void main() {
       });
     });
 
+    test('omits endpoints when they are not set', () async {
+      await platform.create(
+        FingerprintConfig(apiKey: 'key-2', pluginVersion: '9.9.9'),
+      );
+
+      expect(fake.startOptions.containsKey('endpoints'), isFalse);
+    });
+
     test('two configs keep independent agents', () async {
       final first = config();
       final second = FingerprintConfig(apiKey: 'key-2', pluginVersion: '9.9.9');
