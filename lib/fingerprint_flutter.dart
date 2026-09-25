@@ -18,6 +18,10 @@ const pluginVersion = '4.13.1';
 /// The constructor starts the native or web client. [get] waits for that
 /// start and is where create or load failures surface. Every get carries the
 /// full config, so two clients stay independent.
+///
+/// On Android and iOS, the constructor throws if the Flutter binding does not
+/// exist yet. In `main()` before `runApp()`, call
+/// `WidgetsFlutterBinding.ensureInitialized()` first.
 /// https://docs.fingerprint.com/docs/ios-sdk
 /// https://docs.fingerprint.com/docs/android-sdk
 /// https://docs.fingerprint.com/reference/js-agent-start-function
