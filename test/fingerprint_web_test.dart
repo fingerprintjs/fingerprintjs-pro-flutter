@@ -106,7 +106,7 @@ void main() {
       });
     });
 
-test('omits unset start fields', () async {
+    test('omits unset start fields', () async {
       await platform.create(
         FingerprintConfig(apiKey: 'key-1', pluginVersion: '9.9.9'),
       );
