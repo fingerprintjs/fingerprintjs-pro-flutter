@@ -36,9 +36,6 @@ func jsonType(from object: Any?) -> JSONType? {
   if let value = object as? Double {
     return .double(value)
   }
-  if let array = object as? [Any] {
-    return .array(array.compactMap { jsonType(from: $0) })
-  }
   if let array = object as? [Any?] {
     return .array(array.compactMap { jsonType(from: $0) })
   }

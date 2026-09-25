@@ -24,6 +24,10 @@ final class JSONTypeConvertorTests: XCTestCase {
         "sessionId": .int(1),
       ])
     )
+    XCTAssertEqual(
+      jsonType(from: [nil, NSNull(), 1] as [Any?]),
+      .array([.null, .null, .int(1)])
+    )
   }
 
   func testConvertsFlutterNSNumberBoolsAndInts() {
