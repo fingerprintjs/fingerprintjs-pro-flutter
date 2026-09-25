@@ -42,7 +42,25 @@ Web does not use Pigeon.
 
 ## Testing
 
-For running tests just call `flutter test`.
+For running Dart tests, call `flutter test`.
+
+iOS unit tests use the example app's `RunnerTests` target, as recommended by
+[Flutter's plugin testing guide](https://docs.flutter.dev/testing/testing-plugins).
+Create `example/.env.local` first. The example app does not compile without it.
+The tests need Swift Package Manager. `RunnerTests` does not link the CocoaPods build.
+Build the example once, then run XCTest on any available iPhone simulator
+(list them with `xcrun simctl list devices available`):
+
+```bash
+flutter config --enable-swift-package-manager
+cd example
+flutter build ios --simulator --no-codesign
+xcodebuild test \
+  -workspace ios/Runner.xcworkspace \
+  -scheme Runner \
+  -destination 'platform=iOS Simulator,name=<iPhone name>' \
+  -only-testing:RunnerTests
+```
 
 ### Integration smoke test
 

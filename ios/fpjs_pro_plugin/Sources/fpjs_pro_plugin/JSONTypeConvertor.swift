@@ -6,10 +6,13 @@ import Foundation
 @preconcurrency import Fingerprint
 
 func jsonType(from object: Any?) -> JSONType? {
-  guard let object else {
+  guard let object, !(object is NSNull) else {
     return .null
   }
-  if object is NSNull {
+  // A nil optional boxed in `Any` (from `[Any?]` or `[K: Any?]`) passes `guard let`
+  // and matches no cast below.
+  let mirror = Mirror(reflecting: object)
+  if mirror.displayStyle == .optional, mirror.children.isEmpty {
     return .null
   }
   // Flutter bools are CFBoolean NSNumbers. `as? Int` turns them into 0/1,
@@ -36,37 +39,18 @@ func jsonType(from object: Any?) -> JSONType? {
   if let value = object as? Double {
     return .double(value)
   }
-  if let array = object as? [Any] {
-    return .array(array.compactMap { jsonType(from: $0) })
-  }
   if let array = object as? [Any?] {
     return .array(array.compactMap { jsonType(from: $0) })
   }
-  if let entries = stringKeyedEntries(object) {
+  // Also matches [String: Any] and [AnyHashable: Any]. Non-string keys are dropped.
+  if let dict = object as? [AnyHashable: Any?] {
     var result: [String: JSONType] = [:]
-    for (key, value) in entries {
-      if let converted = jsonType(from: value) {
+    for (key, value) in dict {
+      if let key = key as? String, let converted = jsonType(from: value) {
         result[key] = converted
       }
     }
     return .object(result)
-  }
-  return nil
-}
-
-private func stringKeyedEntries(_ object: Any) -> [(String, Any?)]? {
-  if let dict = object as? [String: Any?] {
-    return Array(dict)
-  }
-  if let dict = object as? [AnyHashable: Any?] {
-    return dict.compactMap { key, value in
-      (key as? String).map { ($0, value) }
-    }
-  }
-  if let dict = object as? [AnyHashable: Any] {
-    return dict.compactMap { key, value in
-      (key as? String).map { ($0, value) }
-    }
   }
   return nil
 }

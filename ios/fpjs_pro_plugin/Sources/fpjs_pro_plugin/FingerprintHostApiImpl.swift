@@ -1,3 +1,5 @@
+// Pigeon HostApi: identification via iOS Fingerprint SDK 4.x.
+
 @preconcurrency import Fingerprint
 import Foundation
 
@@ -14,7 +16,11 @@ private final class CompletionBox: @unchecked Sendable {
 
 /// Pigeon HostApi backed by the iOS Fingerprint SDK 4.x.
 final class FingerprintHostApiImpl: FingerprintHostApi {
-  private let clientCache = FingerprintClientCache()
+  private let clientCache: FingerprintClientCache
+
+  init(clientCache: FingerprintClientCache = FingerprintClientCache()) {
+    self.clientCache = clientCache
+  }
 
   func create(config: FingerprintNativeConfig) throws {
     _ = nativeClient(for: config)

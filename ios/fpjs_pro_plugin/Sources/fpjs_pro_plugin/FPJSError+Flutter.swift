@@ -1,5 +1,7 @@
-import Foundation
+// Maps Fingerprint.FPError to Pigeon error codes (snake_case), matching Android.
+
 @preconcurrency import Fingerprint
+import Foundation
 
 extension FPError {
   /// Snake_case code and message for Pigeon [PigeonError].
