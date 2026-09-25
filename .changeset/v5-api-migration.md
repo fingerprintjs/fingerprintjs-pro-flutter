@@ -93,8 +93,8 @@ final fp = Fingerprint(
 - final data = await FpjsProPlugin.getVisitorData();
 + final fp = Fingerprint(apiKey: '<PUBLIC_API_KEY>', region: Region.eu);
 + final result = await fp.get();
-+ result.visitorId
-+ result.eventId
++ print(result.visitorId);
++ print(result.eventId);
 ```
 
 **Identify**
