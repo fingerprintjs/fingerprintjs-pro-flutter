@@ -1,5 +1,6 @@
 // swift-tools-version: 6.0
 
+// Swift package for the Flutter iOS plugin.
 import PackageDescription
 
 let package = Package(
@@ -9,7 +10,10 @@ let package = Package(
         .tvOS("15.0")
     ],
     products: [
-        .library(name: "fingerprint_flutter", targets: ["fingerprint_flutter"])
+        // Flutter generates this name for the native build by replacing `_` with `-`.
+        // Flutter apps do not reference it. They depend on `fingerprint_flutter`.
+        // https://github.com/flutter/flutter/blob/3.47.5/packages/flutter_tools/lib/src/commands/build_swift_package.dart#L1143-L1147
+        .library(name: "fingerprint-flutter", targets: ["fingerprint_flutter"])
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
