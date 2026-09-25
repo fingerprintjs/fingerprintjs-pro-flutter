@@ -7,7 +7,7 @@ Migrated the SDK to Fingerprint API v4 and replaced the static `FpjsProPlugin` A
 **Renamed API**
 
 - Package `fpjs_pro_plugin` → `fingerprint_flutter`. Import `package:fingerprint_flutter/fingerprint_flutter.dart`.
-- `FpjsProPlugin.initFpjs(...)` → `Fingerprint(...)`. The constructor is synchronous and starts the client. Identification failures surface on `get`.
+- `FpjsProPlugin.initFpjs(...)` → `Fingerprint(...)`. The constructor is synchronous and starts the client. Identification failures surface on `get`. On Android and iOS, the constructor throws if the Flutter binding does not exist yet, so call `WidgetsFlutterBinding.ensureInitialized()` first, as with `initFpjs`.
 - `getVisitorId` and `getVisitorData` are removed. Call `get({tags, linkedId, timeout})`.
 - Web loader script: `assets/packages/fpjs_pro_plugin/web/index.js` → `assets/packages/fingerprint_flutter/web/index.js`.
 
