@@ -15,9 +15,12 @@ const pluginVersion = '4.13.1';
 
 /// Identification client. Create one per public API key and configuration.
 ///
-/// The constructor starts the native or web client. [get] waits for that
-/// start and is where create or load failures surface. Every get carries the
-/// full config, so two clients stay independent.
+/// The constructor only stores options. [start] builds the native or web
+/// client. [get] calls [start] if you skip it, then identifies. Every get
+/// carries the full config, so two clients stay independent.
+///
+/// On Android and iOS, [start] needs the Flutter binding. In `main()` before
+/// `runApp()`, call `WidgetsFlutterBinding.ensureInitialized()` first.
 /// https://docs.fingerprint.com/docs/ios-sdk
 /// https://docs.fingerprint.com/docs/android-sdk
 /// https://docs.fingerprint.com/reference/js-agent-start-function
@@ -47,7 +50,7 @@ class Fingerprint {
   final WebOptions? web;
 
   late final FingerprintConfig _config;
-  late final Future<void> _created;
+  Future<void>? _started;
 
   Fingerprint({
     required this.apiKey,
@@ -66,10 +69,17 @@ class Fingerprint {
       ios: ios,
       web: web,
     );
-    // Native create is local client construction so location can warm.
-    // Web start() is sync; the bundle still loads in the background.
-    // ignore() so a create failure is not unhandled if get is never called.
-    _created = FingerprintPlatform.instance.create(_config)..ignore();
+  }
+
+  /// Builds the native client, or starts downloading the web agent.
+  ///
+  /// Safe to call more than once. Native create is local client construction
+  /// so location can warm. Web start() is sync; the bundle still loads in
+  /// the background.
+  /// https://docs.fingerprint.com/reference/js-agent-start-function
+  Future<void> start() async {
+    _started ??= FingerprintPlatform.instance.create(_config);
+    await _started;
   }
 
   /// Identifies the current visitor or device.
@@ -82,7 +92,7 @@ class Fingerprint {
     String? linkedId,
     Duration? timeout,
   }) async {
-    await _created;
+    await start();
     return FingerprintPlatform.instance.get(
       _config,
       tags: tags,

@@ -17,7 +17,7 @@ void main() {
     FingerprintPlatform.instance = previous;
   });
 
-  test('constructor creates the platform client', () async {
+  test('start creates the platform client without identifying', () async {
     final client = Fingerprint(
       apiKey: 'key-1',
       region: Region.eu,
@@ -27,9 +27,11 @@ void main() {
         locationTimeout: Duration(seconds: 3),
       ),
     );
-    await client.get();
+    expect(platform.created, isEmpty);
+    await client.start();
 
     expect(platform.created, hasLength(1));
+    expect(platform.gets, isEmpty);
     expect(platform.created.single.apiKey, 'key-1');
     expect(platform.created.single.pluginVersion, pluginVersion);
     expect(platform.created.single.region, Region.eu);
@@ -72,8 +74,8 @@ void main() {
     expect(platform.gets.single.timeout, const Duration(milliseconds: 500));
   });
 
-  // Constructor ignores create so an unused client is not an unhandled async
-  // error. get() still rethrows, and must not identify.
+  // start() is not required. get() starts, rethrows a create failure, and
+  // must not identify.
   test('get surfaces a create failure without identifying', () async {
     platform.createError = FingerprintError(
       code: FingerprintError.apiKeyInvalid,
