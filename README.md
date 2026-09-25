@@ -29,6 +29,7 @@ application. The plugin allows you to call the underlying native Fingerprint age
     - [Web platform (Optional)](#web-platform-optional)
   - [Usage](#usage)
     - [1. Create a client](#1-create-a-client)
+    - [Custom endpoints](#custom-endpoints)
     - [2. Identify visitors](#2-identify-visitors)
     - [Linking and tagging information](#linking-and-tagging-information)
     - [Specifying a custom timeout](#specifying-a-custom-timeout)
@@ -84,7 +85,7 @@ To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `
 
 ### 1. Create a client
 
-Create one `Fingerprint` per API key and configuration at app startup. The constructor starts the native or web client. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk) and [Android quickstart](https://docs.fingerprint.com/docs/android-quickstart).
+Create one `Fingerprint` client per API key and configuration at app startup. 
 
 ```dart
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
@@ -95,11 +96,15 @@ final client = Fingerprint(
 );
 ```
 
-Default to US when `region` is omitted. See [regions](https://docs.fingerprint.com/docs/regions).
+* `region` defaults to `Region.us` when omitted. See [regions](https://docs.fingerprint.com/docs/regions).
 
-`get` waits for that start. Native create builds the local client. Web `start` returns immediately; load failures surface from `get`.
+* The constructor is synchronous: it starts the client and returns immediately, you do not need to await it. It builds the native client on Android and iOS, and starts downloading the JavaScript agent on web. Initialization failures only surface when you call `get` to identify a visitor.
 
-To avoid ad blockers, proxy identification through a [proxy integration](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers). Pass identification URLs as `endpoints`, first to last:
+### Custom endpoints
+
+To avoid ad blockers, proxy identification through a [proxy integration](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers). Pass identification URLs as `endpoints`, first to last.
+
+We recommend including the default API URL for your [region](https://docs.fingerprint.com/docs/regions) as a fallback: `https://api.fpjs.io` (US), `https://eu.api.fpjs.io` (EU), `https://ap.api.fpjs.io` (Asia). There are no fallbacks by default. 
 
 ```dart
 final client = Fingerprint(
@@ -107,12 +112,10 @@ final client = Fingerprint(
   region: Region.us,
   endpoints: [
     'https://metrics.yourwebsite.com',
-    // Pass your regional Identification API URL default as fallback
-    'https://api.fpjs.io'
+    'https://api.fpjs.io',
   ],
 );
 ```
-
 
 ### 2. Identify visitors
 

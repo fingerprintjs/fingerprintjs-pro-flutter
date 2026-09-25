@@ -62,6 +62,17 @@ class _MyAppState extends State<MyApp> {
     _createFingerprintClient();
   }
 
+  List<String>? _parseEndpoints(String? raw) {
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+    final kept = [
+      for (final url in raw.split(','))
+        if (url.trim().isNotEmpty) url.trim(),
+    ];
+    return kept.isEmpty ? null : kept;
+  }
+
   Region? _parseRegion(String? region) {
     switch (region) {
       case 'us':
@@ -82,9 +93,7 @@ class _MyAppState extends State<MyApp> {
       _client = Fingerprint(
         apiKey: _apiKey,
         region: _parseRegion(_region),
-        endpoints: _endpoints == null || _endpoints.isEmpty
-            ? null
-            : [_endpoints],
+        endpoints: _parseEndpoints(_endpoints),
         android: AndroidOptions(
           allowUseOfLocationData: !_disableLocationCollection,
           locationTimeout: const Duration(milliseconds: 6000),

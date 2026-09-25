@@ -19,7 +19,8 @@ const pluginVersion = '4.13.1';
 /// start and is where create or load failures surface. Every get carries the
 /// full config, so two clients stay independent.
 /// https://docs.fingerprint.com/docs/ios-sdk
-/// https://docs.fingerprint.com/docs/android-quickstart
+/// https://docs.fingerprint.com/docs/android-sdk
+/// https://docs.fingerprint.com/reference/js-agent-start-function
 class Fingerprint {
   /// Public API key for this client.
   final String apiKey;
@@ -31,7 +32,9 @@ class Fingerprint {
 
   /// Identification endpoints, first to last. Null, empty, or only empty
   /// strings uses the regional default. Empty strings in the list are dropped.
-  /// https://docs.fingerprint.com/reference/js-agent-start-function
+  ///
+  /// It's recommended to include the default API URL for your [region](https://docs.fingerprint.com/docs/regions) last, as a fallback.
+  /// https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers
   final List<String>? endpoints;
 
   /// Android-only settings. Ignored on iOS and web.
