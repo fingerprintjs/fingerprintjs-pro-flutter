@@ -1,3 +1,5 @@
+// Maps Fingerprint.FPError to Pigeon error codes (snake_case), matching Android.
+
 @preconcurrency import Fingerprint
 import Foundation
 
@@ -15,7 +17,7 @@ extension FPError {
       return ("invalid_url_params", description, nil)
     case .apiError(let apiError):
       let code = apiError.pigeonCode()
-      let message = normalizeMessage(apiError.errorDetails?.message ?? description)
+      let message = apiError.errorDetails?.message ?? description
       let eventId = normalizeEventId(apiError.eventId)
       return (code, message, eventId)
     // Inner value is usually URLError. Its localizedDescription is the
@@ -85,14 +87,6 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
-}
-
-func normalizeMessage(_ message: String?) -> String? {
-  // The native SDK uses "Unknown" when no useful message is available.
-  guard let message, message != "Unknown" else {
-    return nil
-  }
-  return message
 }
 
 private func camelCaseToSnakeCase(_ value: String) -> String {

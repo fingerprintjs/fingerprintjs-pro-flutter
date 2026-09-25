@@ -199,6 +199,33 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
+      # CocoaPods first. Flutter migrates CocoaPods projects to SwiftPM, but not back, so the
+      # committed project stays CocoaPods-shaped and this order needs no reset in between.
+      # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager
+      - name: Disable Swift Package Manager
+        run: flutter config --no-enable-swift-package-manager
+
+      - name: Build example (iOS, CocoaPods)
+        working-directory: fpjs_pro_plugin/example
+        run: flutter build ios --no-codesign
+
+      - name: Verify CocoaPods was used
+        run: |
+          if [ ! -d example/ios/Pods/Fingerprint-iOS ]; then
+            echo "example/ios/Pods/Fingerprint-iOS is missing, CocoaPods did not install the native SDK."
+            ls example/ios/Pods 2>/dev/null || echo "example/ios/Pods does not exist."
+            exit 1
+          fi
+
+      - name: Enable Swift Package Manager
+        run: flutter config --enable-swift-package-manager
+
+      - name: Build example (iOS, Swift Package Manager)
+        working-directory: fpjs_pro_plugin/example
+        run: |
+          flutter clean
+          flutter build ios --no-codesign
+
       - name: Find iOS simulator
         id: simulator
         run: |
@@ -218,51 +245,14 @@ jobs:
           echo "Using simulator $udid"
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
 
-      # CocoaPods first. Flutter migrates CocoaPods projects to SwiftPM, but not back, so the
-      # committed project stays CocoaPods-shaped and this order needs no reset in between.
-      # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager
-      - name: Disable Swift Package Manager
-        run: flutter config --no-enable-swift-package-manager
-
-      - name: Build example (iOS, CocoaPods)
-        working-directory: fpjs_pro_plugin/example
-        run: flutter build ios --no-codesign
-
-      - name: Run iOS unit tests (CocoaPods)
-        working-directory: fpjs_pro_plugin/example/ios
-        run: |
-          xcodebuild test \
-            -quiet \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Debug \
-            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
-            -only-testing:RunnerTests \
-            -collect-test-diagnostics never \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Verify CocoaPods was used
-        run: |
-          if [ ! -d example/ios/Pods/Fingerprint-iOS ]; then
-            echo "example/ios/Pods/Fingerprint-iOS is missing, CocoaPods did not install the native SDK."
-            ls example/ios/Pods 2>/dev/null || echo "example/ios/Pods does not exist."
-            exit 1
-          fi
-
-      - name: Enable Swift Package Manager
-        run: flutter config --enable-swift-package-manager
-
-      - name: Build example (iOS, Swift Package Manager)
-        working-directory: fpjs_pro_plugin/example
-        run: |
-          flutter clean
-          flutter build ios --no-codesign
-
+      # Plugin sources are the same for CocoaPods and SwiftPM, so test once, under SwiftPM.
+      # Own DerivedData, so the tests can't link frameworks left over from the CocoaPods build.
       - name: Run iOS unit tests (Swift Package Manager)
         working-directory: fpjs_pro_plugin/example/ios
         run: |
           xcodebuild test \
             -quiet \
+            -derivedDataPath "$RUNNER_TEMP/RunnerTests" \
             -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Debug \

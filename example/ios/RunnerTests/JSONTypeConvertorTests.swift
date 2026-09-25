@@ -32,6 +32,17 @@ final class JSONTypeConvertorTests: XCTestCase {
     )
   }
 
+  func testConvertsNilBoxedInAny() {
+    let boxedNil: Any = Optional<Int>.none as Any
+
+    XCTAssertEqual(jsonType(from: boxedNil), .null)
+    XCTAssertEqual(
+      jsonType(from: ["campaign": boxedNil] as [AnyHashable: Any]),
+      .object(["campaign": .null])
+    )
+    XCTAssertEqual(jsonType(from: [boxedNil, 1] as [Any]), .array([.null, .int(1)]))
+  }
+
   func testConvertsFlutterNSNumberBoolsAndInts() {
     XCTAssertEqual(jsonType(from: kCFBooleanTrue), .bool(true))
     XCTAssertEqual(jsonType(from: kCFBooleanFalse), .bool(false))

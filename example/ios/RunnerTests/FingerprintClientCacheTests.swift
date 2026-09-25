@@ -20,11 +20,16 @@ final class FingerprintClientCacheTests: XCTestCase {
   }
 
   func testUsesSeparateClientsForDifferentConfigurations() {
-    let base = Configuration(apiKey: "api-key")
+    // Every pair differs in at least one key field.
     let cases: [(Configuration, String)] = [
+      (Configuration(apiKey: "api-key"), "1.0.0"),
       (Configuration(apiKey: "other-api-key"), "1.0.0"),
       (Configuration(apiKey: "api-key", region: .eu), "1.0.0"),
       (Configuration(apiKey: "api-key", region: .custom(domain: "https://example.com")), "1.0.0"),
+      (
+        Configuration(apiKey: "api-key", region: .custom(domain: "https://other.example.com")),
+        "1.0.0"
+      ),
       (
         Configuration(
           apiKey: "api-key",
@@ -38,17 +43,13 @@ final class FingerprintClientCacheTests: XCTestCase {
       (Configuration(apiKey: "api-key"), "2.0.0"),
       (Configuration(apiKey: "api-key", allowUseOfLocationData: true), "1.0.0"),
     ]
+    let cache = FingerprintClientCache(createClient: { _ in StubFingerprintClient() })
 
-    for (configuration, pluginVersion) in cases {
-      let cache = FingerprintClientCache(createClient: { _ in StubFingerprintClient() })
-      let first = cache.getOrCreate(configuration: base, pluginVersion: "1.0.0")
-      let second = cache.getOrCreate(
-        configuration: configuration,
-        pluginVersion: pluginVersion
-      )
-
-      XCTAssertFalse(first === second)
+    let clients = cases.map { configuration, pluginVersion in
+      cache.getOrCreate(configuration: configuration, pluginVersion: pluginVersion)
     }
+
+    XCTAssertEqual(Set(clients.map(ObjectIdentifier.init)).count, cases.count)
   }
 
   func testCreatesOneClientDuringConcurrentFirstAccess() {

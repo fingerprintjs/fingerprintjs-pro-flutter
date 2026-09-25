@@ -1,3 +1,5 @@
+// Pigeon HostApi: identification via iOS Fingerprint SDK 4.x.
+
 @preconcurrency import Fingerprint
 import Foundation
 

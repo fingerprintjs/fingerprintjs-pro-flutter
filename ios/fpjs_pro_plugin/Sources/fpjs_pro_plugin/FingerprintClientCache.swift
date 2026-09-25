@@ -1,3 +1,5 @@
+// Memoizes Fingerprint clients by resolved native configuration.
+
 @preconcurrency import Fingerprint
 import Foundation
 
