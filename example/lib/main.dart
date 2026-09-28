@@ -82,12 +82,12 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  void _createFingerprintClient() {
+  Future<void> _createFingerprintClient() async {
     try {
       if (_apiKey == null || _apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
-      _client = Fingerprint(
+      final client = Fingerprint(
         apiKey: _apiKey,
         region: _parseRegion(_region),
         endpoints: _parseEndpoints(_endpoints),
@@ -97,10 +97,16 @@ class _MyAppState extends State<MyApp> {
         ),
         ios: IosOptions(allowUseOfLocationData: !_disableLocationCollection),
       );
+      // Start early so native location collection begins before the first get.
+      await client.start();
+      _client = client;
       _initializationState = InitializationState.created;
     } catch (error) {
       _initializationState = InitializationState.error;
       _initializationError = 'Failed to create Fingerprint client: $error';
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
