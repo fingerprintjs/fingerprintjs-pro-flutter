@@ -13,7 +13,11 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
-        .package(url: "https://github.com/fingerprintjs/fingerprint-ios", .upToNextMajor(from: "4.0.0"))
+        // Patch releases only. A minor that shipped with a problem cannot be
+        // pulled from users once a floating range allows it. Take each minor
+        // on purpose. Example: 2.8.0 caused App Store rejections.
+        // https://github.com/fingerprintjs/fingerprintjs-pro-flutter/issues/92
+        .package(url: "https://github.com/fingerprintjs/fingerprint-ios", .upToNextMinor(from: "4.0.0"))
     ],
     targets: [
         .target(
