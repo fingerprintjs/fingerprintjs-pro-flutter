@@ -2,12 +2,12 @@
 
 @preconcurrency import Fingerprint
 import Foundation
-import XCTest
+import Testing
 
 @testable import fpjs_pro_plugin
 
-final class FingerprintClientCacheTests: XCTestCase {
-  func testReusesClientForSameConfiguration() {
+struct FingerprintClientCacheTests {
+  @Test func reusesClientForSameConfiguration() {
     let factory = ClientFactoryRecorder()
     let cache = FingerprintClientCache(createClient: factory.create)
     let configuration = Configuration(apiKey: "api-key")
@@ -15,11 +15,11 @@ final class FingerprintClientCacheTests: XCTestCase {
     let first = cache.getOrCreate(configuration: configuration, pluginVersion: "1.0.0")
     let second = cache.getOrCreate(configuration: configuration, pluginVersion: "1.0.0")
 
-    XCTAssertTrue(first === second)
-    XCTAssertEqual(factory.callCount, 1)
+    #expect(first === second)
+    #expect(factory.callCount == 1)
   }
 
-  func testUsesSeparateClientsForDifferentConfigurations() {
+  @Test func usesSeparateClientsForDifferentConfigurations() {
     // Every pair differs in at least one key field.
     let cases: [(Configuration, String)] = [
       (Configuration(apiKey: "api-key"), "1.0.0"),
@@ -49,10 +49,10 @@ final class FingerprintClientCacheTests: XCTestCase {
       cache.getOrCreate(configuration: configuration, pluginVersion: pluginVersion)
     }
 
-    XCTAssertEqual(Set(clients.map(ObjectIdentifier.init)).count, cases.count)
+    #expect(Set(clients.map(ObjectIdentifier.init)).count == cases.count)
   }
 
-  func testCreatesOneClientDuringConcurrentFirstAccess() {
+  @Test func createsOneClientDuringConcurrentFirstAccess() {
     let factory = ClientFactoryRecorder(creationDelay: 0.02)
     let cache = FingerprintClientCache(createClient: factory.create)
     let clients = ClientCollector()
@@ -85,8 +85,8 @@ final class FingerprintClientCacheTests: XCTestCase {
       finished.wait()
     }
 
-    XCTAssertEqual(factory.callCount, 1)
-    XCTAssertEqual(clients.uniqueCount, 1)
+    #expect(factory.callCount == 1)
+    #expect(clients.uniqueCount == 1)
   }
 }
 

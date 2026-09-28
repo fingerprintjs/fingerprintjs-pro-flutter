@@ -46,9 +46,10 @@ For running Dart tests, call `flutter test`.
 
 iOS unit tests use the example app's `RunnerTests` target, as recommended by
 [Flutter's plugin testing guide](https://docs.flutter.dev/testing/testing-plugins).
+Write them with [Swift Testing](https://developer.apple.com/documentation/testing), not XCTest.
 Create `example/.env.local` first. The example app does not compile without it.
 The tests need Swift Package Manager. `RunnerTests` does not link the CocoaPods build.
-Build the example once, then run XCTest on any available iPhone simulator
+Build the example once, then run the tests on any available iPhone simulator
 (list them with `xcrun simctl list devices available`):
 
 ```bash

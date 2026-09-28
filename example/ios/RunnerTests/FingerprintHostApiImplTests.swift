@@ -1,12 +1,13 @@
 // Verifies the Pigeon host API contract against a controlled native SDK client.
 
 @preconcurrency import Fingerprint
-import XCTest
+import Foundation
+import Testing
 
 @testable import fpjs_pro_plugin
 
-final class FingerprintHostApiImplTests: XCTestCase {
-  func testCreateBuildsCustomRegionFromEndpointAndFallbacks() throws {
+struct FingerprintHostApiImplTests {
+  @Test func createBuildsCustomRegionFromEndpointAndFallbacks() throws {
     let factory = ClientFactoryRecorder(client: StubFingerprintClient())
     let hostApi = FingerprintHostApiImpl(
       clientCache: FingerprintClientCache(createClient: factory.create)
@@ -22,19 +23,21 @@ final class FingerprintHostApiImplTests: XCTestCase {
       )
     )
 
-    let configuration = try XCTUnwrap(factory.lastConfiguration)
-    XCTAssertEqual(configuration.apiKey, "api-key")
-    XCTAssertEqual(configuration.allowUseOfLocationData, true)
-    XCTAssertEqual(configuration.integrationInfo.first?.0, "fingerprint-pro-flutter")
-    XCTAssertEqual(configuration.integrationInfo.first?.1, "1.2.3")
-    guard case .custom(let domain, let fallback) = configuration.region else {
-      return XCTFail("Expected a custom region")
-    }
-    XCTAssertEqual(domain, "https://custom.example.com")
-    XCTAssertEqual(fallback, ["https://fallback.example.com"])
+    let configuration = try #require(factory.lastConfiguration)
+    #expect(configuration.apiKey == "api-key")
+    #expect(configuration.allowUseOfLocationData == true)
+    #expect(configuration.integrationInfo.first?.0 == "fingerprint-pro-flutter")
+    #expect(configuration.integrationInfo.first?.1 == "1.2.3")
+    #expect(
+      configuration.region
+        == .custom(
+          domain: "https://custom.example.com",
+          fallback: ["https://fallback.example.com"]
+        )
+    )
   }
 
-  func testCreateUsesNamedRegionWhenEndpointIsMissing() throws {
+  @Test func createUsesNamedRegionWhenEndpointIsMissing() throws {
     let factory = ClientFactoryRecorder(client: StubFingerprintClient())
     let hostApi = FingerprintHostApiImpl(
       clientCache: FingerprintClientCache(createClient: factory.create)
@@ -49,13 +52,11 @@ final class FingerprintHostApiImplTests: XCTestCase {
       )
     )
 
-    let configuration = try XCTUnwrap(factory.lastConfiguration)
-    guard case .eu = configuration.region else {
-      return XCTFail("Expected the eu region")
-    }
+    let configuration = try #require(factory.lastConfiguration)
+    #expect(configuration.region == .eu)
   }
 
-  func testGetForwardsMetadataIncludingExplicitNullTags() throws {
+  @Test func getForwardsMetadataIncludingExplicitNullTags() throws {
     let client = StubFingerprintClient()
     let factory = ClientFactoryRecorder(client: client)
     let hostApi = FingerprintHostApiImpl(
@@ -78,11 +79,10 @@ final class FingerprintHostApiImplTests: XCTestCase {
       timeoutMs: nil
     ) { _ in }
 
-    let metadata = try XCTUnwrap(client.metadata)
-    XCTAssertEqual(metadata.linkedId, "linked-id")
-    XCTAssertEqual(
-      metadata.tags,
-      [
+    let metadata = try #require(client.metadata)
+    #expect(metadata.linkedId == "linked-id")
+    #expect(
+      metadata.tags == [
         "campaign": .null,
         "sessionId": .int(1),
         "nested": .object(["missing": .null, "active": .bool(true)]),
@@ -90,43 +90,40 @@ final class FingerprintHostApiImplTests: XCTestCase {
     )
   }
 
-  func testGetMapsApiErrorCodes() throws {
-    let cases = [
-      (APIError.Code.publicApiKeyRequired, "public_api_key_required"),
-      (.failed, "failed"),
-      (.requestReadTimeout, "request_read_timeout"),
-    ]
-
-    for (nativeCode, expectedCode) in cases {
-      let apiError = try makeAPIError(code: nativeCode, eventId: "event-id", message: "message")
-      let client = StubFingerprintClient(result: .failure(.apiError(apiError)))
-      let hostApi = FingerprintHostApiImpl(
-        clientCache: FingerprintClientCache(
-          createClient: ClientFactoryRecorder(client: client).create
-        )
+  @Test(arguments: [
+    (APIError.Code.publicApiKeyRequired, "public_api_key_required"),
+    (.failed, "failed"),
+    (.requestReadTimeout, "request_read_timeout"),
+  ])
+  func getMapsApiErrorCodes(nativeCode: APIError.Code, expectedCode: String) throws {
+    let apiError = try makeAPIError(code: nativeCode, eventId: "event-id", message: "message")
+    let client = StubFingerprintClient(result: .failure(.apiError(apiError)))
+    let hostApi = FingerprintHostApiImpl(
+      clientCache: FingerprintClientCache(
+        createClient: ClientFactoryRecorder(client: client).create
       )
-      var captured: Result<FingerprintNativeResult, Error>?
+    )
+    var captured: Result<FingerprintNativeResult, Error>?
 
-      hostApi.get(
-        config: FingerprintNativeConfig(
-          apiKey: "api-key",
-          pluginVersion: "1.2.3",
-          allowUseOfLocationData: false
-        ),
-        tags: nil,
-        linkedId: nil,
-        timeoutMs: nil
-      ) { captured = $0 }
+    hostApi.get(
+      config: FingerprintNativeConfig(
+        apiKey: "api-key",
+        pluginVersion: "1.2.3",
+        allowUseOfLocationData: false
+      ),
+      tags: nil,
+      linkedId: nil,
+      timeoutMs: nil
+    ) { captured = $0 }
 
-      guard case .failure(let capturedError) = try XCTUnwrap(captured) else {
-        return XCTFail("Expected an error")
-      }
-      let error = try XCTUnwrap(capturedError as? PigeonError)
-      XCTAssertEqual(error.code, expectedCode)
+    guard case .failure(let error as PigeonError) = try #require(captured) else {
+      Issue.record("Expected a PigeonError")
+      return
     }
+    #expect(error.code == expectedCode)
   }
 
-  func testGetForwardsTimeoutInSeconds() throws {
+  @Test func getForwardsTimeoutInSeconds() {
     let client = StubFingerprintClient()
     let hostApi = FingerprintHostApiImpl(
       clientCache: FingerprintClientCache(
@@ -145,6 +142,6 @@ final class FingerprintHostApiImplTests: XCTestCase {
       timeoutMs: 1500
     ) { _ in }
 
-    XCTAssertEqual(try XCTUnwrap(client.timeout), 1.5)
+    #expect(client.timeout == 1.5)
   }
 }

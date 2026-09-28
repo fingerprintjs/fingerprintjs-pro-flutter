@@ -3,63 +3,62 @@
 
 @preconcurrency import Fingerprint
 import Foundation
-import XCTest
+import Testing
 
 @testable import fpjs_pro_plugin
 
-final class JSONTypeConvertorTests: XCTestCase {
-  func testConvertsJSONNull() {
-    XCTAssertEqual(jsonType(from: nil), .null)
-    XCTAssertEqual(jsonType(from: NSNull()), .null)
+struct JSONTypeConvertorTests {
+  @Test func convertsJSONNull() {
+    #expect(jsonType(from: nil) == .null)
+    #expect(jsonType(from: NSNull()) == .null)
 
-    XCTAssertEqual(
-      jsonType(from: ["campaign": nil as Any?, "sessionId": 1]),
-      .object([
-        "campaign": .null,
-        "sessionId": .int(1),
-      ])
+    #expect(
+      jsonType(from: ["campaign": nil as Any?, "sessionId": 1])
+        == .object([
+          "campaign": .null,
+          "sessionId": .int(1),
+        ])
     )
-    XCTAssertEqual(
-      jsonType(from: ["campaign": NSNull(), "sessionId": 1]),
-      .object([
-        "campaign": .null,
-        "sessionId": .int(1),
-      ])
+    #expect(
+      jsonType(from: ["campaign": NSNull(), "sessionId": 1])
+        == .object([
+          "campaign": .null,
+          "sessionId": .int(1),
+        ])
     )
-    XCTAssertEqual(
-      jsonType(from: [nil, NSNull(), 1] as [Any?]),
-      .array([.null, .null, .int(1)])
+    #expect(
+      jsonType(from: [nil, NSNull(), 1] as [Any?]) == .array([.null, .null, .int(1)])
     )
   }
 
-  func testConvertsNilBoxedInAny() {
+  @Test func convertsNilBoxedInAny() {
     let boxedNil: Any = Optional<Int>.none as Any
 
-    XCTAssertEqual(jsonType(from: boxedNil), .null)
-    XCTAssertEqual(
-      jsonType(from: ["campaign": boxedNil] as [AnyHashable: Any]),
-      .object(["campaign": .null])
+    #expect(jsonType(from: boxedNil) == .null)
+    #expect(
+      jsonType(from: ["campaign": boxedNil] as [AnyHashable: Any])
+        == .object(["campaign": .null])
     )
-    XCTAssertEqual(jsonType(from: [boxedNil, 1] as [Any]), .array([.null, .int(1)]))
+    #expect(jsonType(from: [boxedNil, 1] as [Any]) == .array([.null, .int(1)]))
   }
 
-  func testConvertsFlutterNSNumberBoolsAndInts() {
-    XCTAssertEqual(jsonType(from: kCFBooleanTrue), .bool(true))
-    XCTAssertEqual(jsonType(from: kCFBooleanFalse), .bool(false))
-    XCTAssertEqual(jsonType(from: NSNumber(value: 1)), .int(1))
-    XCTAssertEqual(jsonType(from: NSNumber(value: 0)), .int(0))
+  @Test func convertsFlutterNSNumberBoolsAndInts() {
+    #expect(jsonType(from: kCFBooleanTrue) == .bool(true))
+    #expect(jsonType(from: kCFBooleanFalse) == .bool(false))
+    #expect(jsonType(from: NSNumber(value: 1)) == .int(1))
+    #expect(jsonType(from: NSNumber(value: 0)) == .int(0))
   }
 
-  func testConvertsNestedAnyHashableMaps() {
+  @Test func convertsNestedAnyHashableMaps() {
     let inner: [AnyHashable: Any] = ["campaign": NSNull()]
     let outer: [AnyHashable: Any] = ["meta": inner, "ok": true]
 
-    XCTAssertEqual(
-      jsonType(from: outer),
-      .object([
-        "meta": .object(["campaign": .null]),
-        "ok": .bool(true),
-      ])
+    #expect(
+      jsonType(from: outer)
+        == .object([
+          "meta": .object(["campaign": .null]),
+          "ok": .bool(true),
+        ])
     )
   }
 }
