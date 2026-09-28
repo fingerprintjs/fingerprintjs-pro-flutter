@@ -2,7 +2,7 @@
 // https://pub.dev/packages/pigeon
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/region.dart';
 import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';

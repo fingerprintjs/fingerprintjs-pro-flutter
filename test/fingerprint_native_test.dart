@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fingerprint_flutter/error.dart';
-import 'package:fingerprint_flutter/options.dart';
-import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_native.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/pigeon/fingerprint_api.g.dart';

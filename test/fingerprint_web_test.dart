@@ -5,9 +5,7 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fingerprint_flutter/error.dart';
-import 'package:fingerprint_flutter/options.dart';
-import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_web.dart';
 import 'package:fingerprint_flutter/src/js_agent_interop.dart';
