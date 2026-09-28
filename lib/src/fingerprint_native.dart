@@ -1,96 +1,102 @@
+// Android and iOS platform code. Dart config and errors go through Pigeon.
+// https://pub.dev/packages/pigeon
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fpjs_pro_plugin/error.dart';
 import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/result.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
-import 'package:fpjs_pro_plugin/src/tags.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
 class FingerprintNative extends FingerprintPlatform {
   FingerprintNative({FingerprintHostApi? hostApi})
-      : _hostApi = hostApi ?? FingerprintHostApi();
+    : _hostApi = hostApi ?? FingerprintHostApi();
 
   final FingerprintHostApi _hostApi;
-  FingerprintConfig? _config;
 
   @override
-  Future<void> init(FingerprintConfig config) async {
+  Future<void> create(FingerprintConfig config) async {
     try {
       await _hostApi.create(_toNativeConfig(config));
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+    } catch (error) {
+      throw _toFingerprintError(error);
     }
-    _config = config;
   }
 
   @override
-  Future<String?> getVisitorId({
-    Map<String, dynamic>? tags,
+  Future<FingerprintResult> get(
+    FingerprintConfig config, {
+    Map<String, Object?>? tags,
     String? linkedId,
-    int? timeoutMs,
+    Duration? timeout,
   }) async {
-    final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
-    // Native/Pigeon send "" when the id is hidden. Dart uses null.
-    return result.visitorId.isEmpty ? null : result.visitorId;
-  }
-
-  @override
-  Future<FingerprintJSProResponse> getVisitorData({
-    Map<String, dynamic>? tags,
-    String? linkedId,
-    int? timeoutMs,
-  }) async {
-    // Pigeon result -> Dart FingerprintResult -> old public FingerprintJSProResponse.
-    final result = await _getNative(tags: tags, linkedId: linkedId, timeoutMs: timeoutMs);
-    final normalized = FingerprintResult(
-      eventId: result.eventId,
-      visitorId: result.visitorId,
-      suspectScore: result.suspectScore,
-      sealedResult: result.sealedResult,
-    );
-    return FingerprintJSProResponse(
-      normalized.eventId,
-      normalized.visitorId ?? '',
-      ConfidenceScore(normalized.suspectScore ?? 0),
-      normalized.sealedResult,
-    );
-  }
-
-  Future<FingerprintNativeResult> _getNative({
-    Map<String, dynamic>? tags,
-    String? linkedId,
-    int? timeoutMs,
-  }) async {
-    final config = _config;
-    if (config == null) {
-      throw Exception(
-        'You need to initialize the FPJS Client first by calling the "initFpjs" method',
-      );
-    }
-    validateTags(tags);
     try {
-      return await _hostApi.get(
+      final result = await _hostApi.get(
         _toNativeConfig(config),
         tags,
         linkedId,
-        timeoutMs,
+        timeout?.inMilliseconds,
       );
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+      return FingerprintResult(
+        eventId: result.eventId,
+        visitorId: result.visitorId,
+        suspectScore: result.suspectScore,
+        sealedResult: result.sealedResult,
+      );
+    } catch (error) {
+      throw _toFingerprintError(error);
     }
   }
 
   FingerprintNativeConfig _toNativeConfig(FingerprintConfig config) {
+    final endpoints = config.endpoints;
     return FingerprintNativeConfig(
       apiKey: config.apiKey,
       region: config.region?.stringValue,
-      endpoint: config.endpoint,
-      endpointFallbacks: config.endpointFallbacks,
+      endpoint: endpoints?.first,
+      endpointFallbacks: endpoints != null && endpoints.length > 1
+          ? endpoints.sublist(1)
+          : null,
       pluginVersion: config.pluginVersion,
-      allowUseOfLocationData: config.allowUseOfLocationData ?? false,
-      locationTimeoutMillis: config.locationTimeoutMillisAndroid,
+      allowUseOfLocationData: _allowLocation(config),
+      locationTimeoutMillis: config.android?.locationTimeout?.inMilliseconds,
     );
   }
+
+  bool _allowLocation(FingerprintConfig config) {
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => config.ios?.allowUseOfLocationData ?? false,
+      _ => config.android?.allowUseOfLocationData ?? false,
+    };
+  }
+}
+
+// Pigeon's own codes when the call never reached native SDK code.
+const _pigeonCodes = {'channel-error', 'null-error'};
+
+/// - Native code already sends snake_case codes. [PlatformException.details]
+///   is the event id when the client reported one.
+/// - Pigeon codes and other errors (e.g. a missing Flutter binding) become
+///   [FingerprintError.unknownError] with the original text as message, so
+///   `get` only throws [FingerprintError] with a documented code.
+FingerprintError _toFingerprintError(Object error) {
+  if (error is! PlatformException) {
+    return FingerprintError(
+      code: FingerprintError.unknownError,
+      message: error.toString(),
+    );
+  }
+  if (_pigeonCodes.contains(error.code)) {
+    return FingerprintError(
+      code: FingerprintError.unknownError,
+      message: '${error.code}: ${error.message}',
+    );
+  }
+  final details = error.details;
+  return FingerprintError(
+    code: error.code,
+    message: error.message,
+    eventId: details is String ? details : null,
+  );
 }

@@ -1,18 +1,30 @@
-/// Validation of the `tags` argument.
+/// Validation of `Fingerprint.get` arguments.
 ///
-/// Same string-keyed JSON map on every platform. No size cap here. The server
-/// enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
+/// Tags: same string-keyed JSON map on every platform. No size cap here.
+/// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
 /// as `payload_too_large`.
+///
+/// Timeout: Dart [Duration] can be negative. Reject it here so native and
+/// web never see a negative millisecond value.
 library;
+
+import 'dart:typed_data';
 
 /// Throws an [ArgumentError] unless [tags] is recursively JSON-compatible.
 ///
 /// Root is a string-keyed map. Values may be [String], [num], [bool], null,
-/// [List], or nested maps. Rejects non-JSON objects, non-string keys, and
-/// non-finite numbers.
+/// [List], or nested maps. Rejects non-JSON objects, typed lists, non-string
+/// keys, and non-finite numbers.
 void validateTags(Map<String, Object?>? tags) {
   if (tags != null) {
     _validate(tags, 'tags');
+  }
+}
+
+/// Throws an [ArgumentError] if [timeout] is negative.
+void validateTimeout(Duration? timeout) {
+  if (timeout != null && timeout.isNegative) {
+    throw ArgumentError.value(timeout, 'timeout', 'Timeout cannot be negative');
   }
 }
 
@@ -31,6 +43,17 @@ void _validate(Object? value, String path) {
       );
     }
     return;
+  }
+  // Uint8List and other TypedData lists are List, so they would pass below.
+  // Pigeon sends them as typed data. iOS JSONTypeConvertor cannot convert
+  // that and drops the tag.
+  // https://docs.fingerprint.com/docs/tagging-information
+  if (value is TypedData) {
+    throw ArgumentError.value(
+      value,
+      path,
+      'Tags must be JSON-compatible, got ${value.runtimeType}',
+    );
   }
   if (value is List) {
     for (var index = 0; index < value.length; index++) {

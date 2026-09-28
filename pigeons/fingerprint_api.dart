@@ -30,7 +30,7 @@ class FingerprintNativeConfig {
 
   String apiKey;
   String? region;
-  // Same split as public init. 4c collapses these into one list.
+  // Public API is one `endpoints` list. Native still splits first + rest.
   String? endpoint;
   List<String>? endpointFallbacks;
   String pluginVersion;

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
+import 'package:fpjs_pro_plugin/error.dart';
 
 void main() {
   group('FingerprintError', () {
