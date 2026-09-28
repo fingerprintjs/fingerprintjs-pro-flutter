@@ -106,15 +106,9 @@ void main() {
 }
 ```
 
-The constructor is synchronous:
-* It returns immediately, you do not need to await it.
-* Initialization failures surface when you call `get` to identify a visitor.
-* On the web, the constructor starts downloading the JavaScript agent in the background.
-* On Android and iOS the constructor starts the native client in the background. If the Flutter binding does not exist yet, it throws `FlutterError`. Call `WidgetsFlutterBinding.ensureInitialized()` first if you need to run the constructor before `runApp()`.
+The constructor returns immediately and starts the client in the background, so create it early and reuse it. Failures surface from `get`.
 
-Create the client early, for example in `main()`, and reuse it for the app's lifetime:
-* iOS: creating the client starts location collection, so an early start gives better location precision. See the [iOS SDK](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection).
-* Android: creating the client loads the SDK, so the first `get` is faster. Location is collected during each `get`, see [Location data](#location-data).
+On Android and iOS, the constructor throws `FlutterError` if the Flutter binding does not exist yet. Call `WidgetsFlutterBinding.ensureInitialized()` first, as above.
 
 ### Custom endpoints
 
@@ -205,10 +199,7 @@ final client = Fingerprint(
 );
 ```
 
-* Android: each `get` waits up to `locationTimeout` for a fix (default 5 seconds), then continues without location.
-* iOS: location collection starts when the client is created, once location permission is granted. Create the client at app startup and keep the same instance for the best precision.
-
-See [Android](https://docs.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) and [iOS](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection) proximity detection.
+On Android, identification waits up to `locationTimeout` for a fix (default 5 seconds), then continues without location. On iOS, collection starts when the client is created, so create it at app startup for the best precision. See [Android](https://docs.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) and [iOS](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection) proximity detection.
 
 ### Web options
 
