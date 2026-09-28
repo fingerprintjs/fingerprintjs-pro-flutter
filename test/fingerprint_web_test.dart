@@ -41,7 +41,7 @@ void main() {
             cache: WebCache(
               storage: WebCacheStorage.sessionStorage,
               duration: WebCacheDuration.optimizeCost,
-              keyPrefix: 'cache_',
+              cachePrefix: 'cache_',
             ),
           ),
         ),

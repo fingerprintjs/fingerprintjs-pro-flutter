@@ -92,7 +92,7 @@ JSObject _toStartOptions(FingerprintConfig config) {
     options['cache'] = {
       'storage': cache.storage.name,
       'duration': _cacheDuration(cache.duration),
-      if (cache.keyPrefix != null) 'cachePrefix': cache.keyPrefix!,
+      if (cache.cachePrefix != null) 'cachePrefix': cache.cachePrefix!,
     };
   }
   return options.jsify() as JSObject;

@@ -27,7 +27,6 @@ import com.fingerprint.android.SubscriptionNotActive
 import com.fingerprint.android.SubscriptionRestricted
 import com.fingerprint.android.TooManyRequest
 import com.fingerprint.android.UnknownError
-import com.fingerprint.android.VisitorNotFound
 import com.fingerprint.android.WrongRegion
 
 // Null for Android types without a Dart code.
@@ -42,7 +41,6 @@ internal fun errorCode(error: Error): String? = when (error) {
   is SubscriptionRestricted -> "subscription_restricted"
   is WrongRegion -> "wrong_region"
   is FeatureNotEnabled -> "feature_not_enabled"
-  is VisitorNotFound -> "visitor_not_found"
   is MissingModule -> "missing_module"
   is PayloadTooLarge -> "payload_too_large"
   is ServiceUnavailable -> "service_unavailable"
@@ -58,9 +56,9 @@ internal fun errorCode(error: Error): String? = when (error) {
   is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
   is UnknownError -> "unknown_error"
-  // Remaining types (secret API key, request/ruleset/subscription not found,
-  // state not ready) are not identification errors. Android Error has no
-  // rawValue like iOS APIError.Code, so they are sent as unknown_error.
+  // Remaining types (secret API key, request/ruleset/subscription/visitor
+  // not found, state not ready) are not identification errors. Android Error
+  // has no rawValue like iOS APIError.Code, so they are sent as unknown_error.
   else -> null
 }
 

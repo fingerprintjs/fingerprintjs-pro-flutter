@@ -216,7 +216,7 @@ final client = Fingerprint(
     cache: WebCache(
       storage: WebCacheStorage.sessionStorage,
       duration: WebCacheDuration.optimizeCost, // 1 hour. aggressive is 12 hours.
-      keyPrefix: 'fp_cache_', // optional
+      cachePrefix: 'fp_cache_', // optional
     ),
   ),
 );

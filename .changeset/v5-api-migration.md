@@ -7,8 +7,9 @@ Migrated the SDK to Fingerprint API v4. This is a breaking change on every platf
 **Requirements**
 
 - Flutter 3.44.0 and Dart 3.12.0.
-- Android 7.0 (API 24+). Native SDK `4.0.0`. The plugin no longer applies the Kotlin Gradle plugin, so it builds under AGP 9. Apps on AGP 8 need Kotlin Gradle plugin 2.2.20 or newer.
-- iOS 15 / tvOS 15, Xcode 16, Swift 6. Native SDK 4.x (`Fingerprint-iOS`).
+- Android 7.0 (API 24+). Native SDK 4.1.x. The plugin no longer applies the Kotlin Gradle plugin, so it builds under AGP 9. Apps on AGP 8 need Kotlin Gradle plugin 2.2.20 or newer.
+- iOS 15 / tvOS 15, Xcode 16, Swift 6. Native SDK 4.0.x (`Fingerprint-iOS`).
+- Only native patch releases are picked up automatically.
 - Web uses the bundled `@fingerprint/agent` v4. There is no extra npm peer dependency.
 
 **Package**
