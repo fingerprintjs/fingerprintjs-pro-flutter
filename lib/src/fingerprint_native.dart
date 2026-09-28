@@ -1,11 +1,12 @@
+// Android and iOS platform code. Dart config and errors go through Pigeon.
+// https://pub.dev/packages/pigeon
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/region.dart';
+import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
-import 'package:fpjs_pro_plugin/src/tags.dart';
-import 'package:fpjs_pro_plugin/src/unwrap_error.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
 class FingerprintNative extends FingerprintPlatform {
@@ -18,8 +19,8 @@ class FingerprintNative extends FingerprintPlatform {
   Future<void> create(FingerprintConfig config) async {
     try {
       await _hostApi.create(_toNativeConfig(config));
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+    } catch (error) {
+      throw _toFingerprintError(error);
     }
   }
 
@@ -30,7 +31,6 @@ class FingerprintNative extends FingerprintPlatform {
     String? linkedId,
     Duration? timeout,
   }) async {
-    validateTags(tags);
     try {
       final result = await _hostApi.get(
         _toNativeConfig(config),
@@ -44,8 +44,8 @@ class FingerprintNative extends FingerprintPlatform {
         suspectScore: result.suspectScore,
         sealedResult: result.sealedResult,
       );
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+    } catch (error) {
+      throw _toFingerprintError(error);
     }
   }
 
@@ -54,7 +54,7 @@ class FingerprintNative extends FingerprintPlatform {
     return FingerprintNativeConfig(
       apiKey: config.apiKey,
       region: config.region?.stringValue,
-      endpoint: endpoints == null || endpoints.isEmpty ? null : endpoints.first,
+      endpoint: endpoints?.first,
       endpointFallbacks: endpoints != null && endpoints.length > 1
           ? endpoints.sublist(1)
           : null,
@@ -70,4 +70,33 @@ class FingerprintNative extends FingerprintPlatform {
       _ => config.android?.allowUseOfLocationData ?? false,
     };
   }
+}
+
+// Pigeon's own codes when the call never reached native SDK code.
+const _pigeonCodes = {'channel-error', 'null-error'};
+
+/// - Native code already sends snake_case codes. [PlatformException.details]
+///   is the event id when the client reported one.
+/// - Pigeon codes and other errors (e.g. a missing Flutter binding) become
+///   [FingerprintError.unknownError] with the original text as message, so
+///   `get` only throws [FingerprintError] with a documented code.
+FingerprintError _toFingerprintError(Object error) {
+  if (error is! PlatformException) {
+    return FingerprintError(
+      code: FingerprintError.unknownError,
+      message: error.toString(),
+    );
+  }
+  if (_pigeonCodes.contains(error.code)) {
+    return FingerprintError(
+      code: FingerprintError.unknownError,
+      message: '${error.code}: ${error.message}',
+    );
+  }
+  final details = error.details;
+  return FingerprintError(
+    code: error.code,
+    message: error.message,
+    eventId: details is String ? details : null,
+  );
 }

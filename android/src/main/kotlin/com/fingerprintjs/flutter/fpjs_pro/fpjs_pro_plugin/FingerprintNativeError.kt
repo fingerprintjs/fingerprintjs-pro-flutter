@@ -30,7 +30,8 @@ import com.fingerprint.android.UnknownError
 import com.fingerprint.android.VisitorNotFound
 import com.fingerprint.android.WrongRegion
 
-internal fun errorCode(error: Error): String = when (error) {
+// Null for Android types without a Dart code.
+internal fun errorCode(error: Error): String? = when (error) {
   is Failed -> "failed"
   is RequestCannotBeParsed -> "request_cannot_be_parsed"
   is RequestTimeout -> "request_read_timeout" // API code, not class name request_timeout
@@ -57,7 +58,10 @@ internal fun errorCode(error: Error): String = when (error) {
   is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
   is UnknownError -> "unknown_error"
-  else -> "unknown_error"
+  // Remaining types (secret API key, request/ruleset/subscription not found,
+  // state not ready) are not identification errors. Android Error has no
+  // rawValue like iOS APIError.Code, so they are sent as unknown_error.
+  else -> null
 }
 
 internal fun normalizeEventId(eventId: String?): String? {
@@ -79,6 +83,14 @@ internal fun normalizeMessage(description: String?): String? {
 
 internal fun toFlutterError(error: Error): FlutterError {
   val eventId = normalizeEventId(error.eventId)
-  val message = normalizeMessage(error.description)
-  return FlutterError(errorCode(error), message, eventId)
+  val description = normalizeMessage(error.description)
+  val code = errorCode(error)
+    ?: return FlutterError(
+      "unknown_error",
+      // Without a code, the message is all a developer sees. Fall back to
+      // the type name. It may be obfuscated in minified builds.
+      description ?: error.javaClass.simpleName,
+      eventId,
+    )
+  return FlutterError(code, description, eventId)
 }
