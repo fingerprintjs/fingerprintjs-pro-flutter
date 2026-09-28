@@ -35,7 +35,6 @@ void main() {
 
     expect(platform.created, hasLength(1));
     expect(platform.created.single.apiKey, 'key-1');
-    expect(platform.created.single.pluginVersion, pluginVersion);
     expect(platform.created.single.region, Region.eu);
     expect(platform.created.single.endpoints, [
       'https://primary.example',

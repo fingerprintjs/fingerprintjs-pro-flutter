@@ -9,6 +9,7 @@ import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_web.dart';
 import 'package:fingerprint_flutter/src/js_agent_interop.dart';
+import 'package:fingerprint_flutter/src/plugin_version.dart';
 
 void main() {
   late FakeAgent fake;
@@ -17,7 +18,6 @@ void main() {
   FingerprintConfig config({WebOptions? web}) {
     return FingerprintConfig(
       apiKey: 'key-1',
-      pluginVersion: '9.9.9',
       region: Region.eu,
       endpoints: const ['https://primary.example', 'https://fallback.example'],
       web: web,
@@ -47,7 +47,7 @@ void main() {
 
       expect(fake.startOptions['apiKey'], 'key-1');
       expect(fake.startOptions['integrationInfo'], [
-        'fingerprint-pro-flutter/9.9.9/web',
+        'fingerprint-pro-flutter/$pluginVersion/web',
       ]);
       expect(fake.startOptions['region'], 'eu');
       expect(fake.startOptions['endpoints'], [
@@ -104,9 +104,7 @@ void main() {
     });
 
     test('omits unset start fields', () async {
-      await platform.create(
-        FingerprintConfig(apiKey: 'key-1', pluginVersion: '9.9.9'),
-      );
+      await platform.create(FingerprintConfig(apiKey: 'key-1'));
 
       expect(fake.startOptions.containsKey('region'), isFalse);
       expect(fake.startOptions.containsKey('endpoints'), isFalse);
@@ -135,7 +133,7 @@ void main() {
 
     test('two configs keep independent agents', () async {
       final first = config();
-      final second = FingerprintConfig(apiKey: 'key-2', pluginVersion: '9.9.9');
+      final second = FingerprintConfig(apiKey: 'key-2');
       await platform.create(first);
       await platform.create(second);
       await platform.get(first);

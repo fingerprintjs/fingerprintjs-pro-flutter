@@ -7,6 +7,7 @@ import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:fingerprint_flutter/src/pigeon/fingerprint_api.g.dart';
+import 'package:fingerprint_flutter/src/plugin_version.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
 class FingerprintNative extends FingerprintPlatform {
@@ -69,7 +70,7 @@ class FingerprintNative extends FingerprintPlatform {
       endpointFallbacks: endpoints != null && endpoints.length > 1
           ? endpoints.sublist(1)
           : null,
-      pluginVersion: config.pluginVersion,
+      pluginVersion: pluginVersion,
       allowUseOfLocationData: _allowLocation(config),
       locationTimeoutMillis: config.android?.locationTimeout?.inMilliseconds,
     );

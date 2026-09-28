@@ -14,9 +14,6 @@ export 'package:fingerprint_flutter/src/fingerprint_result.dart';
 export 'package:fingerprint_flutter/src/options.dart';
 export 'package:fingerprint_flutter/src/region.dart';
 
-// Update it on each release
-const pluginVersion = '4.13.1';
-
 /// Identification client. Create one per public API key and configuration.
 ///
 /// The constructor starts the client early, so create it at app startup and
@@ -73,7 +70,6 @@ class Fingerprint {
   }) : endpoints = _normalizeEndpoints(endpoints) {
     _config = FingerprintConfig(
       apiKey: apiKey,
-      pluginVersion: pluginVersion,
       region: region,
       endpoints: this.endpoints,
       android: android,
