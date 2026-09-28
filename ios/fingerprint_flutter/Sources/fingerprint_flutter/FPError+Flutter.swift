@@ -8,13 +8,18 @@ extension FPError {
     // generic "couldn't be completed" string.
     // https://developer.apple.com/documentation/foundation/localizederror
     let description = self.description
+    // Client-side codes match the JS agent codes for the same failure.
+    // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
     switch self {
     case .invalidURL:
-      return ("invalid_url", description, nil)
+      return ("invalid_endpoint", description, nil)
+    // The plugin builds the integration info, so this is a plugin bug.
     case .invalidURLParams:
-      return ("invalid_url_params", description, nil)
+      return ("unknown_error", description, nil)
     case .apiError(let apiError):
-      let code = apiError.pigeonCode()
+      // rawValue is the server's snake_case code. Dart keeps codes it has
+      // no constant for, so no per-code list is needed here.
+      let code = apiError.errorDetails?.code?.rawValue ?? "unknown_error"
       let message = apiError.errorDetails?.message ?? description
       let eventId = normalizeEventId(apiError.eventId)
       return (code, message, eventId)
@@ -22,53 +27,21 @@ extension FPError {
     // user-facing text. FPError.description is a debug dump of that NSError.
     case .networkError(let error):
       return ("network_error", error.localizedDescription, nil)
+    // Also covers request encoding failures. Dart validates tags first, so
+    // in practice this is a bad response.
     case .jsonParsingError(let error):
-      return ("json_parsing_error", error.localizedDescription, nil)
+      return ("bad_response_format", error.localizedDescription, nil)
     case .invalidResponseType:
-      return ("invalid_response_type", description, nil)
+      return ("bad_response_format", description, nil)
     case .clientTimeout:
       return ("client_timeout", description, nil)
+    // The SDK also returns unknownError when the server sends a code missing
+    // from APIError.Code. The whole error body fails to decode, so the server
+    // code, message, and eventId are gone before the plugin sees them.
     case .unknownError:
       fallthrough
     @unknown default:
       return ("unknown_error", description, nil)
-    }
-  }
-}
-
-extension APIError {
-  func pigeonCode() -> String {
-    guard let code = errorDetails?.code else {
-      return "unknown_error"
-    }
-    return Self.snakeCaseCode(code)
-  }
-
-  static func snakeCaseCode(_ code: APIError.Code) -> String {
-    switch code {
-    case .requestCannotBeParsed: return "request_cannot_be_parsed"
-    case .failed: return "failed"
-    case .requestReadTimeout: return "request_read_timeout"
-    case .tooManyRequests: return "too_many_requests"
-    case .publicApiKeyRequired: return "public_api_key_required"
-    case .publicApiKeyNotFound: return "public_api_key_not_found"
-    case .subscriptionNotActive: return "subscription_not_active"
-    case .subscriptionRestricted: return "subscription_restricted"
-    case .wrongRegion: return "wrong_region"
-    case .featureNotEnabled: return "feature_not_enabled"
-    case .missingModule: return "missing_module"
-    case .payloadTooLarge: return "payload_too_large"
-    case .serviceUnavailable: return "service_unavailable"
-    case .environmentRestricted: return "environment_restricted"
-    case .installationMethodRestricted: return "installation_method_restricted"
-    case .invalidProxyIntegrationSecret: return "invalid_proxy_integration_secret"
-    case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
-    case .proxyIntegrationSecretEnvironmentMismatch:
-      return "proxy_integration_secret_environment_mismatch"
-    // Identification-only constants live in Dart. Unlisted codes still go
-    // through so a newer iOS SDK is debuggable.
-    default:
-      return camelCaseToSnakeCase(code.rawValue)
     }
   }
 }
@@ -80,19 +53,4 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
-}
-
-private func camelCaseToSnakeCase(_ value: String) -> String {
-  var result = ""
-  for character in value {
-    if character.isUppercase {
-      if !result.isEmpty {
-        result.append("_")
-      }
-      result.append(character.lowercased())
-    } else {
-      result.append(character)
-    }
-  }
-  return result
 }
