@@ -110,7 +110,7 @@ The constructor is synchronous:
 * It returns immediately, you do not need to await it.
 * Initialization failures surface when you call `get` to identify a visitor.
 * On the web, the constructor starts downloading the JavaScript agent in the background.
-* On Android and iOS the constructor starts the native client, so the Flutter binding must already exist. Call `WidgetsFlutterBinding.ensureInitialized()` first if you need to run the constructor before `runApp()`.
+* On Android and iOS the constructor starts the native client. If the Flutter binding does not exist yet, it throws `FlutterError`. Call `WidgetsFlutterBinding.ensureInitialized()` first if you need to run the constructor before `runApp()`.
 
 ### Custom endpoints
 
