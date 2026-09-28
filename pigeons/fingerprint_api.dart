@@ -66,10 +66,15 @@ class FingerprintNativeResult {
 // https://pub.dev/packages/pigeon#task-queue
 @HostApi()
 abstract class FingerprintHostApi {
-  /// Builds the native Fingerprint client immediately so location can warm
-  /// before identification. get still carries config and reuses this client,
-  /// so two Dart clients stay independent if create was skipped.
+  /// Builds the native Fingerprint client immediately:
+  /// - iOS: starts location collection early, for better precision
+  /// - Android: loads the SDK before the first get. Location is collected
+  ///   during get.
+  ///
+  /// get still carries config and reuses this client, so two Dart clients
+  /// stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
+  /// https://docs.fingerprint.com/docs/android-sdk
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void create(FingerprintNativeConfig config);
 

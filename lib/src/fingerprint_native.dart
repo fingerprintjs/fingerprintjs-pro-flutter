@@ -19,7 +19,7 @@ class FingerprintNative extends FingerprintPlatform {
   Future<void> create(FingerprintConfig config) {
     // Before anything async, so a missing binding throws from the Fingerprint
     // constructor. Inside the future, ignore() would drop it and skip the
-    // native create that starts location collection.
+    // early native create (starts location on iOS).
     // The framework error names ServicesBinding. Release builds throw a
     // null-check instead. Replace both.
     // https://api.flutter.dev/flutter/widgets/WidgetsFlutterBinding/ensureInitialized.html

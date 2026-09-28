@@ -348,10 +348,15 @@ class FingerprintApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendabl
 
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol FingerprintHostApi {
-  /// Builds the native Fingerprint client immediately so location can warm
-  /// before identification. get still carries config and reuses this client,
-  /// so two Dart clients stay independent if create was skipped.
+  /// Builds the native Fingerprint client immediately:
+  /// - iOS: starts location collection early, for better precision
+  /// - Android: loads the SDK before the first get. Location is collected
+  ///   during get.
+  ///
+  /// get still carries config and reuses this client, so two Dart clients
+  /// stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
+  /// https://docs.fingerprint.com/docs/android-sdk
   func create(config: FingerprintNativeConfig) throws
   func get(config: FingerprintNativeConfig, tags: [String?: Any?]?, linkedId: String?, timeoutMs: Int64?, completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void)
 }
@@ -367,10 +372,15 @@ class FingerprintHostApiSetup {
     #else
       let taskQueue: FlutterTaskQueue? = nil
     #endif
-    /// Builds the native Fingerprint client immediately so location can warm
-    /// before identification. get still carries config and reuses this client,
-    /// so two Dart clients stay independent if create was skipped.
+    /// Builds the native Fingerprint client immediately:
+    /// - iOS: starts location collection early, for better precision
+    /// - Android: loads the SDK before the first get. Location is collected
+    ///   during get.
+    ///
+    /// get still carries config and reuses this client, so two Dart clients
+    /// stay independent if create was skipped.
     /// https://docs.fingerprint.com/docs/ios-sdk
+    /// https://docs.fingerprint.com/docs/android-sdk
     let createChannel = taskQueue == nil
       ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
       : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)

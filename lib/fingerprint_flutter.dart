@@ -18,9 +18,16 @@ const pluginVersion = '4.13.1';
 
 /// Identification client. Create one per public API key and configuration.
 ///
-/// The constructor starts the native or web client early. [get] does not
-/// depend on that start and is where create or load failures surface. Every
-/// get carries the full config, so two clients stay independent.
+/// The constructor starts the client early, so create it at app startup and
+/// keep it:
+/// - iOS: starts location collection, for better location precision
+/// - Android: loads the SDK, so the first [get] is faster. Location is
+///   collected during [get].
+/// - Web: starts loading the JS agent
+///
+/// [get] does not depend on that start and is where create or load failures
+/// surface. Every get carries the full config, so two clients stay
+/// independent.
 ///
 /// On Android and iOS, the constructor throws `FlutterError` if the Flutter
 /// binding does not exist yet. In `main()` before `runApp()`, call
@@ -72,7 +79,7 @@ class Fingerprint {
       ios: ios,
       web: web,
     );
-    // Warm-up only, so native location and the web bundle start early.
+    // Warm-up only: iOS location, Android SDK loading, the web bundle.
     // - get does not wait for it. Platform get creates the client itself.
     // - A failed warm-up does not break the client. Real create errors
     //   surface from get.

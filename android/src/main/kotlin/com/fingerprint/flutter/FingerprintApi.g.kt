@@ -343,10 +343,15 @@ private open class FingerprintApiPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface FingerprintHostApi {
   /**
-   * Builds the native Fingerprint client immediately so location can warm
-   * before identification. get still carries config and reuses this client,
-   * so two Dart clients stay independent if create was skipped.
+   * Builds the native Fingerprint client immediately:
+   * - iOS: starts location collection early, for better precision
+   * - Android: loads the SDK before the first get. Location is collected
+   *   during get.
+   *
+   * get still carries config and reuses this client, so two Dart clients
+   * stay independent if create was skipped.
    * https://docs.fingerprint.com/docs/ios-sdk
+   * https://docs.fingerprint.com/docs/android-sdk
    */
   fun create(config: FingerprintNativeConfig)
   fun get(config: FingerprintNativeConfig, tags: Map<String?, Any?>?, linkedId: String?, timeoutMs: Long?, callback: (Result<FingerprintNativeResult>) -> Unit)
