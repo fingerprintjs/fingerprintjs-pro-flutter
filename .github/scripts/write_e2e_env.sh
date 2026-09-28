@@ -12,8 +12,6 @@ target=example/.env.local
 
 printf 'API_KEY=%s\n' "$API_KEY" > "$target"
 [ -z "${REGION:-}" ] || printf 'REGION=%s\n' "$REGION" >> "$target"
-[ -z "${ENDPOINT:-}" ] || printf 'ENDPOINT=%s\n' "$ENDPOINT" >> "$target"
-[ -z "${SCRIPT_URL_PATTERN:-}" ] \
-  || printf 'SCRIPT_URL_PATTERN=%s\n' "$SCRIPT_URL_PATTERN" >> "$target"
+[ -z "${ENDPOINTS:-}" ] || printf 'ENDPOINTS=%s\n' "$ENDPOINTS" >> "$target"
 [ "${DISABLE_LOCATION_COLLECTION:-false}" != true ] \
   || printf 'DISABLE_LOCATION_COLLECTION=true\n' >> "$target"
