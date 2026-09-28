@@ -20,23 +20,18 @@ import com.fingerprint.android.NetworkUnavailableError
 import com.fingerprint.android.PayloadTooLarge
 import com.fingerprint.android.ProxyIntegrationSecretEnvironmentMismatch
 import com.fingerprint.android.RequestCannotBeParsed
-import com.fingerprint.android.RequestNotFound
 import com.fingerprint.android.RequestTimeout
 import com.fingerprint.android.ResponseCannotBeParsed
-import com.fingerprint.android.RulesetNotFound
-import com.fingerprint.android.SecretApiKeyNotFound
-import com.fingerprint.android.SecretApiKeyRequired
 import com.fingerprint.android.ServiceUnavailable
-import com.fingerprint.android.StateNotReady
 import com.fingerprint.android.SubscriptionNotActive
-import com.fingerprint.android.SubscriptionNotFound
 import com.fingerprint.android.SubscriptionRestricted
 import com.fingerprint.android.TooManyRequest
 import com.fingerprint.android.UnknownError
 import com.fingerprint.android.VisitorNotFound
 import com.fingerprint.android.WrongRegion
 
-internal fun errorCode(error: Error): String = when (error) {
+// Null for Android types without a Dart code.
+internal fun errorCode(error: Error): String? = when (error) {
   is Failed -> "failed"
   is RequestCannotBeParsed -> "request_cannot_be_parsed"
   is RequestTimeout -> "request_read_timeout" // API code, not class name request_timeout
@@ -58,16 +53,15 @@ internal fun errorCode(error: Error): String = when (error) {
   is ProxyIntegrationSecretEnvironmentMismatch ->
     "proxy_integration_secret_environment_mismatch"
   is ResponseCannotBeParsed -> "response_cannot_be_parsed"
+  // Android splits offline vs request failure. iOS and web use one code.
   is NetworkError -> "network_error"
-  is NetworkUnavailableError -> "network_unavailable_error"
+  is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
   is UnknownError -> "unknown_error"
-  is SecretApiKeyRequired -> "secret_api_key_required"
-  is SecretApiKeyNotFound -> "secret_api_key_not_found"
-  is RequestNotFound -> "request_not_found"
-  is StateNotReady -> "state_not_ready"
-  is RulesetNotFound -> "ruleset_not_found"
-  is SubscriptionNotFound -> "subscription_not_found"
+  // Remaining types (secret API key, request/ruleset/subscription not found,
+  // state not ready) are not identification errors. Android Error has no
+  // rawValue like iOS APIError.Code, so they are sent as unknown_error.
+  else -> null
 }
 
 internal fun normalizeEventId(eventId: String?): String? {
@@ -89,6 +83,14 @@ internal fun normalizeMessage(description: String?): String? {
 
 internal fun toFlutterError(error: Error): FlutterError {
   val eventId = normalizeEventId(error.eventId)
-  val message = normalizeMessage(error.description)
-  return FlutterError(errorCode(error), message, eventId)
+  val description = normalizeMessage(error.description)
+  val code = errorCode(error)
+    ?: return FlutterError(
+      "unknown_error",
+      // Without a code, the message is all a developer sees. Fall back to
+      // the type name. It may be obfuscated in minified builds.
+      description ?: error.javaClass.simpleName,
+      eventId,
+    )
+  return FlutterError(code, description, eventId)
 }

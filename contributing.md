@@ -64,7 +64,8 @@ xcodebuild test \
 
 ### Integration smoke test
 
-The Maestro smoke test builds the normal example app, waits for initialization,
+The Maestro smoke test builds the normal example app, waits for the Dart client
+to be created,
 runs all built-in checks, identifies a visitor, and verifies that the visitor-data
 JSON contains the same `visitorId`. Mobile and web use the same flow.
 
@@ -99,8 +100,7 @@ The E2E smoke test workflow reads these repository secrets:
 
 - `API_KEY` (required)
 - `REGION` (optional; defaults to `us`)
-- `ENDPOINT` (optional)
-- `SCRIPT_URL_PATTERN` (optional)
+- `ENDPOINTS` (optional; comma-separated identification URLs, first to last)
 
 GitHub withholds secrets from pull requests opened from a fork, so the Web,
 Android and iOS jobs are skipped there.
