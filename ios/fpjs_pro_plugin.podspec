@@ -1,8 +1,8 @@
-# Keep CocoaPods and Swift Package Manager on the same v4 major.
-fingerprint_lower = File.read(File.join(__dir__, 'fpjs_pro_plugin', 'Package.swift'))[/\.upToNextMajor\(from: "([\d.]+)"\)/, 1]
+# Keep CocoaPods and Swift Package Manager on the same patch range.
+fingerprint_lower = File.read(File.join(__dir__, 'fpjs_pro_plugin', 'Package.swift'))[/\.upToNextMinor\(from: "([\d.]+)"\)/, 1]
 raise 'Could not read the Fingerprint version range from Package.swift' if fingerprint_lower.nil?
-fingerprint_major, = fingerprint_lower.split('.').map(&:to_i)
-fingerprint_upper = "#{fingerprint_major + 1}.0.0"
+fingerprint_major, fingerprint_minor = fingerprint_lower.split('.').map(&:to_i)
+fingerprint_upper = "#{fingerprint_major}.#{fingerprint_minor + 1}.0"
 
 Pod::Spec.new do |s|
   s.name             = 'fpjs_pro_plugin'
