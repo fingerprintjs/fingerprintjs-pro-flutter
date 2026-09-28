@@ -1,3 +1,5 @@
+// Public entry point: the `Fingerprint` client and its options.
+// https://docs.fingerprint.com/docs/flutter
 import 'dart:async';
 
 import 'package:fpjs_pro_plugin/options.dart';

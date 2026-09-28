@@ -204,12 +204,13 @@ final client = Fingerprint(
     cache: WebCache(
       storage: WebCacheStorage.sessionStorage,
       duration: WebCacheDuration.optimizeCost, // 1 hour. aggressive is 12 hours.
+      keyPrefix: 'fp_cache_', // optional
     ),
   ),
 );
 ```
 
-A custom cache duration must be a whole number of seconds, greater than zero and at most 12 hours: `WebCacheDuration.custom(const Duration(hours: 2))`. See the [JS agent start options](https://docs.fingerprint.com/reference/js-agent-start-function).
+A custom cache duration must be a whole number of seconds, greater than zero and at most 12 hours: `WebCacheDuration.custom(const Duration(hours: 2))`. The JS agent checks the maximum. See the [JS agent start options](https://docs.fingerprint.com/reference/js-agent-start-function).
 
 ## Additional Resources
 - [Fingerprint Pro documentation](https://docs.fingerprint.com)

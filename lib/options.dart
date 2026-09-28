@@ -86,9 +86,10 @@ class WebCacheDuration {
   static const optimizeCost = WebCacheDuration._(_Kind.optimizeCost);
   static const aggressive = WebCacheDuration._(_Kind.aggressive);
 
-  /// [duration] in whole seconds, greater than zero.
+  /// [duration] in whole seconds, greater than zero, at most 12 hours.
   ///
-  /// The JS agent enforces its own maximum.
+  /// The 12 hour maximum is intentionally not checked here. The JS agent
+  /// validates it, so the limit can change without a plugin release.
   /// https://docs.fingerprint.com/reference/js-agent-start-function
   factory WebCacheDuration.custom(Duration duration) {
     if (duration <= Duration.zero) {

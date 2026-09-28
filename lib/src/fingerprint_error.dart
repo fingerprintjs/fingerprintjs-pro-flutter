@@ -3,7 +3,8 @@
 /// [code] is the client's snake_case value. Compare it with the constants on
 /// this class. Other strings are kept.
 ///
-/// Platform adapters construct this after stripping platform-only sentinels.
+/// Platform code builds this after replacing SDK placeholders (e.g. Android
+/// "Unknown" event ids) with null.
 final class FingerprintError implements Exception {
   // Server errors returned by Identification API.
   static const failed = 'failed';
