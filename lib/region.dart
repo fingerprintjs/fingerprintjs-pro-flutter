@@ -1,7 +1,7 @@
 /// Fingerprint workspace region.
 enum Region { eu, us, ap }
 
-/// Returns a string value of a region to pass to the native library through a [MethodChannel]
+/// Lowercase region name sent to the native SDKs and the JS agent.
 extension RegionValue on Region {
   String get stringValue => toString().split('.')[1].toLowerCase();
 }
