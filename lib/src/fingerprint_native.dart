@@ -16,12 +16,16 @@ class FingerprintNative extends FingerprintPlatform {
   final FingerprintHostApi _hostApi;
 
   @override
-  Future<void> create(FingerprintConfig config) async {
-    try {
-      await _hostApi.create(_toNativeConfig(config));
-    } catch (error) {
-      throw _toFingerprintError(error);
-    }
+  Future<void> create(FingerprintConfig config) {
+    // Read the binding before anything async, so a missing binding throws
+    // from the Fingerprint constructor. If it failed inside the returned
+    // future, the constructor would ignore it and silently skip the early
+    // native create, which starts location collection.
+    // https://api.flutter.dev/flutter/widgets/WidgetsFlutterBinding/ensureInitialized.html
+    ServicesBinding.instance;
+    return _hostApi
+        .create(_toNativeConfig(config))
+        .catchError((Object error) => throw _toFingerprintError(error));
   }
 
   @override
