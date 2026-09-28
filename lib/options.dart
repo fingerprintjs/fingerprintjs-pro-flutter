@@ -77,7 +77,7 @@ enum WebCacheStorage { sessionStorage, localStorage, agent }
 
 /// How long a cached web identification result is reused.
 ///
-/// [optimizeCost] is 1 hour. [aggressive] is 12 hours..
+/// [optimizeCost] is 1 hour. [aggressive] is 12 hours.
 /// https://docs.fingerprint.com/reference/js-agent-start-function
 class WebCacheDuration {
   // Distinct const args so Dart does not canonicalize the presets together.

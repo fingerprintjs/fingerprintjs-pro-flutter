@@ -96,7 +96,7 @@ final client = Fingerprint(
 );
 ```
 
-* `region` defaults to `Region.us` when omitted. See [regions](https://docs.fingerprint.com/docs/regions).
+* On Android and iOS, `region` defaults to `Region.us` when omitted. On web, the agent infers it from the API key. See [regions](https://docs.fingerprint.com/docs/regions).
 
 * The constructor is synchronous: it starts the client and returns immediately, you do not need to await it. It builds the native client on Android and iOS, and starts downloading the JavaScript agent on web. Initialization failures only surface when you call `get` to identify a visitor.
 

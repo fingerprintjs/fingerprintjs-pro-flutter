@@ -57,6 +57,9 @@ internal fun errorCode(error: Error): String = when (error) {
   is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
   is UnknownError -> "unknown_error"
+  // Remaining Android types (secret API key, request/ruleset/subscription
+  // not found, state not ready) are not identification errors. Android Error
+  // has no rawValue, unlike iOS APIError.Code. unknown_error is enough.
   else -> "unknown_error"
 }
 
