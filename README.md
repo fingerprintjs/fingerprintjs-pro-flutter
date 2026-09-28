@@ -170,6 +170,8 @@ Default timeout:
 final result = await client.get(timeout: const Duration(seconds: 10));
 ```
 
+Must not be negative.
+
 A timeout throws `FingerprintError` with `code` `client_timeout`.
 
 ### Location data

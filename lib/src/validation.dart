@@ -1,8 +1,11 @@
-/// Validation of the `tags` argument.
+/// Validation of get() arguments shared by native and web.
 ///
-/// Same string-keyed JSON map on every platform. No size cap here. The server
-/// enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
+/// Tags: same string-keyed JSON map on every platform. No size cap here.
+/// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
 /// as `payload_too_large`.
+///
+/// Timeout: Dart [Duration] can be negative. Reject it here so native and
+/// web never see a negative millisecond value.
 library;
 
 import 'dart:typed_data';
@@ -15,6 +18,13 @@ import 'dart:typed_data';
 void validateTags(Map<String, Object?>? tags) {
   if (tags != null) {
     _validate(tags, 'tags');
+  }
+}
+
+/// Throws an [ArgumentError] if [timeout] is negative.
+void validateTimeout(Duration? timeout) {
+  if (timeout != null && timeout.isNegative) {
+    throw ArgumentError.value(timeout, 'timeout', 'Timeout cannot be negative');
   }
 }
 

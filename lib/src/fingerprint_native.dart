@@ -4,7 +4,7 @@ import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
-import 'package:fpjs_pro_plugin/src/tags.dart';
+import 'package:fpjs_pro_plugin/src/validation.dart';
 import 'package:fpjs_pro_plugin/src/unwrap_error.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
@@ -31,6 +31,7 @@ class FingerprintNative extends FingerprintPlatform {
     Duration? timeout,
   }) async {
     validateTags(tags);
+    validateTimeout(timeout);
     try {
       final result = await _hostApi.get(
         _toNativeConfig(config),

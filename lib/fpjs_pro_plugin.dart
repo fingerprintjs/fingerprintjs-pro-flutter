@@ -77,6 +77,8 @@ class Fingerprint {
   /// [tags] is a string-keyed map of JSON-compatible values. The same map
   /// is forwarded on every platform, including JSON null.
   /// https://docs.fingerprint.com/docs/tagging-information
+  ///
+  /// [timeout] must not be negative. Null uses the platform default.
   Future<FingerprintResult> get({
     Map<String, Object?>? tags,
     String? linkedId,

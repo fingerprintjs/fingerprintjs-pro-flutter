@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/src/tags.dart';
+import 'package:fpjs_pro_plugin/src/validation.dart';
 
 /// A value with no JSON form.
 class _NotJson {
