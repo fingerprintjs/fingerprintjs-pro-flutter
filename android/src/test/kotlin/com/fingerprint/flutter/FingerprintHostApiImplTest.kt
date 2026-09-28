@@ -6,7 +6,6 @@ import com.fingerprint.android.Configuration
 import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
-import com.fingerprint.android.NetworkError
 import com.fingerprint.android.NetworkUnavailableError
 import com.fingerprint.android.RequestTimeout
 import org.junit.Assert.assertEquals
@@ -26,7 +25,8 @@ class FingerprintHostApiImplTest {
       Failed("e2", "fail") to "failed",
       RequestTimeout("e3", "timeout") to "request_read_timeout",
       NetworkUnavailableError() to "network_error",
-      NetworkError() to "network_error",
+      // NetworkError is left out: its obfuscated static initializer in SDK 4.1.0
+      // throws IllegalAccessError on the desktop JVM (works on ART).
     )
     for ((nativeError, expectedCode) in cases) {
       val cache = FingerprintClientCache(context) { _, _ ->
