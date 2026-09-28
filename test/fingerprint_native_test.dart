@@ -51,7 +51,7 @@ void main() {
       );
 
       expect(fakeHostApi.createdConfig?.apiKey, 'key-1');
-      expect(fakeHostApi.createdConfig?.region, 'eu');
+      expect(fakeHostApi.createdConfig?.region, NativeRegion.eu);
       expect(fakeHostApi.createdConfig?.endpoint, 'https://primary.example');
       expect(fakeHostApi.createdConfig?.endpointFallbacks, [
         'https://fallback.example',
@@ -82,7 +82,7 @@ void main() {
       );
 
       expect(fakeHostApi.lastConfig?.apiKey, 'key-1');
-      expect(fakeHostApi.lastConfig?.region, 'eu');
+      expect(fakeHostApi.lastConfig?.region, NativeRegion.eu);
       expect(fakeHostApi.lastConfig?.endpoint, 'https://primary.example');
       expect(fakeHostApi.lastConfig?.endpointFallbacks, [
         'https://fallback.example',
@@ -115,10 +115,10 @@ void main() {
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
     });
 
-    test('leaves region and endpoints unset when omitted', () async {
+    test('defaults region to US and leaves endpoints unset', () async {
       await platform.create(config());
 
-      expect(fakeHostApi.createdConfig?.region, isNull);
+      expect(fakeHostApi.createdConfig?.region, NativeRegion.us);
       expect(fakeHostApi.createdConfig?.endpoint, isNull);
       expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, isNull);
@@ -159,7 +159,7 @@ void main() {
     test('create failure does not block a later get', () async {
       fakeHostApi.nextCreateError = PlatformException(
         code: 'unknown_error',
-        message: 'Invalid region: xx',
+        message: 'create failed',
       );
       await expectLater(
         platform.create(config()),

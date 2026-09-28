@@ -65,7 +65,12 @@ class FingerprintNative extends FingerprintPlatform {
     final endpoints = config.endpoints;
     return FingerprintNativeConfig(
       apiKey: config.apiKey,
-      region: config.region?.stringValue,
+      region: switch (config.region) {
+        Region.eu => NativeRegion.eu,
+        Region.ap => NativeRegion.ap,
+        // Android and iOS default to US, see Fingerprint.region.
+        Region.us || null => NativeRegion.us,
+      },
       endpoint: endpoints?.first,
       endpointFallbacks: endpoints != null && endpoints.length > 1
           ? endpoints.sublist(1)

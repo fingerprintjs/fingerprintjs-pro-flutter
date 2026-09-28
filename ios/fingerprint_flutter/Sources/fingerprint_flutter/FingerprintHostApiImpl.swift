@@ -74,7 +74,11 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     if let endpoint = config.endpoint {
       region = .custom(domain: endpoint, fallback: config.endpointFallbacks ?? [])
     } else {
-      region = Self.namedRegion(config.region)
+      switch config.region {
+      case .us: region = .global
+      case .eu: region = .eu
+      case .ap: region = .ap
+      }
     }
     return Configuration(
       apiKey: config.apiKey,
@@ -98,16 +102,5 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
       }
     }
     return metadata
-  }
-
-  private static func namedRegion(_ region: String?) -> Region {
-    switch region?.lowercased() {
-    case "eu":
-      return .eu
-    case "ap":
-      return .ap
-    default:
-      return .global
-    }
   }
 }

@@ -34,7 +34,7 @@ class FingerprintHostApiImplTest {
       }
       var captured: Result<FingerprintNativeResult>? = null
       FingerprintHostApiImpl(context, cache).get(
-        FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+        nativeConfig(),
         null,
         null,
         null,
@@ -49,7 +49,7 @@ class FingerprintHostApiImplTest {
     val client = CapturingFingerprint()
     val cache = FingerprintClientCache(context) { _, _ -> client }
     FingerprintHostApiImpl(context, cache).get(
-      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      nativeConfig(),
       mapOf("campaign" to null, "sessionId" to 1),
       null,
       null,
@@ -65,7 +65,7 @@ class FingerprintHostApiImplTest {
     val client = CapturingFingerprint()
     val cache = FingerprintClientCache(context) { _, _ -> client }
     FingerprintHostApiImpl(context, cache).get(
-      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      nativeConfig(),
       null,
       null,
       500L,
@@ -78,7 +78,7 @@ class FingerprintHostApiImplTest {
     val client = CapturingFingerprint()
     val cache = FingerprintClientCache(context) { _, _ -> client }
     FingerprintHostApiImpl(context, cache).get(
-      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      nativeConfig(),
       null,
       null,
       Int.MAX_VALUE.toLong() + 1,
@@ -103,7 +103,7 @@ class FingerprintHostApiImplTest {
   @Test
   fun createUsesRegionUrlWhenEndpointIsOmitted() {
     val built = captureConfiguration(
-      nativeConfig(region = "eu", endpoint = null),
+      nativeConfig(region = NativeRegion.EU, endpoint = null),
     )
     assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
   }
@@ -146,12 +146,11 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createMapsRegionsAndDefaultsToUs() {
+  fun createMapsRegions() {
     val cases = listOf(
-      "eu" to Configuration.Region.EU,
-      "ap" to Configuration.Region.AP,
-      "us" to Configuration.Region.US,
-      null to Configuration.Region.US,
+      NativeRegion.EU to Configuration.Region.EU,
+      NativeRegion.AP to Configuration.Region.AP,
+      NativeRegion.US to Configuration.Region.US,
     )
     for ((region, expected) in cases) {
       val built = captureConfiguration(nativeConfig(region = region))
@@ -200,7 +199,7 @@ class FingerprintHostApiImplTest {
   }
 
   private fun nativeConfig(
-    region: String? = "us",
+    region: NativeRegion = NativeRegion.US,
     endpoint: String? = null,
     allowUseOfLocationData: Boolean = false,
     locationTimeoutMillis: Long? = 5000L,

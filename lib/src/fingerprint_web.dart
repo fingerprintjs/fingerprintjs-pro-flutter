@@ -3,7 +3,6 @@ import 'dart:js_interop_unsafe';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:fingerprint_flutter/src/options.dart';
-import 'package:fingerprint_flutter/src/region.dart';
 import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
@@ -73,7 +72,7 @@ JSObject _toStartOptions(FingerprintConfig config) {
   final options = <String, Object>{
     'apiKey': config.apiKey,
     'integrationInfo': ['fingerprint-pro-flutter/$pluginVersion/web'],
-    if (config.region != null) 'region': config.region!.stringValue,
+    if (config.region != null) 'region': config.region!.name,
     if (config.endpoints != null) 'endpoints': config.endpoints!,
   };
   final web = config.web;

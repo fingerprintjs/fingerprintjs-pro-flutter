@@ -97,10 +97,16 @@ int _deepHash(Object? value) {
 }
 
 
+enum NativeRegion {
+  us,
+  eu,
+  ap,
+}
+
 class FingerprintNativeConfig {
   FingerprintNativeConfig({
     required this.apiKey,
-    this.region,
+    required this.region,
     this.endpoint,
     this.endpointFallbacks,
     required this.pluginVersion,
@@ -110,7 +116,7 @@ class FingerprintNativeConfig {
 
   String apiKey;
 
-  String? region;
+  NativeRegion region;
 
   String? endpoint;
 
@@ -141,7 +147,7 @@ class FingerprintNativeConfig {
     result as List<Object?>;
     return FingerprintNativeConfig(
       apiKey: result[0]! as String,
-      region: result[1] as String?,
+      region: result[1]! as NativeRegion,
       endpoint: result[2] as String?,
       endpointFallbacks: (result[3] as List<Object?>?)?.cast<String>(),
       pluginVersion: result[4]! as String,
@@ -244,11 +250,14 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is FingerprintNativeConfig) {
+    }    else if (value is NativeRegion) {
       buffer.putUint8(129);
+      writeValue(buffer, value.index);
+    }    else if (value is FingerprintNativeConfig) {
+      buffer.putUint8(130);
       writeValue(buffer, value.encode());
     }    else if (value is FingerprintNativeResult) {
-      buffer.putUint8(130);
+      buffer.putUint8(131);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -259,8 +268,11 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129:
-        return FingerprintNativeConfig.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NativeRegion.values[value];
       case 130:
+        return FingerprintNativeConfig.decode(readValue(buffer)!);
+      case 131:
         return FingerprintNativeResult.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

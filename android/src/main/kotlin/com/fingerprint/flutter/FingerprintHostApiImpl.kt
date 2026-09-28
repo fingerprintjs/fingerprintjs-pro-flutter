@@ -21,12 +21,7 @@ internal class FingerprintHostApiImpl(
     timeoutMs: Long?,
     callback: (Result<FingerprintNativeResult>) -> Unit,
   ) {
-    val client = try {
-      nativeClient(config)
-    } catch (error: FlutterError) {
-      callback(Result.failure(error))
-      return
-    }
+    val client = nativeClient(config)
     val tagMap = pigeonTagsToNative(tags)
     val linked = linkedId ?: ""
     val listener: (FingerprintResponse) -> Unit = { response ->
@@ -59,7 +54,11 @@ internal class FingerprintHostApiImpl(
     clientCache.getOrCreate(buildConfiguration(config), config.pluginVersion)
 
   private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
-    val region = parseRegion(config.region)
+    val region = when (config.region) {
+      NativeRegion.US -> Configuration.Region.US
+      NativeRegion.EU -> Configuration.Region.EU
+      NativeRegion.AP -> Configuration.Region.AP
+    }
     // Dart drops empty endpoint strings before they get here.
     val endpointUrl = config.endpoint ?: region.endpointUrl
     val fallbacks = config.endpointFallbacks ?: emptyList()
@@ -73,15 +72,6 @@ internal class FingerprintHostApiImpl(
       config.allowUseOfLocationData,
       locationTimeout,
     )
-  }
-}
-
-internal fun parseRegion(region: String?): Configuration.Region {
-  return when (region?.lowercase()) {
-    "eu" -> Configuration.Region.EU
-    "ap" -> Configuration.Region.AP
-    "us", null -> Configuration.Region.US
-    else -> throw FlutterError("unknown_error", "Invalid region: $region", null)
   }
 }
 
