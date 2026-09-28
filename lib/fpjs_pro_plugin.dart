@@ -18,10 +18,9 @@ const pluginVersion = '4.13.1';
 
 /// Identification client. Create one per public API key and configuration.
 ///
-/// The constructor starts the native or web client. [get] waits for that
-/// start and is where create or load failures surface. After a failed start,
-/// the next get tries again. Every get carries the full config, so two clients
-/// stay independent.
+/// The constructor starts the native or web client early. [get] does not
+/// depend on that start and is where create or load failures surface. Every
+/// get carries the full config, so two clients stay independent.
 /// https://docs.fingerprint.com/docs/ios-sdk
 /// https://docs.fingerprint.com/docs/android-sdk
 /// https://docs.fingerprint.com/reference/js-agent-start-function
@@ -51,7 +50,6 @@ class Fingerprint {
   final WebOptions? web;
 
   late final FingerprintConfig _config;
-  Future<void>? _created;
 
   Fingerprint({
     required this.apiKey,
@@ -70,21 +68,12 @@ class Fingerprint {
       ios: ios,
       web: web,
     );
-    // - Native create is local client construction so location can warm.
-    // - Web start() is sync. The bundle still loads in the background.
-    // - ignore() so a create failure is not unhandled if get is never called.
-    _create().ignore();
-  }
-
-  // A failed create is forgotten so the next get retries it. Otherwise one
-  // early failure (e.g. before the Flutter binding is ready) breaks the client.
-  Future<void> _create() {
-    return _created ??= FingerprintPlatform.instance.create(_config).catchError(
-      (Object error, StackTrace stackTrace) {
-        _created = null;
-        Error.throwWithStackTrace(error, stackTrace);
-      },
-    );
+    // Warm-up only, so native location and the web bundle start early.
+    // - get does not wait for it. Platform get creates the client itself.
+    // - A failed warm-up (e.g. before the Flutter binding is ready) does not
+    //   break the client. Real create errors surface from get.
+    // - ignore() so a failure is not an unhandled async error.
+    FingerprintPlatform.instance.create(_config).ignore();
   }
 
   /// Identifies the current visitor or device.
@@ -99,17 +88,14 @@ class Fingerprint {
     String? linkedId,
     Duration? timeout,
   }) {
-    // Not `async`. An async body would wrap ArgumentError in the Future and
-    // only throw after awaiting create.
+    // Not `async`, so ArgumentError throws now, not as a Future error.
     validateTags(tags);
     validateTimeout(timeout);
-    return _create().then(
-      (_) => FingerprintPlatform.instance.get(
-        _config,
-        tags: tags,
-        linkedId: linkedId,
-        timeout: timeout,
-      ),
+    return FingerprintPlatform.instance.get(
+      _config,
+      tags: tags,
+      linkedId: linkedId,
+      timeout: timeout,
     );
   }
 }

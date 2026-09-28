@@ -75,9 +75,6 @@ void main() {
   });
 
   test('rejects invalid tags without identifying', () {
-    platform.createError = FingerprintError(
-      code: FingerprintError.apiKeyInvalid,
-    );
     final client = Fingerprint(apiKey: 'key-1');
 
     expect(() => client.get(tags: {'value': Object()}), throwsArgumentError);
@@ -85,9 +82,6 @@ void main() {
   });
 
   test('rejects a negative timeout without identifying', () {
-    platform.createError = FingerprintError(
-      code: FingerprintError.apiKeyInvalid,
-    );
     final client = Fingerprint(apiKey: 'key-1');
 
     expect(
@@ -97,39 +91,16 @@ void main() {
     expect(platform.gets, isEmpty);
   });
 
-  // Constructor ignores create so an unused client is not an unhandled async
-  // error. get() still rethrows, and must not identify.
-  test('get surfaces a create failure without identifying', () async {
-    platform.createError = FingerprintError(
-      code: FingerprintError.apiKeyInvalid,
-    );
-    final client = Fingerprint(apiKey: 'key-1');
-
-    await expectLater(
-      client.get(),
-      throwsA(
-        isA<FingerprintError>().having(
-          (error) => error.code,
-          'code',
-          FingerprintError.apiKeyInvalid,
-        ),
-      ),
-    );
-    expect(platform.gets, isEmpty);
-  });
-
-  test('get retries a failed create', () async {
+  // E.g. the client was built before the Flutter binding was ready.
+  test('a failed constructor start does not break get', () async {
     platform.createError = FingerprintError(
       code: FingerprintError.unknownError,
     );
     final client = Fingerprint(apiKey: 'key-1');
-    await expectLater(client.get(), throwsA(isA<FingerprintError>()));
 
-    platform.createError = null;
     final result = await client.get();
 
     expect(result.visitorId, 'key-1');
-    expect(platform.created, hasLength(1));
   });
 
   test(
