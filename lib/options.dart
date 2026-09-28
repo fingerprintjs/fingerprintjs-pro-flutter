@@ -137,12 +137,12 @@ class WebCache {
   final WebCacheDuration duration;
 
   /// Prefix for `sessionStorage` and `localStorage` keys.
-  final String? keyPrefix;
+  final String? cachePrefix;
 
   const WebCache({
     required this.storage,
     required this.duration,
-    this.keyPrefix,
+    this.cachePrefix,
   });
 
   @override
@@ -150,10 +150,10 @@ class WebCache {
       other is WebCache &&
       other.storage == storage &&
       other.duration == duration &&
-      other.keyPrefix == keyPrefix;
+      other.cachePrefix == cachePrefix;
 
   @override
-  int get hashCode => Object.hash(storage, duration, keyPrefix);
+  int get hashCode => Object.hash(storage, duration, cachePrefix);
 }
 
 /// Web agent settings.
