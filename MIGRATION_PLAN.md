@@ -46,7 +46,7 @@ Ticket notes:
 Merged in [#147](https://github.com/fingerprintjs/flutter/pull/147).
 
 Flutter 3.44, Dart 3.12, Android API 24, iOS/tvOS 15, Xcode 16, Swift 6.
-Android v4 `4.0.0`, iOS `Fingerprint-iOS`/`fingerprint-ios`, Pigeon 28.1.0.
+Android v4 `4.1.0`, iOS `Fingerprint-iOS`/`fingerprint-ios`, Pigeon 28.1.0.
 Android build baseline AGP 8.13.2, Gradle 8.13, Kotlin 2.3.20, compileSdk 36,
 bytecode Java 11; PR 2 upgrades the toolchain.
 

@@ -17,7 +17,6 @@ final class FingerprintError implements Exception {
   static const subscriptionRestricted = 'subscription_restricted';
   static const wrongRegion = 'wrong_region';
   static const featureNotEnabled = 'feature_not_enabled';
-  static const visitorNotFound = 'visitor_not_found';
   static const missingModule = 'missing_module';
   static const payloadTooLarge = 'payload_too_large';
   static const serviceUnavailable = 'service_unavailable';
