@@ -14,7 +14,11 @@ private final class CompletionBox: @unchecked Sendable {
 
 /// Pigeon HostApi backed by the iOS Fingerprint SDK 4.x.
 final class FingerprintHostApiImpl: FingerprintHostApi {
-  private let clientCache = FingerprintClientCache()
+  // One client per config. Pigeon generates Hashable for the config.
+  // Configs that differ only in a field iOS ignores (locationTimeoutMillis)
+  // get separate clients, which is harmless.
+  private var clients: [FingerprintNativeConfig: FingerprintClientProviding] = [:]
+  private let lock = NSLock()
 
   func create(config: FingerprintNativeConfig) throws {
     _ = nativeClient(for: config)
@@ -62,10 +66,14 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
   }
 
   private func nativeClient(for config: FingerprintNativeConfig) -> FingerprintClientProviding {
-    clientCache.getOrCreate(
-      configuration: buildConfiguration(config: config),
-      pluginVersion: config.pluginVersion
-    )
+    lock.lock()
+    defer { lock.unlock() }
+    if let existing = clients[config] {
+      return existing
+    }
+    let client = FingerprintFactory.getInstance(buildConfiguration(config: config))
+    clients[config] = client
+    return client
   }
 
   private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {

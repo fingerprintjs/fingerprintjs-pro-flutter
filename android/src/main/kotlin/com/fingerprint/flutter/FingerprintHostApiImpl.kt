@@ -3,12 +3,23 @@ package com.fingerprint.flutter
 
 import android.content.Context
 import com.fingerprint.android.Configuration
+import com.fingerprint.android.Fingerprint
+import com.fingerprint.android.FingerprintFactory
 import com.fingerprint.android.FingerprintResponse
+import java.util.concurrent.ConcurrentHashMap
+
+internal typealias FingerprintFactoryFn = (Context, Configuration) -> Fingerprint
 
 internal class FingerprintHostApiImpl(
   private val applicationContext: Context,
-  private val clientCache: FingerprintClientCache = FingerprintClientCache(applicationContext),
+  private val createFingerprint: FingerprintFactoryFn = { context, configuration ->
+    FingerprintFactory(context).createInstance(configuration)
+  },
 ) : FingerprintHostApi {
+  // One client per config. Pigeon generates value equality for the config.
+  // Configs that only resolve to the same Configuration (no endpoint vs the
+  // region's default URL) get separate clients, which is harmless.
+  private val clients = ConcurrentHashMap<FingerprintNativeConfig, Fingerprint>()
 
   override fun create(config: FingerprintNativeConfig) {
     nativeClient(config)
@@ -50,8 +61,13 @@ internal class FingerprintHostApiImpl(
     }
   }
 
-  private fun nativeClient(config: FingerprintNativeConfig) =
-    clientCache.getOrCreate(buildConfiguration(config), config.pluginVersion)
+  // Kotlin ConcurrentHashMap.getOrPut is not atomic: concurrent first hits can
+  // each create a Fingerprint client. computeIfAbsent runs the factory once.
+  // https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/get-or-put.html
+  private fun nativeClient(config: FingerprintNativeConfig): Fingerprint =
+    clients.computeIfAbsent(config) {
+      createFingerprint(applicationContext, buildConfiguration(config))
+    }
 
   private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
     val region = when (config.region) {
