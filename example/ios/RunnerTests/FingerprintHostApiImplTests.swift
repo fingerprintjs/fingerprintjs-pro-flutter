@@ -6,16 +6,17 @@ import XCTest
 @testable import fpjs_pro_plugin
 
 final class FingerprintHostApiImplTests: XCTestCase {
-  func testCreateBuildsConfigurationWithRegionFallbacks() throws {
+  func testCreateBuildsCustomRegionFromEndpointAndFallbacks() throws {
     let factory = ClientFactoryRecorder(client: StubFingerprintClient())
-    let cache = FingerprintClientCache(createClient: factory.create)
-    let hostApi = FingerprintHostApiImpl(clientCache: cache)
+    let hostApi = FingerprintHostApiImpl(
+      clientCache: FingerprintClientCache(createClient: factory.create)
+    )
 
     try hostApi.create(
       config: FingerprintNativeConfig(
         apiKey: "api-key",
-        region: "eu",
-        endpointFallbacks: ["", "https://fallback.example.com"],
+        endpoint: "https://custom.example.com",
+        endpointFallbacks: ["https://fallback.example.com"],
         pluginVersion: "1.2.3",
         allowUseOfLocationData: true
       )
@@ -29,8 +30,29 @@ final class FingerprintHostApiImplTests: XCTestCase {
     guard case .custom(let domain, let fallback) = configuration.region else {
       return XCTFail("Expected a custom region")
     }
-    XCTAssertEqual(domain, "https://eu.api.fpjs.io")
+    XCTAssertEqual(domain, "https://custom.example.com")
     XCTAssertEqual(fallback, ["https://fallback.example.com"])
+  }
+
+  func testCreateUsesNamedRegionWhenEndpointIsMissing() throws {
+    let factory = ClientFactoryRecorder(client: StubFingerprintClient())
+    let hostApi = FingerprintHostApiImpl(
+      clientCache: FingerprintClientCache(createClient: factory.create)
+    )
+
+    try hostApi.create(
+      config: FingerprintNativeConfig(
+        apiKey: "api-key",
+        region: "eu",
+        pluginVersion: "1.2.3",
+        allowUseOfLocationData: false
+      )
+    )
+
+    let configuration = try XCTUnwrap(factory.lastConfiguration)
+    guard case .eu = configuration.region else {
+      return XCTFail("Expected the eu region")
+    }
   }
 
   func testGetForwardsMetadataIncludingExplicitNullTags() throws {
@@ -102,5 +124,27 @@ final class FingerprintHostApiImplTests: XCTestCase {
       let error = try XCTUnwrap(capturedError as? PigeonError)
       XCTAssertEqual(error.code, expectedCode)
     }
+  }
+
+  func testGetForwardsTimeoutInSeconds() throws {
+    let client = StubFingerprintClient()
+    let hostApi = FingerprintHostApiImpl(
+      clientCache: FingerprintClientCache(
+        createClient: ClientFactoryRecorder(client: client).create
+      )
+    )
+
+    hostApi.get(
+      config: FingerprintNativeConfig(
+        apiKey: "api-key",
+        pluginVersion: "1.2.3",
+        allowUseOfLocationData: false
+      ),
+      tags: nil,
+      linkedId: nil,
+      timeoutMs: 1500
+    ) { _ in }
+
+    XCTAssertEqual(try XCTUnwrap(client.timeout), 1.5)
   }
 }

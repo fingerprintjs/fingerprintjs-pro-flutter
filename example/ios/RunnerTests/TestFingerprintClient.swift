@@ -52,6 +52,7 @@ final class StubFingerprintClient: FingerprintClientProviding, @unchecked Sendab
   private let lock = NSLock()
   private let result: Result<FingerprintResponse, FPError>
   private var capturedMetadata: Metadata?
+  private var capturedTimeout: TimeInterval?
 
   init(
     result: Result<FingerprintResponse, FPError> = .success(
@@ -63,6 +64,10 @@ final class StubFingerprintClient: FingerprintClientProviding, @unchecked Sendab
 
   var metadata: Metadata? {
     lock.withLock { capturedMetadata }
+  }
+
+  var timeout: TimeInterval? {
+    lock.withLock { capturedTimeout }
   }
 
   func getVisitorId(_ metadata: Metadata?, timeout: TimeInterval) async throws -> String {
@@ -81,7 +86,7 @@ final class StubFingerprintClient: FingerprintClientProviding, @unchecked Sendab
     timeout: TimeInterval,
     completion: @escaping VisitorIdBlock
   ) {
-    let response = record(metadata: metadata)
+    let response = record(metadata: metadata, timeout: timeout)
     completion(response.map(\.visitorId))
   }
 
@@ -90,12 +95,16 @@ final class StubFingerprintClient: FingerprintClientProviding, @unchecked Sendab
     timeout: TimeInterval,
     completion: @escaping VisitorIdResponseBlock
   ) {
-    completion(record(metadata: metadata))
+    completion(record(metadata: metadata, timeout: timeout))
   }
 
-  private func record(metadata: Metadata?) -> Result<FingerprintResponse, FPError> {
+  private func record(
+    metadata: Metadata?,
+    timeout: TimeInterval
+  ) -> Result<FingerprintResponse, FPError> {
     lock.withLock {
       capturedMetadata = metadata
+      capturedTimeout = timeout
       return result
     }
   }
