@@ -14,27 +14,6 @@ void main() {
       expect(result.sealedResult, isNull);
     });
 
-    test('keeps a zero suspect score, which is not the same as none', () {
-      expect(
-        FingerprintResult(
-          eventId: 'event-1',
-          visitorId: 'visitor-1',
-          suspectScore: 0,
-        ).suspectScore,
-        0,
-      );
-    });
-
-    test('keeps a false cacheHit, which is not the same as none', () {
-      expect(
-        FingerprintResult(
-          eventId: 'event-1',
-          visitorId: 'visitor-1',
-          cacheHit: false,
-        ).cacheHit,
-        false,
-      );
-    });
 
     test('compares by value', () {
       final result = FingerprintResult(

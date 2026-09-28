@@ -168,11 +168,11 @@ void main() {
     });
 
     test('maps a JS error code and event id', () async {
-      fake.nextError = {
-        'code': 'client_timeout',
-        'message': 'timed out',
-        'event_id': 'evt-err',
-      };
+      fake.nextError = jsError(
+        'timed out',
+        code: 'client_timeout',
+        eventId: 'evt-err',
+      );
       await expectLater(
         platform.get(config()),
         throwsA(
@@ -186,11 +186,7 @@ void main() {
 
     test('collapses web network codes into network_error', () async {
       for (final code in ['network_connection', 'network_abort']) {
-        fake.nextError = {
-          'code': code,
-          'message': 'Network failed',
-          'event_id': 'evt-err',
-        };
+        fake.nextError = jsError('Network failed', code: code);
         await expectLater(
           platform.get(config()),
           throwsA(
@@ -203,6 +199,41 @@ void main() {
         );
       }
     });
+
+    test('maps a JS error without a code to unknown_error', () async {
+      fake.nextError = jsError('boom');
+      await expectLater(
+        platform.get(config()),
+        throwsA(
+          isA<FingerprintError>()
+              .having((error) => error.code, 'code', 'unknown_error')
+              .having((error) => error.message, 'message', contains('boom')),
+        ),
+      );
+    });
+
+    test(
+      'maps a throw from start and retries start on the next call',
+      () async {
+        fake.startError = jsError('start failed');
+        await expectLater(
+          platform.create(config()),
+          throwsA(
+            isA<FingerprintError>()
+                .having((error) => error.code, 'code', 'unknown_error')
+                .having(
+                  (error) => error.message,
+                  'message',
+                  contains('start failed'),
+                ),
+          ),
+        );
+
+        fake.startError = null;
+        final result = await platform.get(config());
+        expect(result.eventId, 'default-event');
+      },
+    );
 
     test('get before create still starts the agent', () async {
       final result = await platform.get(config());
@@ -221,9 +252,14 @@ class FakeAgent {
     'event_id': 'default-event',
     'visitor_id': 'default-visitor',
   };
-  Map<String, Object?>? nextError;
+  JSObject? nextError;
+  JSObject? startError;
 
   FingerprintAgent start(JSObject options) {
+    final error = startError;
+    if (error != null) {
+      throw error;
+    }
     startCount += 1;
     startOptions = (options.dartify() as Map).cast<Object?, Object?>();
     startApiKeys.add(startOptions['apiKey'] as String);
@@ -238,11 +274,7 @@ class FakeAgent {
         : (options.dartify() as Map).cast<Object?, Object?>();
     final error = nextError;
     if (error != null) {
-      final jsError = JSObject();
-      jsError['code'] = (error['code'] as String).toJS;
-      jsError['message'] = (error['message'] as String).toJS;
-      jsError['event_id'] = (error['event_id'] as String).toJS;
-      throw jsError;
+      throw error;
     }
     return Future<JSObject>.value(nextResult.jsify() as JSObject).toJS;
   }
@@ -252,4 +284,18 @@ class FakeAgent {
     output['base64'] = (() => base64.toJS).toJS;
     return output;
   }
+}
+
+/// A JS `Error`, like the agent throws. [code] and [eventId] are set only when
+/// given.
+JSObject jsError(String message, {String? code, String? eventId}) {
+  final error = (globalContext['Error'] as JSFunction)
+      .callAsConstructor<JSObject>(message.toJS);
+  if (code != null) {
+    error['code'] = code.toJS;
+  }
+  if (eventId != null) {
+    error['event_id'] = eventId.toJS;
+  }
+  return error;
 }
