@@ -58,7 +58,6 @@ extension APIError {
     case .subscriptionRestricted: return "subscription_restricted"
     case .wrongRegion: return "wrong_region"
     case .featureNotEnabled: return "feature_not_enabled"
-    case .visitorNotFound: return "visitor_not_found"
     case .missingModule: return "missing_module"
     case .payloadTooLarge: return "payload_too_large"
     case .serviceUnavailable: return "service_unavailable"
