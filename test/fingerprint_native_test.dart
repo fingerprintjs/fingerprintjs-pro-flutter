@@ -97,14 +97,6 @@ void main() {
       expect(fakeHostApi.lastTimeoutMs, 500);
     });
 
-    test('rejects a negative timeout', () async {
-      await expectLater(
-        platform.get(config(), timeout: const Duration(seconds: -1)),
-        throwsArgumentError,
-      );
-      expect(fakeHostApi.lastTimeoutMs, isNull);
-    });
-
     test('forwards JSON null tag values unchanged', () async {
       await platform.get(config(), tags: {'campaign': null, 'sessionId': 1});
 

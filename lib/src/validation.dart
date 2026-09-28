@@ -1,4 +1,4 @@
-/// Validation of get() arguments shared by native and web.
+/// Validation of `Fingerprint.get` arguments.
 ///
 /// Tags: same string-keyed JSON map on every platform. No size cap here.
 /// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)

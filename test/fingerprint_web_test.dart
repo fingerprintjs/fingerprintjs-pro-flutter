@@ -140,15 +140,6 @@ void main() {
       expect(fake.getOptions['timeout'], 500);
     });
 
-    test('rejects a negative timeout', () async {
-      await expectLater(
-        platform.get(config(), timeout: const Duration(seconds: -1)),
-        throwsArgumentError,
-      );
-      expect(fake.getOptions, isEmpty);
-      expect(fake.startCount, 0);
-    });
-
     test('maps cacheHit and a missing Zero Trust visitor id', () async {
       fake.nextResult = {
         'event_id': 'evt-1',

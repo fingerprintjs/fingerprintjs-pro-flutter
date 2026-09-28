@@ -72,6 +72,29 @@ void main() {
     expect(platform.gets.single.timeout, const Duration(milliseconds: 500));
   });
 
+  test('rejects invalid tags without identifying', () {
+    platform.createError = FingerprintError(
+      code: FingerprintError.apiKeyInvalid,
+    );
+    final client = Fingerprint(apiKey: 'key-1');
+
+    expect(() => client.get(tags: {'value': Object()}), throwsArgumentError);
+    expect(platform.gets, isEmpty);
+  });
+
+  test('rejects a negative timeout without identifying', () {
+    platform.createError = FingerprintError(
+      code: FingerprintError.apiKeyInvalid,
+    );
+    final client = Fingerprint(apiKey: 'key-1');
+
+    expect(
+      () => client.get(timeout: const Duration(seconds: -1)),
+      throwsArgumentError,
+    );
+    expect(platform.gets, isEmpty);
+  });
+
   // Constructor ignores create so an unused client is not an unhandled async
   // error. get() still rethrows, and must not identify.
   test('get surfaces a create failure without identifying', () async {

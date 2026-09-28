@@ -8,7 +8,6 @@ import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
 import 'package:fpjs_pro_plugin/src/js_agent_interop.dart';
-import 'package:fpjs_pro_plugin/src/validation.dart';
 
 /// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
@@ -34,8 +33,6 @@ class FingerprintWeb extends FingerprintPlatform {
     String? linkedId,
     Duration? timeout,
   }) async {
-    validateTags(tags);
-    validateTimeout(timeout);
     try {
       final agent = _agentFor(config);
       final options = _toGetOptions(

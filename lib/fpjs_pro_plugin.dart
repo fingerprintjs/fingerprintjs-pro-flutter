@@ -4,6 +4,7 @@ import 'package:fpjs_pro_plugin/options.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
+import 'package:fpjs_pro_plugin/src/validation.dart';
 
 export 'package:fpjs_pro_plugin/error.dart';
 export 'package:fpjs_pro_plugin/options.dart';
@@ -83,13 +84,18 @@ class Fingerprint {
     Map<String, Object?>? tags,
     String? linkedId,
     Duration? timeout,
-  }) async {
-    await _created;
-    return FingerprintPlatform.instance.get(
-      _config,
-      tags: tags,
-      linkedId: linkedId,
-      timeout: timeout,
+  }) {
+    // Not `async`. An async body would wrap ArgumentError in the Future and
+    // only throw after awaiting create.
+    validateTags(tags);
+    validateTimeout(timeout);
+    return _created.then(
+      (_) => FingerprintPlatform.instance.get(
+        _config,
+        tags: tags,
+        linkedId: linkedId,
+        timeout: timeout,
+      ),
     );
   }
 }
