@@ -17,8 +17,9 @@ const pluginVersion = '4.13.1';
 /// Identification client. Create one per public API key and configuration.
 ///
 /// The constructor starts the native or web client. [get] waits for that
-/// start and is where create or load failures surface. Every get carries the
-/// full config, so two clients stay independent.
+/// start and is where create or load failures surface. After a failed start,
+/// the next get tries again. Every get carries the full config, so two clients
+/// stay independent.
 /// https://docs.fingerprint.com/docs/ios-sdk
 /// https://docs.fingerprint.com/docs/android-sdk
 /// https://docs.fingerprint.com/reference/js-agent-start-function
@@ -48,7 +49,7 @@ class Fingerprint {
   final WebOptions? web;
 
   late final FingerprintConfig _config;
-  late final Future<void> _created;
+  Future<void>? _created;
 
   Fingerprint({
     required this.apiKey,
@@ -67,10 +68,21 @@ class Fingerprint {
       ios: ios,
       web: web,
     );
-    // Native create is local client construction so location can warm.
-    // Web start() is sync; the bundle still loads in the background.
-    // ignore() so a create failure is not unhandled if get is never called.
-    _created = FingerprintPlatform.instance.create(_config)..ignore();
+    // - Native create is local client construction so location can warm.
+    // - Web start() is sync. The bundle still loads in the background.
+    // - ignore() so a create failure is not unhandled if get is never called.
+    _create().ignore();
+  }
+
+  // A failed create is forgotten so the next get retries it. Otherwise one
+  // early failure (e.g. before the Flutter binding is ready) breaks the client.
+  Future<void> _create() {
+    return _created ??= FingerprintPlatform.instance.create(_config).catchError(
+      (Object error, StackTrace stackTrace) {
+        _created = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      },
+    );
   }
 
   /// Identifies the current visitor or device.
@@ -89,7 +101,7 @@ class Fingerprint {
     // only throw after awaiting create.
     validateTags(tags);
     validateTimeout(timeout);
-    return _created.then(
+    return _create().then(
       (_) => FingerprintPlatform.instance.get(
         _config,
         tags: tags,

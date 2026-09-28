@@ -182,6 +182,22 @@ void main() {
       );
     });
 
+    test('maps a non-platform error to unknown_error', () async {
+      fakeHostApi.nextCreateError = StateError('binding not initialized');
+      await expectLater(
+        platform.create(config()),
+        throwsA(
+          isA<FingerprintError>()
+              .having((error) => error.code, 'code', 'unknown_error')
+              .having(
+                (error) => error.message,
+                'message',
+                contains('binding not initialized'),
+              ),
+        ),
+      );
+    });
+
     test('keeps an unknown code unchanged', () async {
       fakeHostApi.nextError = PlatformException(
         code: 'new_server_code',
@@ -215,8 +231,8 @@ class FakeFingerprintHostApi extends FingerprintHostApi {
     sealedResult: null,
   );
 
-  PlatformException? nextError;
-  PlatformException? nextCreateError;
+  Object? nextError;
+  Object? nextCreateError;
 
   @override
   Future<void> create(FingerprintNativeConfig config) async {

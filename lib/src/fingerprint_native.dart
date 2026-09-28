@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:fpjs_pro_plugin/region.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
@@ -17,8 +16,8 @@ class FingerprintNative extends FingerprintPlatform {
   Future<void> create(FingerprintConfig config) async {
     try {
       await _hostApi.create(_toNativeConfig(config));
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+    } catch (error) {
+      throw unwrapError(error);
     }
   }
 
@@ -42,8 +41,8 @@ class FingerprintNative extends FingerprintPlatform {
         suspectScore: result.suspectScore,
         sealedResult: result.sealedResult,
       );
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+    } catch (error) {
+      throw unwrapError(error);
     }
   }
 

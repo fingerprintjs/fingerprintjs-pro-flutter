@@ -116,6 +116,20 @@ void main() {
     expect(platform.gets, isEmpty);
   });
 
+  test('get retries a failed create', () async {
+    platform.createError = FingerprintError(
+      code: FingerprintError.unknownError,
+    );
+    final client = Fingerprint(apiKey: 'key-1');
+    await expectLater(client.get(), throwsA(isA<FingerprintError>()));
+
+    platform.createError = null;
+    final result = await client.get();
+
+    expect(result.visitorId, 'key-1');
+    expect(platform.created, hasLength(1));
+  });
+
   test(
     'treats an empty endpoints list as null, uses the regional default',
     () async {
