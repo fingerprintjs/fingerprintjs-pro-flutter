@@ -57,15 +57,24 @@ class FingerprintNativeResult {
   String? sealedResult;
 }
 
+// Native handlers run on one serial background queue, not the main thread:
+// - first client creation loads SDK classes (~170 ms on Android, more on
+//   slow devices), and apps create the client at startup
+// - get must share the queue: it waits on the client cache lock while create
+//   runs, and builds the client itself if create was skipped
+// - serial keeps create before a get sent right after it
+// https://pub.dev/packages/pigeon#task-queue
 @HostApi()
 abstract class FingerprintHostApi {
   /// Builds the native Fingerprint client immediately so location can warm
   /// before identification. get still carries config and reuses this client,
   /// so two Dart clients stay independent if create was skipped.
   /// https://docs.fingerprint.com/docs/ios-sdk
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void create(FingerprintNativeConfig config);
 
   @asyncCallback
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   FingerprintNativeResult get(
     FingerprintNativeConfig config,
     Map<String?, Object?>? tags,

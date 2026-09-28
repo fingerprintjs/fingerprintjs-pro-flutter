@@ -362,11 +362,18 @@ class FingerprintHostApiSetup {
   /// Sets up an instance of `FingerprintHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: FingerprintHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    #if os(iOS)
+      let taskQueue = binaryMessenger.makeBackgroundTaskQueue?()
+    #else
+      let taskQueue: FlutterTaskQueue? = nil
+    #endif
     /// Builds the native Fingerprint client immediately so location can warm
     /// before identification. get still carries config and reuses this client,
     /// so two Dart clients stay independent if create was skipped.
     /// https://docs.fingerprint.com/docs/ios-sdk
-    let createChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    let createChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
     if let api = api {
       createChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
@@ -381,7 +388,9 @@ class FingerprintHostApiSetup {
     } else {
       createChannel.setMessageHandler(nil)
     }
-    let getChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    let getChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
     if let api = api {
       getChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
