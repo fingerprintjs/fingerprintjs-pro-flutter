@@ -28,6 +28,8 @@ void main() {
         allowUseOfLocationData: true,
         locationTimeout: Duration(seconds: 3),
       ),
+      ios: const IosOptions(allowUseOfLocationData: true),
+      web: const WebOptions(storageKeyPrefix: 'fp_'),
     );
     expect(platform.created, isEmpty);
     await client.start();
@@ -46,6 +48,8 @@ void main() {
       platform.created.single.android?.locationTimeout,
       const Duration(seconds: 3),
     );
+    expect(platform.created.single.ios?.allowUseOfLocationData, isTrue);
+    expect(platform.created.single.web?.storageKeyPrefix, 'fp_');
   });
 
   test('two clients keep independent configs', () async {

@@ -45,6 +45,7 @@ This package replaces `fpjs_pro_plugin`. If you are upgrading from 4.x, see the 
 - Flutter 3.44.0 or higher
 - Dart 3.12.0 or higher
 - Android 7.0 (API level 24+) or higher
+- Android apps on AGP 8: Kotlin Gradle plugin 2.2.20 or higher. The Android SDK is built with Kotlin 2.3, and your app's Kotlin version compiles the plugin.
 - iOS 15+/tvOS 15+, Xcode 16+, Swift 6 or higher (stable releases)
 
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
