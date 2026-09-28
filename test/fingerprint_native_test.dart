@@ -117,8 +117,8 @@ void main() {
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
     });
 
-    // Shared platform singleton. A failed create must not latch and
-    // poison a later get, which can create the native client itself.
+    // The platform is a shared singleton. A failed create must not make later
+    // gets fail, because native get creates the client if it is missing.
     test('create failure does not block a later get', () async {
       fakeHostApi.nextCreateError = PlatformException(
         code: 'unknown_error',
@@ -193,6 +193,25 @@ void main() {
                 (error) => error.message,
                 'message',
                 contains('binding not initialized'),
+              ),
+        ),
+      );
+    });
+
+    test('maps a Pigeon channel error to unknown_error', () async {
+      fakeHostApi.nextError = PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+      await expectLater(
+        platform.get(config()),
+        throwsA(
+          isA<FingerprintError>()
+              .having((error) => error.code, 'code', 'unknown_error')
+              .having(
+                (error) => error.message,
+                'message',
+                contains('Unable to establish connection'),
               ),
         ),
       );

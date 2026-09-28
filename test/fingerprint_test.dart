@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpjs_pro_plugin/fpjs_pro_plugin.dart';
 import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
@@ -165,6 +167,112 @@ void main() {
       expect(platform.created.single.endpoints, isNull);
     },
   );
+
+  group('get tags validation', () {
+    Future<FingerprintResult> get(Map<String, Object?>? tags) =>
+        Fingerprint(apiKey: 'key-1').get(tags: tags);
+
+    Matcher throwsWithMessage(String part) => throwsA(
+      isA<ArgumentError>().having(
+        (error) => error.message,
+        'message',
+        contains(part),
+      ),
+    );
+
+    Matcher throwsAtPath(String path) => throwsA(
+      isA<ArgumentError>().having((error) => error.name, 'name', path),
+    );
+
+    test('accepts every JSON type, nested to depth', () async {
+      const tags = {
+        'string': 'a',
+        'int': 1,
+        'double': 1.5,
+        'bool': true,
+        'null': null,
+        'list': [
+          1,
+          'a',
+          null,
+          {'nested': true},
+        ],
+        'map': {
+          'deep': {
+            'deeper': ['x'],
+          },
+        },
+      };
+      await get(tags);
+
+      expect(platform.gets.single.tags, tags);
+    });
+
+    test('accepts null, an empty map, and a nested empty list', () async {
+      await get(null);
+      await get(<String, Object?>{});
+      await get({'items': <Object?>[]});
+
+      expect(platform.gets, hasLength(3));
+    });
+
+    test('rejects a typed list, which Pigeon would drop on iOS', () {
+      expect(
+        () => get({
+          'bytes': Uint8List.fromList(const [1, 2]),
+        }),
+        throwsWithMessage('JSON-compatible'),
+      );
+    });
+
+    test('rejects a non-string nested map key', () {
+      expect(
+        () => get({
+          'nested': <Object?, Object?>{1: 'a'},
+        }),
+        throwsWithMessage('must be strings'),
+      );
+    });
+
+    test('rejects a non-finite number, which has no JSON literal', () {
+      for (final value in [
+        double.nan,
+        double.infinity,
+        double.negativeInfinity,
+      ]) {
+        expect(() => get({'value': value}), throwsArgumentError);
+      }
+    });
+
+    test('names the path to a rejected value inside a list', () {
+      expect(
+        () => get({
+          'items': [1, Object()],
+        }),
+        throwsAtPath("tags['items'][1]"),
+      );
+    });
+
+    test('names the path to a rejected value inside a nested map', () {
+      expect(
+        () => get({
+          'outer': {'inner': Object()},
+        }),
+        throwsAtPath("tags['outer']['inner']"),
+      );
+    });
+
+    test('names the path to a non-string key nested in a list', () {
+      expect(
+        () => get({
+          'items': [
+            {2: 'a'},
+          ],
+        }),
+        throwsAtPath("tags['items'][0]"),
+      );
+    });
+  });
 }
 
 class RecordingPlatform extends FingerprintPlatform
