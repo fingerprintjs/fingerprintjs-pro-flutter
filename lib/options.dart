@@ -77,8 +77,7 @@ enum WebCacheStorage { sessionStorage, localStorage, agent }
 
 /// How long a cached web identification result is reused.
 ///
-/// [optimizeCost] is 1 hour. [aggressive] is 12 hours. A [custom] duration
-/// cannot exceed 12 hours.
+/// [optimizeCost] is 1 hour. [aggressive] is 12 hours.
 /// https://docs.fingerprint.com/reference/js-agent-start-function
 class WebCacheDuration {
   // Distinct const args so Dart does not canonicalize the presets together.
@@ -87,13 +86,17 @@ class WebCacheDuration {
   static const optimizeCost = WebCacheDuration._(_Kind.optimizeCost);
   static const aggressive = WebCacheDuration._(_Kind.aggressive);
 
-  /// [duration] in whole seconds. Must be greater than zero and at most 12 hours.
+  /// [duration] in whole seconds, greater than zero, at most 12 hours.
+  ///
+  /// The 12 hour maximum is intentionally not checked here. The JS agent
+  /// validates it, so the limit can change without a plugin release.
+  /// https://docs.fingerprint.com/reference/js-agent-start-function
   factory WebCacheDuration.custom(Duration duration) {
-    if (duration <= Duration.zero || duration > _max) {
+    if (duration <= Duration.zero) {
       throw ArgumentError.value(
         duration,
         'duration',
-        'Cache duration must be greater than zero and at most 12 hours',
+        'Cache duration must be greater than zero',
       );
     }
     if (duration != Duration(seconds: duration.inSeconds)) {
@@ -105,8 +108,6 @@ class WebCacheDuration {
     }
     return WebCacheDuration._(_Kind.custom, seconds: duration.inSeconds);
   }
-
-  static const _max = Duration(hours: 12);
 
   final _Kind _kind;
 

@@ -87,7 +87,7 @@ To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `
 
 ### 1. Create a client
 
-Create one `Fingerprint` client per API key and configuration. The `region` option defaults to `Region.us` when omitted. See [regions](https://docs.fingerprint.com/docs/regions).
+Create one `Fingerprint` client per API key and configuration. On Android and iOS, `region` defaults to `Region.us` when omitted. On web, the agent infers it from the API key. See [regions](https://docs.fingerprint.com/docs/regions).
 
 ```dart
 import 'package:flutter/widgets.dart';
@@ -107,7 +107,8 @@ Future<void> main() async {
 ```
 
 * The constructor only stores options. `start()` builds the native client, or starts downloading the JavaScript agent on web.
-* `get()` calls `start()` if you skip it, then identifies. Create failures surface on `start()` or `get()`.
+* `start()` is optional. `get()` does not wait for it and creates the client itself if needed. Create failures surface on `start()` or `get()`.
+* On Android and iOS, `start()` also starts location collection, so call it as early as possible.
 * On Android and iOS, `start()` needs the Flutter binding. Call `WidgetsFlutterBinding.ensureInitialized()` first if you start before `runApp()`. After `runApp()`, the binding already exists.
 
 ### Custom endpoints
@@ -180,6 +181,8 @@ Default timeout:
 final result = await client.get(timeout: const Duration(seconds: 10));
 ```
 
+Must not be negative.
+
 A timeout throws `FingerprintError` with `code` `client_timeout`.
 
 ### Location data
@@ -212,12 +215,13 @@ final client = Fingerprint(
     cache: WebCache(
       storage: WebCacheStorage.sessionStorage,
       duration: WebCacheDuration.optimizeCost, // 1 hour. aggressive is 12 hours.
+      keyPrefix: 'fp_cache_', // optional
     ),
   ),
 );
 ```
 
-A custom cache duration must be a whole number of seconds, greater than zero and at most 12 hours: `WebCacheDuration.custom(const Duration(hours: 2))`. See the [JS agent start options](https://docs.fingerprint.com/reference/js-agent-start-function).
+A custom cache duration must be a whole number of seconds, greater than zero and at most 12 hours: `WebCacheDuration.custom(const Duration(hours: 2))`. The JS agent checks the maximum. See the [JS agent start options](https://docs.fingerprint.com/reference/js-agent-start-function).
 
 ## Additional Resources
 - [Fingerprint documentation](https://docs.fingerprint.com)

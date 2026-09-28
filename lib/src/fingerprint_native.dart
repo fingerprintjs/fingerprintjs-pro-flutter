@@ -1,11 +1,12 @@
+// Android and iOS platform code. Dart config and errors go through Pigeon.
+// https://pub.dev/packages/pigeon
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:fingerprint_flutter/src/pigeon/fingerprint_api.g.dart';
-import 'package:fingerprint_flutter/src/tags.dart';
-import 'package:fingerprint_flutter/src/unwrap_error.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
 class FingerprintNative extends FingerprintPlatform {
@@ -17,16 +18,13 @@ class FingerprintNative extends FingerprintPlatform {
   @override
   Future<void> create(FingerprintConfig config) {
     // Read the binding before anything async, so a missing binding throws
-    // from the Fingerprint constructor. If it failed later inside the
-    // returned future, the client would skip the early native create and
-    // every get() would rethrow an error that is not a FingerprintError.
+    // the standard "call WidgetsFlutterBinding.ensureInitialized()" error
+    // from start(), not a wrapped unknown_error.
     // https://api.flutter.dev/flutter/widgets/WidgetsFlutterBinding/ensureInitialized.html
     ServicesBinding.instance;
     return _hostApi
         .create(_toNativeConfig(config))
-        .onError<PlatformException>(
-          (exception, _) => throw unwrapError(exception),
-        );
+        .catchError((Object error) => throw _toFingerprintError(error));
   }
 
   @override
@@ -36,7 +34,6 @@ class FingerprintNative extends FingerprintPlatform {
     String? linkedId,
     Duration? timeout,
   }) async {
-    validateTags(tags);
     try {
       final result = await _hostApi.get(
         _toNativeConfig(config),
@@ -50,8 +47,8 @@ class FingerprintNative extends FingerprintPlatform {
         suspectScore: result.suspectScore,
         sealedResult: result.sealedResult,
       );
-    } on PlatformException catch (exception) {
-      throw unwrapError(exception);
+    } catch (error) {
+      throw _toFingerprintError(error);
     }
   }
 
@@ -60,7 +57,7 @@ class FingerprintNative extends FingerprintPlatform {
     return FingerprintNativeConfig(
       apiKey: config.apiKey,
       region: config.region?.stringValue,
-      endpoint: endpoints == null || endpoints.isEmpty ? null : endpoints.first,
+      endpoint: endpoints?.first,
       endpointFallbacks: endpoints != null && endpoints.length > 1
           ? endpoints.sublist(1)
           : null,
@@ -76,4 +73,33 @@ class FingerprintNative extends FingerprintPlatform {
       _ => config.android?.allowUseOfLocationData ?? false,
     };
   }
+}
+
+// Pigeon's own codes when the call never reached native SDK code.
+const _pigeonCodes = {'channel-error', 'null-error'};
+
+/// - Native code already sends snake_case codes. [PlatformException.details]
+///   is the event id when the client reported one.
+/// - Pigeon codes and other errors (e.g. a missing Flutter binding) become
+///   [FingerprintError.unknownError] with the original text as message, so
+///   `get` only throws [FingerprintError] with a documented code.
+FingerprintError _toFingerprintError(Object error) {
+  if (error is! PlatformException) {
+    return FingerprintError(
+      code: FingerprintError.unknownError,
+      message: error.toString(),
+    );
+  }
+  if (_pigeonCodes.contains(error.code)) {
+    return FingerprintError(
+      code: FingerprintError.unknownError,
+      message: '${error.code}: ${error.message}',
+    );
+  }
+  final details = error.details;
+  return FingerprintError(
+    code: error.code,
+    message: error.message,
+    eventId: details is String ? details : null,
+  );
 }

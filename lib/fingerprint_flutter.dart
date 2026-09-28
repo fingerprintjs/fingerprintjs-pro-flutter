@@ -1,9 +1,12 @@
+// Public entry point: the `Fingerprint` client and its options.
+// https://docs.fingerprint.com/docs/flutter
 import 'dart:async';
 
 import 'package:fingerprint_flutter/options.dart';
 import 'package:fingerprint_flutter/region.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter/src/validation.dart';
 
 export 'package:fingerprint_flutter/error.dart';
 export 'package:fingerprint_flutter/options.dart';
@@ -16,8 +19,9 @@ const pluginVersion = '4.13.1';
 /// Identification client. Create one per public API key and configuration.
 ///
 /// The constructor only stores options. [start] builds the native or web
-/// client. [get] calls [start] if you skip it, then identifies. Every get
-/// carries the full config, so two clients stay independent.
+/// client early. [get] does not wait for [start] and creates the client
+/// itself if needed. Every get carries the full config, so two clients stay
+/// independent.
 ///
 /// On Android and iOS, [start] needs the Flutter binding. In `main()` before
 /// `runApp()`, call `WidgetsFlutterBinding.ensureInitialized()` first.
@@ -50,7 +54,6 @@ class Fingerprint {
   final WebOptions? web;
 
   late final FingerprintConfig _config;
-  Future<void>? _started;
 
   Fingerprint({
     required this.apiKey,
@@ -73,13 +76,12 @@ class Fingerprint {
 
   /// Builds the native client, or starts downloading the web agent.
   ///
-  /// Safe to call more than once. Native create is local client construction
-  /// so location can warm. Web start() is sync; the bundle still loads in
-  /// the background.
+  /// Optional. Await it to surface create errors early. On Android and iOS it
+  /// starts location collection, so call it as early as possible. Safe to
+  /// call more than once. A failed start does not break [get].
   /// https://docs.fingerprint.com/reference/js-agent-start-function
   Future<void> start() async {
-    _started ??= FingerprintPlatform.instance.create(_config);
-    await _started;
+    await FingerprintPlatform.instance.create(_config);
   }
 
   /// Identifies the current visitor or device.
@@ -87,12 +89,16 @@ class Fingerprint {
   /// [tags] is a string-keyed map of JSON-compatible values. The same map
   /// is forwarded on every platform, including JSON null.
   /// https://docs.fingerprint.com/docs/tagging-information
+  ///
+  /// [timeout] must not be negative. Null uses the platform default.
   Future<FingerprintResult> get({
     Map<String, Object?>? tags,
     String? linkedId,
     Duration? timeout,
-  }) async {
-    await start();
+  }) {
+    // Not `async`, so ArgumentError throws now, not as a Future error.
+    validateTags(tags);
+    validateTimeout(timeout);
     return FingerprintPlatform.instance.get(
       _config,
       tags: tags,

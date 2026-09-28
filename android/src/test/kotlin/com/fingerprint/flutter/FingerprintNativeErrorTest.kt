@@ -1,6 +1,7 @@
 package com.fingerprint.flutter
 
 import com.fingerprint.android.ApiKeyRequired
+import com.fingerprint.android.StateNotReady
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -20,5 +21,20 @@ class FingerprintNativeErrorTest {
     assertEquals("public_api_key_required", flutterError.code)
     assertEquals("need key", flutterError.message)
     assertEquals("evt-123", flutterError.details)
+  }
+
+  @Test
+  fun forwardsUnmappedErrorAsUnknownWithDescription() {
+    val flutterError = toFlutterError(StateNotReady("evt-1", "state not ready"))
+    assertEquals("unknown_error", flutterError.code)
+    assertEquals("state not ready", flutterError.message)
+    assertEquals("evt-1", flutterError.details)
+  }
+
+  @Test
+  fun namesUnmappedErrorTypeWhenDescriptionIsMissing() {
+    val flutterError = toFlutterError(StateNotReady("Unknown", "Unknown"))
+    assertEquals("unknown_error", flutterError.code)
+    assertEquals("StateNotReady", flutterError.message)
   }
 }

@@ -69,10 +69,10 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
   }
 
   private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
-    let fallbacks = config.endpointFallbacks?.filter { !$0.isEmpty } ?? []
+    // Dart drops empty endpoint strings before they get here.
     let region: Region
-    if let endpoint = config.endpoint, !endpoint.isEmpty {
-      region = .custom(domain: endpoint, fallback: fallbacks)
+    if let endpoint = config.endpoint {
+      region = .custom(domain: endpoint, fallback: config.endpointFallbacks ?? [])
     } else {
       region = Self.namedRegion(config.region)
     }
@@ -91,6 +91,8 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     }
     for (key, value) in tags {
       guard let key else { continue }
+      // Dart validateTags rejects values jsonType cannot convert, so nil is
+      // not expected here.
       if let converted = jsonType(from: value) {
         metadata.setTag(converted, forKey: key)
       }

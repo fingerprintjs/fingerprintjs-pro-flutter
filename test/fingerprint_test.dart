@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
@@ -74,16 +76,32 @@ void main() {
     expect(platform.gets.single.timeout, const Duration(milliseconds: 500));
   });
 
-  // start() is not required. get() starts, rethrows a create failure, and
-  // must not identify.
-  test('get surfaces a create failure without identifying', () async {
+  test('rejects invalid tags without identifying', () {
+    final client = Fingerprint(apiKey: 'key-1');
+
+    expect(() => client.get(tags: {'value': Object()}), throwsArgumentError);
+    expect(platform.gets, isEmpty);
+  });
+
+  test('rejects a negative timeout without identifying', () {
+    final client = Fingerprint(apiKey: 'key-1');
+
+    expect(
+      () => client.get(timeout: const Duration(seconds: -1)),
+      throwsArgumentError,
+    );
+    expect(platform.gets, isEmpty);
+  });
+
+  // start() is optional, so a failed start must not break get.
+  test('start surfaces a create failure and get still works', () async {
     platform.createError = FingerprintError(
       code: FingerprintError.apiKeyInvalid,
     );
     final client = Fingerprint(apiKey: 'key-1');
 
     await expectLater(
-      client.get(),
+      client.start(),
       throwsA(
         isA<FingerprintError>().having(
           (error) => error.code,
@@ -92,14 +110,16 @@ void main() {
         ),
       ),
     );
-    expect(platform.gets, isEmpty);
+    final result = await client.get();
+
+    expect(result.visitorId, 'key-1');
   });
 
   test(
     'treats an empty endpoints list as null, uses the regional default',
     () async {
       final client = Fingerprint(apiKey: 'key-1', endpoints: const []);
-      await client.get();
+      await client.start();
 
       expect(client.endpoints, isNull);
       expect(platform.created.single.endpoints, isNull);
@@ -113,7 +133,7 @@ void main() {
         apiKey: 'key-1',
         endpoints: const ['', 'https://proxy.example', ''],
       );
-      await client.get();
+      await client.start();
 
       expect(client.endpoints, ['https://proxy.example']);
       expect(platform.created.single.endpoints, ['https://proxy.example']);
@@ -124,12 +144,118 @@ void main() {
     'treats a list of empty endpoint strings as null, uses the regional default',
     () async {
       final client = Fingerprint(apiKey: 'key-1', endpoints: const ['', '']);
-      await client.get();
+      await client.start();
 
       expect(client.endpoints, isNull);
       expect(platform.created.single.endpoints, isNull);
     },
   );
+
+  group('get tags validation', () {
+    Future<FingerprintResult> get(Map<String, Object?>? tags) =>
+        Fingerprint(apiKey: 'key-1').get(tags: tags);
+
+    Matcher throwsWithMessage(String part) => throwsA(
+      isA<ArgumentError>().having(
+        (error) => error.message,
+        'message',
+        contains(part),
+      ),
+    );
+
+    Matcher throwsAtPath(String path) => throwsA(
+      isA<ArgumentError>().having((error) => error.name, 'name', path),
+    );
+
+    test('accepts every JSON type, nested to depth', () async {
+      const tags = {
+        'string': 'a',
+        'int': 1,
+        'double': 1.5,
+        'bool': true,
+        'null': null,
+        'list': [
+          1,
+          'a',
+          null,
+          {'nested': true},
+        ],
+        'map': {
+          'deep': {
+            'deeper': ['x'],
+          },
+        },
+      };
+      await get(tags);
+
+      expect(platform.gets.single.tags, tags);
+    });
+
+    test('accepts null, an empty map, and a nested empty list', () async {
+      await get(null);
+      await get(<String, Object?>{});
+      await get({'items': <Object?>[]});
+
+      expect(platform.gets, hasLength(3));
+    });
+
+    test('rejects a typed list, which Pigeon would drop on iOS', () {
+      expect(
+        () => get({
+          'bytes': Uint8List.fromList(const [1, 2]),
+        }),
+        throwsWithMessage('JSON-compatible'),
+      );
+    });
+
+    test('rejects a non-string nested map key', () {
+      expect(
+        () => get({
+          'nested': <Object?, Object?>{1: 'a'},
+        }),
+        throwsWithMessage('must be strings'),
+      );
+    });
+
+    test('rejects a non-finite number, which has no JSON literal', () {
+      for (final value in [
+        double.nan,
+        double.infinity,
+        double.negativeInfinity,
+      ]) {
+        expect(() => get({'value': value}), throwsArgumentError);
+      }
+    });
+
+    test('names the path to a rejected value inside a list', () {
+      expect(
+        () => get({
+          'items': [1, Object()],
+        }),
+        throwsAtPath("tags['items'][1]"),
+      );
+    });
+
+    test('names the path to a rejected value inside a nested map', () {
+      expect(
+        () => get({
+          'outer': {'inner': Object()},
+        }),
+        throwsAtPath("tags['outer']['inner']"),
+      );
+    });
+
+    test('names the path to a non-string key nested in a list', () {
+      expect(
+        () => get({
+          'items': [
+            {2: 'a'},
+          ],
+        }),
+        throwsAtPath("tags['items'][0]"),
+      );
+    });
+  });
 }
 
 class RecordingPlatform extends FingerprintPlatform

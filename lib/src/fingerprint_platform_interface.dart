@@ -1,3 +1,5 @@
+// Platform interface that the native and web implementations share.
+// https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins
 import 'package:flutter/foundation.dart';
 import 'package:fingerprint_flutter/options.dart';
 import 'package:fingerprint_flutter/region.dart';
@@ -10,6 +12,9 @@ class FingerprintConfig {
   final String apiKey;
   final String pluginVersion;
   final Region? region;
+
+  /// Null or non-empty, without empty strings. [Fingerprint] filters them so
+  /// platform code can use the list as is.
   final List<String>? endpoints;
   final AndroidOptions? android;
   final IosOptions? ios;
@@ -25,7 +30,8 @@ class FingerprintConfig {
     this.web,
   });
 
-  // Value equality so two configs with the same fields compare equal.
+  // Value equality because the config is the key for cached web agents and
+  // native clients. Equal configs share one client.
   @override
   bool operator ==(Object other) =>
       other is FingerprintConfig &&
