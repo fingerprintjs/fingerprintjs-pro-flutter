@@ -60,8 +60,9 @@ internal class FingerprintHostApiImpl(
 
   private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
     val region = parseRegion(config.region)
-    val endpointUrl = config.endpoint?.takeIf { it.isNotEmpty() } ?: region.endpointUrl
-    val fallbacks = config.endpointFallbacks?.filter { it.isNotEmpty() } ?: emptyList()
+    // Dart drops empty endpoint strings before they get here.
+    val endpointUrl = config.endpoint ?: region.endpointUrl
+    val fallbacks = config.endpointFallbacks ?: emptyList()
     val locationTimeout = config.locationTimeoutMillis ?: 5000L
     return Configuration(
       config.apiKey,

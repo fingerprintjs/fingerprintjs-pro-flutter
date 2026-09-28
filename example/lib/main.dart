@@ -66,11 +66,8 @@ class _MyAppState extends State<MyApp> {
     if (raw == null || raw.isEmpty) {
       return null;
     }
-    final kept = [
-      for (final url in raw.split(','))
-        if (url.trim().isNotEmpty) url.trim(),
-    ];
-    return kept.isEmpty ? null : kept;
+    // Fingerprint drops empty entries.
+    return [for (final url in raw.split(',')) url.trim()];
   }
 
   Region? _parseRegion(String? region) {
