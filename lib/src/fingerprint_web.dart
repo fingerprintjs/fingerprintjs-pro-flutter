@@ -8,7 +8,6 @@ import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:fingerprint_flutter/src/js_agent_interop.dart';
-import 'package:fingerprint_flutter/src/tags.dart';
 
 /// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
@@ -34,7 +33,6 @@ class FingerprintWeb extends FingerprintPlatform {
     String? linkedId,
     Duration? timeout,
   }) async {
-    validateTags(tags);
     try {
       final agent = _agentFor(config);
       final options = _toGetOptions(
