@@ -9,7 +9,6 @@ import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_web.dart';
 import 'package:fingerprint_flutter/src/js_agent_interop.dart';
-import 'package:fingerprint_flutter/src/plugin_version.dart';
 
 void main() {
   late FakeAgent fake;
@@ -47,7 +46,7 @@ void main() {
 
       expect(fake.startOptions['apiKey'], 'key-1');
       expect(fake.startOptions['integrationInfo'], [
-        'fingerprint-pro-flutter/$pluginVersion/web',
+        'fingerprint-pro-flutter/$fingerprintFlutterVersion/web',
       ]);
       expect(fake.startOptions['region'], 'eu');
       expect(fake.startOptions['endpoints'], [

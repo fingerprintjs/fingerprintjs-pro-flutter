@@ -26,7 +26,7 @@ Migrated the SDK to Fingerprint API v4. This is a breaking change on every platf
 
 **API**
 
-- `package:fingerprint_flutter/fingerprint_flutter.dart` is the only public import. `error.dart`, `result.dart`, and `region.dart` are gone. `pluginVersion` and `Region.stringValue` are no longer public, use `Region.name`.
+- `package:fingerprint_flutter/fingerprint_flutter.dart` is the only public import. `error.dart`, `result.dart`, and `region.dart` are gone. `pluginVersion` is renamed to `fingerprintFlutterVersion`. `Region.stringValue` is removed, use `Region.name`.
 - Static `FpjsProPlugin.initFpjs` / `getVisitorId` / `getVisitorData` are replaced by an instance `Fingerprint` client with `get({tags, linkedId, timeout})`.
 - The constructor is synchronous and starts the client. Identification failures surface on `get`. On Android and iOS, the constructor throws `FlutterError` if the Flutter binding does not exist yet, so call `WidgetsFlutterBinding.ensureInitialized()` first, as with `initFpjs`.
 - Timeouts are `Duration`. `endpoint` + `endpointFallbacks` become one `endpoints` list. Platform options nest under `android`, `ios`, and `web`.

@@ -7,7 +7,7 @@ import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:fingerprint_flutter/src/js_agent_interop.dart';
-import 'package:fingerprint_flutter/src/plugin_version.dart';
+import 'package:fingerprint_flutter/src/version.dart';
 
 /// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
@@ -71,7 +71,7 @@ class FingerprintWeb extends FingerprintPlatform {
 JSObject _toStartOptions(FingerprintConfig config) {
   final options = <String, Object>{
     'apiKey': config.apiKey,
-    'integrationInfo': ['fingerprint-pro-flutter/$pluginVersion/web'],
+    'integrationInfo': ['fingerprint-pro-flutter/$fingerprintFlutterVersion/web'],
     if (config.region != null) 'region': config.region!.name,
     if (config.endpoints != null) 'endpoints': config.endpoints!,
   };
