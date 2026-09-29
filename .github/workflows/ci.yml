@@ -226,6 +226,41 @@ jobs:
           flutter clean
           flutter build ios --no-codesign
 
+      - name: Find iOS simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          for runtime, items in devices.items():
+              if "iOS" not in runtime:
+                  continue
+              for device in items:
+                  if device.get("isAvailable") and "iPhone" in device.get("name", ""):
+                      print(device["udid"])
+                      raise SystemExit
+          raise SystemExit("no available iPhone simulator")
+          ')"
+          echo "Using simulator $udid"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      # Plugin sources are the same for CocoaPods and SwiftPM, so test once, under SwiftPM.
+      # Own DerivedData, so the tests can't link frameworks left over from the CocoaPods build.
+      - name: Run iOS unit tests (Swift Package Manager)
+        working-directory: fpjs_pro_plugin/example/ios
+        run: |
+          xcodebuild test \
+            -quiet \
+            -derivedDataPath "$RUNNER_TEMP/RunnerTests" \
+            -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -only-testing:RunnerTests \
+            -collect-test-diagnostics never \
+            CODE_SIGNING_ALLOWED=NO
+
       # `flutter build ios` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
       - name: Verify Swift Package Manager was used
         run: |
