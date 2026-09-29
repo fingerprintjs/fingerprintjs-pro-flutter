@@ -69,7 +69,7 @@ abstract class FingerprintPlatform extends PlatformInterface {
   }
 
   /// Builds the native or web client for [config]. Warm-up only: [Fingerprint]
-  /// ignores the result, and [get] reports the same failures as
+  /// ignores the returned future, and [get] reports the same failures as
   /// [FingerprintError].
   Future<void> create(FingerprintConfig config);
 
