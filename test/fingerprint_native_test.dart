@@ -51,8 +51,8 @@ void main() {
 
       expect(fakeHostApi.createdConfig?.apiKey, 'key-1');
       expect(fakeHostApi.createdConfig?.region, NativeRegion.eu);
-      expect(fakeHostApi.createdConfig?.endpoint, 'https://primary.example');
-      expect(fakeHostApi.createdConfig?.endpointFallbacks, [
+      expect(fakeHostApi.createdConfig?.endpoints, [
+        'https://primary.example',
         'https://fallback.example',
       ]);
       expect(
@@ -85,8 +85,8 @@ void main() {
 
       expect(fakeHostApi.lastConfig?.apiKey, 'key-1');
       expect(fakeHostApi.lastConfig?.region, NativeRegion.eu);
-      expect(fakeHostApi.lastConfig?.endpoint, 'https://primary.example');
-      expect(fakeHostApi.lastConfig?.endpointFallbacks, [
+      expect(fakeHostApi.lastConfig?.endpoints, [
+        'https://primary.example',
         'https://fallback.example',
       ]);
       expect(fakeHostApi.lastConfig?.pluginVersion, fingerprintFlutterVersion);
@@ -121,19 +121,9 @@ void main() {
       await platform.create(config());
 
       expect(fakeHostApi.createdConfig?.region, NativeRegion.us);
-      expect(fakeHostApi.createdConfig?.endpoint, isNull);
-      expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
+      expect(fakeHostApi.createdConfig?.endpoints, isNull);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, isNull);
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isFalse);
-    });
-
-    test('forwards a single endpoint without fallbacks', () async {
-      await platform.create(
-        config(endpoints: const ['https://primary.example']),
-      );
-
-      expect(fakeHostApi.createdConfig?.endpoint, 'https://primary.example');
-      expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
     });
 
     test('omits timeout when get does not pass one', () async {

@@ -30,10 +30,10 @@ final class FingerprintClientCache: @unchecked Sendable {
   }
 
   private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
-    // Dart drops empty endpoint strings before they get here.
+    // Dart drops empty endpoint strings and sends nil, not an empty list.
     let region: Region
-    if let endpoint = config.endpoint {
-      region = .custom(domain: endpoint, fallback: config.endpointFallbacks ?? [])
+    if let endpoints = config.endpoints, let endpoint = endpoints.first {
+      region = .custom(domain: endpoint, fallback: Array(endpoints.dropFirst()))
     } else {
       switch config.region {
       case .us: region = .global

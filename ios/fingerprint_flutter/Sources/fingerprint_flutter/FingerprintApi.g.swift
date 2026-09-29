@@ -194,8 +194,7 @@ enum NativeRegion: Int, CaseIterable {
 struct FingerprintNativeConfig: Hashable, CustomStringConvertible {
   var apiKey: String
   var region: NativeRegion
-  var endpoint: String? = nil
-  var endpointFallbacks: [String]? = nil
+  var endpoints: [String]? = nil
   var pluginVersion: String
   var allowUseOfLocationData: Bool
   var locationTimeoutMillis: Int64? = nil
@@ -205,17 +204,15 @@ struct FingerprintNativeConfig: Hashable, CustomStringConvertible {
   static func fromList(_ pigeonVar_list: [Any?]) -> FingerprintNativeConfig? {
     let apiKey = pigeonVar_list[0] as! String
     let region = pigeonVar_list[1] as! NativeRegion
-    let endpoint: String? = nilOrValue(pigeonVar_list[2])
-    let endpointFallbacks: [String]? = nilOrValue(pigeonVar_list[3])
-    let pluginVersion = pigeonVar_list[4] as! String
-    let allowUseOfLocationData = pigeonVar_list[5] as! Bool
-    let locationTimeoutMillis: Int64? = nilOrValue(pigeonVar_list[6])
+    let endpoints: [String]? = nilOrValue(pigeonVar_list[2])
+    let pluginVersion = pigeonVar_list[3] as! String
+    let allowUseOfLocationData = pigeonVar_list[4] as! Bool
+    let locationTimeoutMillis: Int64? = nilOrValue(pigeonVar_list[5])
 
     return FingerprintNativeConfig(
       apiKey: apiKey,
       region: region,
-      endpoint: endpoint,
-      endpointFallbacks: endpointFallbacks,
+      endpoints: endpoints,
       pluginVersion: pluginVersion,
       allowUseOfLocationData: allowUseOfLocationData,
       locationTimeoutMillis: locationTimeoutMillis
@@ -225,8 +222,7 @@ struct FingerprintNativeConfig: Hashable, CustomStringConvertible {
     return [
       apiKey,
       region,
-      endpoint,
-      endpointFallbacks,
+      endpoints,
       pluginVersion,
       allowUseOfLocationData,
       locationTimeoutMillis,
@@ -236,22 +232,21 @@ struct FingerprintNativeConfig: Hashable, CustomStringConvertible {
     if Swift.type(of: lhs) != Swift.type(of: rhs) {
       return false
     }
-    return FingerprintApiPigeonInternal.deepEquals(lhs.apiKey, rhs.apiKey) && FingerprintApiPigeonInternal.deepEquals(lhs.region, rhs.region) && FingerprintApiPigeonInternal.deepEquals(lhs.endpoint, rhs.endpoint) && FingerprintApiPigeonInternal.deepEquals(lhs.endpointFallbacks, rhs.endpointFallbacks) && FingerprintApiPigeonInternal.deepEquals(lhs.pluginVersion, rhs.pluginVersion) && FingerprintApiPigeonInternal.deepEquals(lhs.allowUseOfLocationData, rhs.allowUseOfLocationData) && FingerprintApiPigeonInternal.deepEquals(lhs.locationTimeoutMillis, rhs.locationTimeoutMillis)
+    return FingerprintApiPigeonInternal.deepEquals(lhs.apiKey, rhs.apiKey) && FingerprintApiPigeonInternal.deepEquals(lhs.region, rhs.region) && FingerprintApiPigeonInternal.deepEquals(lhs.endpoints, rhs.endpoints) && FingerprintApiPigeonInternal.deepEquals(lhs.pluginVersion, rhs.pluginVersion) && FingerprintApiPigeonInternal.deepEquals(lhs.allowUseOfLocationData, rhs.allowUseOfLocationData) && FingerprintApiPigeonInternal.deepEquals(lhs.locationTimeoutMillis, rhs.locationTimeoutMillis)
   }
 
   func hash(into hasher: inout Hasher) {
     hasher.combine("FingerprintNativeConfig")
     FingerprintApiPigeonInternal.deepHash(value: apiKey, hasher: &hasher)
     FingerprintApiPigeonInternal.deepHash(value: region, hasher: &hasher)
-    FingerprintApiPigeonInternal.deepHash(value: endpoint, hasher: &hasher)
-    FingerprintApiPigeonInternal.deepHash(value: endpointFallbacks, hasher: &hasher)
+    FingerprintApiPigeonInternal.deepHash(value: endpoints, hasher: &hasher)
     FingerprintApiPigeonInternal.deepHash(value: pluginVersion, hasher: &hasher)
     FingerprintApiPigeonInternal.deepHash(value: allowUseOfLocationData, hasher: &hasher)
     FingerprintApiPigeonInternal.deepHash(value: locationTimeoutMillis, hasher: &hasher)
   }
 
   public var description: String {
-    return "FingerprintNativeConfig(apiKey: \(String(describing: apiKey)), region: \(String(describing: region)), endpoint: \(String(describing: endpoint)), endpointFallbacks: \(String(describing: endpointFallbacks)), pluginVersion: \(String(describing: pluginVersion)), allowUseOfLocationData: \(String(describing: allowUseOfLocationData)), locationTimeoutMillis: \(String(describing: locationTimeoutMillis)))"
+    return "FingerprintNativeConfig(apiKey: \(String(describing: apiKey)), region: \(String(describing: region)), endpoints: \(String(describing: endpoints)), pluginVersion: \(String(describing: pluginVersion)), allowUseOfLocationData: \(String(describing: allowUseOfLocationData)), locationTimeoutMillis: \(String(describing: locationTimeoutMillis)))"
   }
 }
 
@@ -368,7 +363,7 @@ protocol FingerprintHostApi {
   /// config too and builds the client if create did not run.
   /// https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection
   func create(config: FingerprintNativeConfig) throws
-  func get(config: FingerprintNativeConfig, tags: [String?: Any?]?, linkedId: String?, timeoutMs: Int64?, completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void)
+  func get(config: FingerprintNativeConfig, tags: [String: Any?]?, linkedId: String?, timeoutMs: Int64?, completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void)
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -410,7 +405,7 @@ class FingerprintHostApiSetup {
       getChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
         let configArg = args[0] as! FingerprintNativeConfig
-        let tagsArg: [String?: Any?]? = nilOrValue(args[1])
+        let tagsArg: [String: Any?]? = nilOrValue(args[1])
         let linkedIdArg: String? = nilOrValue(args[2])
         let timeoutMsArg: Int64? = nilOrValue(args[3])
         api.get(config: configArg, tags: tagsArg, linkedId: linkedIdArg, timeoutMs: timeoutMsArg) { result in
