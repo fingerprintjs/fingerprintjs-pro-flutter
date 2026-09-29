@@ -46,32 +46,21 @@ class FingerprintWeb extends FingerprintPlatform {
           await (options == null ? agent.get() : agent.get(options)).toDart;
       return _toResult(result);
     } catch (error) {
-      if (error is FingerprintError) {
-        rethrow;
-      }
       throw _wrapJsError(error);
     }
   }
 
-  FingerprintAgent _agentFor(FingerprintConfig config) {
-    final existing = _agents[config];
-    if (existing != null) {
-      return existing;
-    }
-    try {
-      final agent = _start(_toStartOptions(config));
-      _agents[config] = agent;
-      return agent;
-    } catch (error) {
-      throw _wrapJsError(error);
-    }
-  }
+  // A failed start is not cached, so the next call retries it.
+  FingerprintAgent _agentFor(FingerprintConfig config) =>
+      _agents[config] ??= _start(_toStartOptions(config));
 }
 
 JSObject _toStartOptions(FingerprintConfig config) {
   final options = <String, Object>{
     'apiKey': config.apiKey,
-    'integrationInfo': ['fingerprint-pro-flutter/$fingerprintFlutterVersion/web'],
+    'integrationInfo': [
+      'fingerprint-pro-flutter/$fingerprintFlutterVersion/web',
+    ],
     if (config.region != null) 'region': config.region!.name,
     if (config.endpoints != null) 'endpoints': config.endpoints!,
   };
