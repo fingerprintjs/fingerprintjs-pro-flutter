@@ -12,7 +12,8 @@ extension FPError {
     case .invalidURL:
       return ("invalid_url", description, nil)
     case .apiError(let apiError):
-      // rawValue is the server's snake_case code.
+      // The SDK decodes the server's code string into APIError.Code, so
+      // rawValue is exactly what the server sent. No per-code mapping needed.
       let code = apiError.errorDetails?.code?.rawValue ?? "unknown_error"
       let message = apiError.errorDetails?.message ?? description
       let eventId = normalizeEventId(apiError.eventId)
