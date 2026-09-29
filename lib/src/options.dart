@@ -83,21 +83,31 @@ enum WebCacheStorage { sessionStorage, localStorage, agent }
 
 /// How long a cached web identification result is reused.
 ///
-/// [optimizeCost] is 1 hour. [aggressive] is 12 hours.
+/// Either a [WebCachePreset] or a [WebCacheCustomDuration]. The presets are
+/// sent by name, so the JS agent decides how long they last.
 /// https://docs.fingerprint.com/reference/js-agent-start-function
-class WebCacheDuration {
-  // Distinct const args so Dart does not canonicalize the presets together.
-  const WebCacheDuration._(this._kind, {this.seconds});
+sealed class WebCacheDuration {
+  /// 1 hour.
+  static const optimizeCost = WebCachePreset.optimizeCost;
 
-  static const optimizeCost = WebCacheDuration._(_Kind.optimizeCost);
-  static const aggressive = WebCacheDuration._(_Kind.aggressive);
+  /// 12 hours.
+  static const aggressive = WebCachePreset.aggressive;
 
+  /// See [WebCacheCustomDuration.new].
+  factory WebCacheDuration.custom(Duration duration) = WebCacheCustomDuration;
+}
+
+/// Named [WebCacheDuration] presets.
+enum WebCachePreset implements WebCacheDuration { optimizeCost, aggressive }
+
+/// A [WebCacheDuration] in whole seconds.
+final class WebCacheCustomDuration implements WebCacheDuration {
   /// [duration] in whole seconds, greater than zero, at most 12 hours.
   ///
   /// The 12 hour maximum is intentionally not checked here. The JS agent
   /// validates it, so the limit can change without a plugin release.
   /// https://docs.fingerprint.com/reference/js-agent-start-function
-  factory WebCacheDuration.custom(Duration duration) {
+  WebCacheCustomDuration(Duration duration) : seconds = duration.inSeconds {
     if (duration <= Duration.zero) {
       throw ArgumentError.value(
         duration,
@@ -105,32 +115,24 @@ class WebCacheDuration {
         'Cache duration must be greater than zero',
       );
     }
-    if (duration != Duration(seconds: duration.inSeconds)) {
+    if (duration != Duration(seconds: seconds)) {
       throw ArgumentError.value(
         duration,
         'duration',
         'Cache duration must be a whole number of seconds',
       );
     }
-    return WebCacheDuration._(_Kind.custom, seconds: duration.inSeconds);
   }
 
-  final _Kind _kind;
-
-  /// Seconds for a custom duration. Null for [optimizeCost] and [aggressive].
-  final int? seconds;
+  final int seconds;
 
   @override
   bool operator ==(Object other) =>
-      other is WebCacheDuration &&
-      other._kind == _kind &&
-      other.seconds == seconds;
+      other is WebCacheCustomDuration && other.seconds == seconds;
 
   @override
-  int get hashCode => Object.hash(_kind, seconds);
+  int get hashCode => seconds.hashCode;
 }
-
-enum _Kind { optimizeCost, aggressive, custom }
 
 /// Web identification result cache. Off when omitted from [WebOptions].
 ///

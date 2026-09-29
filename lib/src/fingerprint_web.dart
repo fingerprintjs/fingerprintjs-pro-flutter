@@ -80,7 +80,11 @@ JSObject _toStartOptions(FingerprintConfig config) {
   if (cache != null) {
     options['cache'] = {
       'storage': cache.storage.name,
-      'duration': _cacheDuration(cache.duration),
+      'duration': switch (cache.duration) {
+        WebCachePreset.optimizeCost => 'optimize-cost',
+        WebCachePreset.aggressive => 'aggressive',
+        WebCacheCustomDuration(:final seconds) => seconds,
+      },
       if (cache.cachePrefix != null) 'cachePrefix': cache.cachePrefix!,
     };
   }
@@ -101,16 +105,6 @@ JSObject? _toGetOptions({
         'timeout': ?timeout?.inMilliseconds,
       }.jsify()
       as JSObject;
-}
-
-Object _cacheDuration(WebCacheDuration duration) {
-  if (duration == WebCacheDuration.optimizeCost) {
-    return 'optimize-cost';
-  }
-  if (duration == WebCacheDuration.aggressive) {
-    return 'aggressive';
-  }
-  return duration.seconds!;
 }
 
 FingerprintResult _toResult(JSObject js) {

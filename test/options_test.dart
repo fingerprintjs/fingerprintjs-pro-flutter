@@ -7,14 +7,9 @@ void main() {
   });
 
   test('accepts a custom cache duration in seconds', () {
-    expect(WebCacheDuration.custom(const Duration(hours: 10)).seconds, 36000);
-  });
-
-  test('optimizeCost and aggressive stay distinct', () {
-    expect(WebCacheDuration.optimizeCost, isNot(WebCacheDuration.aggressive));
     expect(
-      WebCacheDuration.optimizeCost,
-      isNot(WebCacheDuration.custom(const Duration(hours: 1))),
+      WebCacheDuration.custom(const Duration(hours: 10)),
+      isA<WebCacheCustomDuration>().having((d) => d.seconds, 'seconds', 36000),
     );
   });
 
