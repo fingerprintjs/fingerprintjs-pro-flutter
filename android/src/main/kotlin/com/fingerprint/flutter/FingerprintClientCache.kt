@@ -38,7 +38,7 @@ internal class FingerprintClientCache(
     // Dart drops empty endpoint strings before they get here.
     val endpointUrl = config.endpoint ?: region.endpointUrl
     val fallbacks = config.endpointFallbacks ?: emptyList()
-    val locationTimeout = config.locationTimeoutMillis ?: 5000L
+    val locationTimeout = config.locationTimeoutMillis ?: Configuration.DEFAULT_LOCATION_TIMEOUT_MILLIS
     return Configuration(
       config.apiKey,
       region,
