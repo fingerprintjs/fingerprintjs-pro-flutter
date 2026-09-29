@@ -26,7 +26,6 @@ import com.fingerprint.android.ServiceUnavailable
 import com.fingerprint.android.SubscriptionNotActive
 import com.fingerprint.android.SubscriptionRestricted
 import com.fingerprint.android.TooManyRequest
-import com.fingerprint.android.UnknownError
 import com.fingerprint.android.WrongRegion
 
 // Null for Android types without a Dart code.
@@ -55,9 +54,8 @@ internal fun errorCode(error: Error): String? = when (error) {
   is NetworkError -> "network_error"
   is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
-  // Also what the SDK returns for a server code it does not know.
-  is UnknownError -> "unknown_error"
-  // Server API only types. Android has no raw code string to forward.
+  // UnknownError (also used for server codes the SDK does not know) and
+  // Server API only types. No raw code string to forward.
   else -> null
 }
 
