@@ -88,7 +88,7 @@ Migrated the SDK to Fingerprint API v4. This is a breaking change on every platf
 
 **Errors**
 
-One `FingerprintError` (`code`, `message?`, `eventId?`). Discriminate on `error.code`. Network failures report `code: 'network_error'` on all platforms. Codes without a `FingerprintError` constant are passed through, except server codes a native SDK does not know (`unknown_error`). `FingerprintError` does not extend `PlatformException`; if you catch SDK errors with `on PlatformException`, switch to `FingerprintError`.
+One `FingerprintError` (`code`, `message?`, `eventId?`). Discriminate on `error.code`. Network failures report `code: 'network_error'` on all platforms. `FingerprintError` does not extend `PlatformException`; if you catch SDK errors with `on PlatformException`, switch to `FingerprintError`.
 
 ```diff
   try {
