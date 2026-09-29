@@ -19,7 +19,8 @@ extension FPError {
       // rawValue is the code string the server sent.
       let code = apiError.errorDetails?.code?.rawValue ?? "unknown_error"
       let message = apiError.errorDetails?.message ?? description
-      let eventId = normalizeEventId(apiError.eventId)
+      // Same as Android: Dart gets nil, not an empty id.
+      let eventId = apiError.eventId.isEmpty ? nil : apiError.eventId
       return (code, message, eventId)
     // Inner value is usually URLError. Its localizedDescription is the
     // user-facing text. FPError.description is a debug dump of that NSError.
@@ -38,13 +39,4 @@ extension FPError {
       return ("unknown_error", description, nil)
     }
   }
-}
-
-func normalizeEventId(_ eventId: String?) -> String? {
-  // Android Error defaults a missing id to "Unknown". That is not a server
-  // event. Apply the same filter here so Dart never sees the placeholder.
-  guard let eventId, !eventId.isEmpty, eventId != "Unknown" else {
-    return nil
-  }
-  return eventId
 }
