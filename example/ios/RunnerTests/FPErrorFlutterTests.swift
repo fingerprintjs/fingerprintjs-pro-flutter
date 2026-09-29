@@ -3,9 +3,9 @@
 @preconcurrency import Fingerprint
 import Testing
 
-@testable import fpjs_pro_plugin
+@testable import fingerprint_flutter
 
-struct FPJSErrorFlutterTests {
+struct FPErrorFlutterTests {
   @Test(arguments: [
     ("Unknown", nil),
     ("event-id", "event-id"),

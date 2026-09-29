@@ -248,7 +248,7 @@ jobs:
       # Plugin sources are the same for CocoaPods and SwiftPM, so test once, under SwiftPM.
       # Own DerivedData, so the tests can't link frameworks left over from the CocoaPods build.
       - name: Run iOS unit tests (Swift Package Manager)
-        working-directory: fpjs_pro_plugin/example/ios
+        working-directory: fingerprint_flutter/example/ios
         run: |
           xcodebuild test \
             -quiet \
