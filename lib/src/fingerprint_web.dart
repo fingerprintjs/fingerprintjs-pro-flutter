@@ -50,7 +50,10 @@ class FingerprintWeb extends FingerprintPlatform {
     }
   }
 
-  // A failed start is not cached, so the next call retries it.
+  // - A start() that throws is not cached, so the next call retries it.
+  // - start() returns before the agent script loads. If the load fails, this
+  //   agent rejects every get with script_load_fail until the page reloads.
+  // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   FingerprintAgent _agentFor(FingerprintConfig config) =>
       _agents[config] ??= _start(_toStartOptions(config));
 }
