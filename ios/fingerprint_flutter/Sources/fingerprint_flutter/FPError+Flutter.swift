@@ -10,17 +10,11 @@ extension FPError {
     // generic "couldn't be completed" string.
     // https://developer.apple.com/documentation/foundation/localizederror
     let description = self.description
-    // Client-side codes match the JS agent codes for the same failure.
-    // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
     switch self {
     case .invalidURL:
-      return ("invalid_endpoint", description, nil)
-    // The plugin builds the integration info, so this is a plugin bug.
-    case .invalidURLParams:
-      return ("unknown_error", description, nil)
+      return ("invalid_url", description, nil)
     case .apiError(let apiError):
-      // rawValue is the server's snake_case code. Dart keeps codes it has
-      // no constant for, so no per-code list is needed here.
+      // rawValue is the server's snake_case code.
       let code = apiError.errorDetails?.code?.rawValue ?? "unknown_error"
       let message = apiError.errorDetails?.message ?? description
       let eventId = normalizeEventId(apiError.eventId)
@@ -29,18 +23,13 @@ extension FPError {
     // user-facing text. FPError.description is a debug dump of that NSError.
     case .networkError(let error):
       return ("network_error", error.localizedDescription, nil)
-    // Also covers request encoding failures. Dart validates tags first, so
-    // in practice this is a bad response.
     case .jsonParsingError(let error):
-      return ("bad_response_format", error.localizedDescription, nil)
-    case .invalidResponseType:
-      return ("bad_response_format", description, nil)
+      return ("json_parsing_error", error.localizedDescription, nil)
     case .clientTimeout:
       return ("client_timeout", description, nil)
-    // The SDK also returns unknownError when the server sends a code missing
-    // from APIError.Code. The whole error body fails to decode, so the server
-    // code, message, and eventId are gone before the plugin sees them.
-    case .unknownError:
+    // Also what the SDK returns for a server code missing from APIError.Code.
+    // invalidURLParams and invalidResponseType are practically unreachable.
+    case .unknownError, .invalidURLParams, .invalidResponseType:
       fallthrough
     @unknown default:
       return ("unknown_error", description, nil)
