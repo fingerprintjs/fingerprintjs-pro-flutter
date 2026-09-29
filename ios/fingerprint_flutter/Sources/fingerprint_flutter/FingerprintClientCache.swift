@@ -1,13 +1,22 @@
 // One iOS Fingerprint client per Pigeon config.
-import Foundation
 @preconcurrency import Fingerprint
+import Foundation
 
 final class FingerprintClientCache: @unchecked Sendable {
   // Pigeon generates Hashable for the config, so new fields are part of the
   // key automatically. Configs that differ only in a field iOS ignores
   // (locationTimeoutMillis) get separate clients, which is harmless.
   private var clients: [FingerprintNativeConfig: FingerprintClientProviding] = [:]
+  private let createClient: (Configuration) -> FingerprintClientProviding
   private let lock = NSLock()
+
+  init(
+    createClient: @escaping (Configuration) -> FingerprintClientProviding = {
+      FingerprintFactory.getInstance($0)
+    }
+  ) {
+    self.createClient = createClient
+  }
 
   func getOrCreate(_ config: FingerprintNativeConfig) -> FingerprintClientProviding {
     lock.lock()
@@ -15,7 +24,7 @@ final class FingerprintClientCache: @unchecked Sendable {
     if let existing = clients[config] {
       return existing
     }
-    let client = FingerprintFactory.getInstance(buildConfiguration(config: config))
+    let client = createClient(buildConfiguration(config: config))
     clients[config] = client
     return client
   }
