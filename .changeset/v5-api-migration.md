@@ -31,7 +31,7 @@ Migrated the SDK to Fingerprint API v4. This is a breaking change on every platf
 - The constructor is synchronous and starts the client. Identification failures surface on `get`. On Android and iOS, the constructor throws `FlutterError` if the Flutter binding does not exist yet, so call `WidgetsFlutterBinding.ensureInitialized()` first, as with `initFpjs`.
 - Timeouts are `Duration`. `endpoint` + `endpointFallbacks` become one `endpoints` list. Platform options nest under `android`, `ios`, and `web`.
 - `scriptUrlPattern`, `scriptUrlPatternFallbacks`, and `extendedResponseFormat` are removed.
-- `tags` must be JSON-compatible (string keys, finite numbers, no typed lists). `get` throws `ArgumentError` right away for invalid `tags` or a negative `timeout`, before identifying.
+- `tags` must be JSON-compatible (string keys, finite numbers, no typed lists). `get` throws `ArgumentError` right away for invalid `tags` or a negative `timeout`, before identifying. The constructor throws `ArgumentError` for a negative `android.locationTimeout`.
 - Custom `endpoints` still get no automatic fallback on any platform, even though JS agent v4 adds one by default. List the [regional default URL](https://docs.fingerprint.com/docs/regions) last if you want it.
 - On Android and iOS, `region` still defaults to `Region.us`. Set it for EU and AP workspaces.
 

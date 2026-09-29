@@ -93,6 +93,23 @@ void main() {
     expect(platform.gets, isEmpty);
   });
 
+  test('rejects a negative Android location timeout without starting', () {
+    expect(
+      () => Fingerprint(
+        apiKey: 'key-1',
+        android: const AndroidOptions(locationTimeout: Duration(seconds: -1)),
+      ),
+      throwsA(
+        isA<ArgumentError>().having(
+          (error) => error.name,
+          'name',
+          'android.locationTimeout',
+        ),
+      ),
+    );
+    expect(platform.created, isEmpty);
+  });
+
   // E.g. the client was built before the Flutter binding was ready.
   test('a failed constructor start does not break get', () async {
     platform.createError = FingerprintError(

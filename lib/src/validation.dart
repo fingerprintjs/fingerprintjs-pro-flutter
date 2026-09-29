@@ -1,10 +1,10 @@
-/// Validation of `Fingerprint.get` arguments.
+/// Validation of `Fingerprint` and `Fingerprint.get` arguments.
 ///
 /// Tags: same string-keyed JSON map on every platform. No size cap here.
 /// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
 /// as `payload_too_large`.
 ///
-/// Timeout: Dart [Duration] can be negative. Reject it here so native and
+/// Timeouts: Dart [Duration] can be negative. Reject it here so native and
 /// web never see a negative millisecond value.
 library;
 
@@ -21,10 +21,10 @@ void validateTags(Map<String, Object?>? tags) {
   }
 }
 
-/// Throws an [ArgumentError] if [timeout] is negative.
-void validateTimeout(Duration? timeout) {
+/// Throws an [ArgumentError] named [name] if [timeout] is negative.
+void validateTimeout(Duration? timeout, String name) {
   if (timeout != null && timeout.isNegative) {
-    throw ArgumentError.value(timeout, 'timeout', 'Timeout cannot be negative');
+    throw ArgumentError.value(timeout, name, 'Timeout cannot be negative');
   }
 }
 
