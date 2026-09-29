@@ -284,7 +284,7 @@ void main() {
       () async {
         fake.startError = jsError('start failed');
         await expectLater(
-          platform.create(config()),
+          platform.get(config()),
           throwsA(
             isA<FingerprintError>()
                 .having((error) => error.code, 'code', 'unknown_error')
@@ -326,7 +326,7 @@ void main() {
   test('wraps a start failure as FingerprintError', () async {
     platform = FingerprintWeb(start: (_) => throw 'start failed');
     await expectLater(
-      platform.create(config()),
+      platform.get(config()),
       throwsA(
         isA<FingerprintError>().having(
           (error) => error.code,

@@ -28,8 +28,9 @@ class FingerprintConfig {
     this.web,
   });
 
-  // Value equality because the config is the key for cached web agents and
-  // native clients. Equal configs share one client.
+  // Value equality because the config is the key for cached web agents. Equal
+  // configs share one agent. Native code keys its clients on
+  // FingerprintNativeConfig instead.
   @override
   bool operator ==(Object other) =>
       other is FingerprintConfig &&
@@ -67,7 +68,9 @@ abstract class FingerprintPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  /// Builds the native or web client for [config].
+  /// Builds the native or web client for [config]. Warm-up only: [Fingerprint]
+  /// ignores the result, and [get] reports the same failures as
+  /// [FingerprintError].
   Future<void> create(FingerprintConfig config);
 
   /// Identifies using [config]. Creates the client if [create] never ran.
