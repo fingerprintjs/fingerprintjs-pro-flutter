@@ -42,10 +42,11 @@ final class FingerprintError implements Exception {
   static const clientTimeout = 'client_timeout';
   static const unknownError = 'unknown_error';
 
-  // Client errors on iOS (invalid URL, JSON) and Android (response). Same
-  // codes as the React Native SDK.
+  // Client errors on iOS and Android. Same codes as the React Native SDK.
   static const invalidUrl = 'invalid_url';
+  static const invalidUrlParams = 'invalid_url_params';
   static const jsonParsingError = 'json_parsing_error';
+  static const invalidResponseType = 'invalid_response_type';
   static const responseCannotBeParsed = 'response_cannot_be_parsed';
 
   // JavaScript agent errors from its public docs, minus codes for options the

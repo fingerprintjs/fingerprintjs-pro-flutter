@@ -11,6 +11,8 @@ extension FPError {
     switch self {
     case .invalidURL:
       return ("invalid_url", description, nil)
+    case .invalidURLParams:
+      return ("invalid_url_params", description, nil)
     case .apiError(let apiError):
       // The SDK decodes the server's code string into APIError.Code, so
       // rawValue is exactly what the server sent. No per-code mapping needed.
@@ -24,11 +26,12 @@ extension FPError {
       return ("network_error", error.localizedDescription, nil)
     case .jsonParsingError(let error):
       return ("json_parsing_error", error.localizedDescription, nil)
+    case .invalidResponseType:
+      return ("invalid_response_type", description, nil)
     case .clientTimeout:
       return ("client_timeout", description, nil)
     // Also what the SDK returns for a server code missing from APIError.Code.
-    // invalidURLParams and invalidResponseType are practically unreachable.
-    case .unknownError, .invalidURLParams, .invalidResponseType:
+    case .unknownError:
       fallthrough
     @unknown default:
       return ("unknown_error", description, nil)
