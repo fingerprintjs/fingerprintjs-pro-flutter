@@ -8,10 +8,10 @@ import Testing
 
 struct FPErrorFlutterTests {
   @Test(arguments: [
-    ("Unknown", nil),
+    ("", nil),
     ("event-id", "event-id"),
   ] as [(String, String?)])
-  func keepsCodeAndMessageAndDropsUnknownEventId(eventId: String, expectedEventId: String?)
+  func keepsCodeAndMessageAndDropsEmptyEventId(eventId: String, expectedEventId: String?)
     throws
   {
     let error = try makeAPIError(
