@@ -49,17 +49,21 @@ final class FingerprintError implements Exception {
   static const invalidResponseType = 'invalid_response_type';
   static const responseCannotBeParsed = 'response_cannot_be_parsed';
 
-  // JavaScript agent errors from its public docs, minus codes for options the
-  // plugin does not expose (worker, non-string apiKey).
+  // JavaScript agent errors from its ErrorCode type. Left out:
+  // - wrong_worker_option, handle_agent_data, api_key_invalid: the plugin has
+  //   no worker option, never calls handleAgentData, and apiKey is a String.
+  // - bundle_not_defined: the type marks it as never thrown outside the loader.
   // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   static const sandboxedIframe = 'sandboxed_iframe';
   static const cspBlock = 'csp_block';
   static const invalidEndpoint = 'invalid_endpoint';
   static const scriptLoadFail = 'script_load_fail';
   static const badResponseFormat = 'bad_response_format';
+  static const serverError = 'server_error';
   static const apiKeyMissing = 'api_key_missing';
   static const cacheMisconfigured = 'cache_misconfigured';
   static const endpointsMisconfigured = 'endpoints_misconfigured';
+  static const workerInitializationFailed = 'worker_initialization_failed';
 
   /// The machine-readable error code. Not limited to the constants above.
   final String code;
