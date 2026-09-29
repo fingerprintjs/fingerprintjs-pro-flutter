@@ -3,6 +3,10 @@
 /// [code] is the client's snake_case value. Compare it with the constants on
 /// this class. Other strings are kept.
 ///
+/// Server codes without a constant here: iOS and web pass them through as is.
+/// Android sends [unknownError] with the server message, because the Android
+/// SDK has no code string to forward.
+///
 /// On Android and iOS, a server code the native SDK does not know arrives as
 /// [unknownError] and the server message is lost. Android still sets
 /// [eventId], so the event can be looked up.
