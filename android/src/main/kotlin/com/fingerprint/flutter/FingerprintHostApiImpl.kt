@@ -20,7 +20,15 @@ internal class FingerprintHostApiImpl(
     timeoutMs: Long?,
     callback: (Result<FingerprintNativeResult>) -> Unit,
   ) {
-    val client = clientCache.getOrCreate(config)
+    // Pigeon catches throws only for sync methods like create. Here a throw
+    // would escape the handler instead of completing the Dart Future.
+    // Non-FlutterError throws would reach Dart with the class name as code.
+    val client = try {
+      clientCache.getOrCreate(config)
+    } catch (error: Exception) {
+      callback(Result.failure(FlutterError("unknown_error", error.toString())))
+      return
+    }
     val tagMap = pigeonTagsToNative(tags)
     val linked = linkedId ?: ""
     val listener: (FingerprintResponse) -> Unit = { response ->
