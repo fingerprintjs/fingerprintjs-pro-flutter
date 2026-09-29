@@ -1,6 +1,7 @@
 package com.fingerprint.flutter
 
 import android.content.Context
+import com.fingerprint.android.Configuration
 import com.fingerprint.android.Fingerprint
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
@@ -67,5 +68,57 @@ class FingerprintClientCacheTest {
     go.countDown()
     threads.forEach { it.join() }
     assertEquals(1, created.get())
+  }
+
+  @Test
+  fun usesRegionUrlWhenEndpointIsOmitted() {
+    val built = buildConfiguration(nativeConfig(region = NativeRegion.EU, endpoint = null))
+    assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
+  }
+
+  @Test
+  fun usesCustomEndpointAndFallbacks() {
+    val built = buildConfiguration(
+      nativeConfig(endpoint = "https://proxy.example", fallbacks = listOf("https://fallback.example")),
+    )
+    assertEquals("https://proxy.example", built.endpointUrl)
+    assertEquals(listOf("https://fallback.example"), built.fallbackEndpointUrls)
+  }
+
+  @Test
+  fun mapsRegions() {
+    val cases = listOf(
+      NativeRegion.EU to Configuration.Region.EU,
+      NativeRegion.AP to Configuration.Region.AP,
+      NativeRegion.US to Configuration.Region.US,
+    )
+    for ((region, expected) in cases) {
+      assertEquals(expected, buildConfiguration(nativeConfig(region = region)).region)
+    }
+  }
+
+  @Test
+  fun forwardsLocationSettings() {
+    val built = buildConfiguration(
+      nativeConfig(allowUseOfLocationData = true, locationTimeoutMillis = 1000L),
+    )
+    assertEquals(true, built.allowUseOfLocationData)
+    assertEquals(1000L, built.locationTimeoutMillis)
+  }
+
+  @Test
+  fun usesSdkDefaultLocationTimeoutWhenOmitted() {
+    val built = buildConfiguration(nativeConfig(locationTimeoutMillis = null))
+    assertEquals(Configuration.DEFAULT_LOCATION_TIMEOUT_MILLIS, built.locationTimeoutMillis)
+  }
+
+  // The Configuration the cache passes to the SDK factory.
+  private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
+    var captured: Configuration? = null
+    FingerprintClientCache(context) { _, configuration ->
+      captured = configuration
+      mock(Fingerprint::class.java)
+    }.getOrCreate(config)
+    return checkNotNull(captured)
   }
 }

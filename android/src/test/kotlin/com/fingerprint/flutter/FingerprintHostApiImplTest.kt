@@ -2,7 +2,6 @@ package com.fingerprint.flutter
 
 import android.content.Context
 import com.fingerprint.android.ApiKeyRequired
-import com.fingerprint.android.Configuration
 import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
@@ -101,38 +100,6 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createUsesRegionUrlWhenEndpointIsOmitted() {
-    val built = captureConfiguration(
-      nativeConfig(region = NativeRegion.EU, endpoint = null),
-    )
-    assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
-  }
-
-  @Test
-  fun createUsesCustomEndpoint() {
-    val built = captureConfiguration(
-      nativeConfig(endpoint = "https://proxy.example"),
-    )
-    assertEquals("https://proxy.example", built.endpointUrl)
-  }
-
-  @Test
-  fun createForwardsLocationFlag() {
-    val built = captureConfiguration(
-      nativeConfig(allowUseOfLocationData = true),
-    )
-    assertEquals(true, built.allowUseOfLocationData)
-  }
-
-  @Test
-  fun createUsesProvidedLocationTimeout() {
-    val built = captureConfiguration(
-      nativeConfig(locationTimeoutMillis = 1000L),
-    )
-    assertEquals(1000L, built.locationTimeoutMillis)
-  }
-
-  @Test
   fun getForwardsLinkedId() {
     val client = CapturingFingerprint()
     val api = hostApi { _, _ -> client }
@@ -146,22 +113,14 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createMapsRegions() {
-    val cases = listOf(
-      NativeRegion.EU to Configuration.Region.EU,
-      NativeRegion.AP to Configuration.Region.AP,
-      NativeRegion.US to Configuration.Region.US,
-    )
-    for ((region, expected) in cases) {
-      val built = captureConfiguration(nativeConfig(region = region))
-      assertEquals(expected, built.region)
-    }
-  }
-
-  @Test
-  fun createDefaultsLocationTimeoutWhenOmitted() {
-    val built = captureConfiguration(nativeConfig(locationTimeoutMillis = null))
-    assertEquals(5000L, built.locationTimeoutMillis)
+  fun getReportsClientCreationFailureAsUnknownError() {
+    val api = hostApi { _, _ -> throw IllegalStateException("bad config") }
+    var captured: Result<FingerprintNativeResult>? = null
+    api.get(nativeConfig(), null, null, null) { captured = it }
+    val error = captured!!.exceptionOrNull() as FlutterError
+    assertEquals("unknown_error", error.code)
+    assertTrue(error.message!!.contains("bad config"))
+    assertNull(error.details)
   }
 
   @Test
@@ -190,16 +149,6 @@ class FingerprintHostApiImplTest {
 
   private fun hostApi(createFingerprint: FingerprintFactoryFn) =
     FingerprintHostApiImpl(context, FingerprintClientCache(context, createFingerprint))
-
-  private fun captureConfiguration(config: FingerprintNativeConfig): Configuration {
-    var captured: Configuration? = null
-    val api = hostApi { _, configuration ->
-      captured = configuration
-      mock(Fingerprint::class.java)
-    }
-    api.create(config)
-    return checkNotNull(captured)
-  }
 }
 
 internal fun nativeConfig(
