@@ -1,11 +1,9 @@
 // Platform interface that the native and web implementations share.
-// https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins
 import 'package:flutter/foundation.dart';
 import 'package:fingerprint_flutter/src/options.dart';
 import 'package:fingerprint_flutter/src/region.dart';
 import 'package:fingerprint_flutter/src/fingerprint_native.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// Configuration passed to every platform [create] and [get].
 class FingerprintConfig {
@@ -53,20 +51,14 @@ class FingerprintConfig {
 }
 
 /// The interface each platform implementation of this plugin implements.
-abstract class FingerprintPlatform extends PlatformInterface {
-  FingerprintPlatform() : super(token: _token);
-
-  static final Object _token = Object();
-
-  static FingerprintPlatform _instance = FingerprintNative();
-
-  /// The implementation used by [Fingerprint], [FingerprintNative] by default.
-  static FingerprintPlatform get instance => _instance;
-
-  static set instance(FingerprintPlatform instance) {
-    PlatformInterface.verify(instance, _token);
-    _instance = instance;
-  }
+///
+/// A plain abstract class: only this package implements it, so the
+/// plugin_platform_interface token check has nothing to guard.
+/// https://pub.dev/packages/plugin_platform_interface
+abstract class FingerprintPlatform {
+  /// The implementation used by [Fingerprint], [FingerprintNative] by
+  /// default. Web registration replaces it.
+  static FingerprintPlatform instance = FingerprintNative();
 
   /// Builds the native or web client for [config]. Warm-up only: [Fingerprint]
   /// ignores the returned future, and [get] reports the same failures as

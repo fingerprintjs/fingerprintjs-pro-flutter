@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 void main() {
   late RecordingPlatform platform;
@@ -249,8 +248,7 @@ void main() {
   });
 }
 
-class RecordingPlatform extends FingerprintPlatform
-    with MockPlatformInterfaceMixin {
+class RecordingPlatform extends FingerprintPlatform {
   final created = <FingerprintConfig>[];
   final gets = <_GetCall>[];
   FingerprintError? createError;
