@@ -19,9 +19,7 @@ extension FPError {
       // rawValue is the code string the server sent.
       let code = apiError.errorDetails?.code?.rawValue ?? "unknown_error"
       let message = apiError.errorDetails?.message ?? description
-      // Same as Android: Dart gets nil, not an empty id.
-      let eventId = apiError.eventId.isEmpty ? nil : apiError.eventId
-      return (code, message, eventId)
+      return (code, message, apiError.eventId)
     // Inner value is usually URLError. Its localizedDescription is the
     // user-facing text. FPError.description is a debug dump of that NSError.
     case .networkError(let error):

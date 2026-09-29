@@ -24,13 +24,6 @@ class FingerprintNativeErrorTest {
   }
 
   @Test
-  fun stripsEmptyEventId() {
-    val flutterError = toFlutterError(ApiKeyRequired("", "need key"))
-    assertEquals("need key", flutterError.message)
-    assertNull(flutterError.details)
-  }
-
-  @Test
   fun forwardsUnmappedErrorAsUnknownWithDescription() {
     val flutterError = toFlutterError(StateNotReady("evt-1", "state not ready"))
     assertEquals("unknown_error", flutterError.code)

@@ -61,8 +61,8 @@ internal fun errorCode(error: Error): String? = when (error) {
 
 internal fun normalizeEventId(eventId: String?): String? {
   // Android Error defaults eventId to "Unknown" when the SDK has no id.
-  // That is not a server event. Empty and missing are also not usable ids.
-  if (eventId == null || eventId.isEmpty() || eventId == "Unknown") {
+  // That is not a server event. Dart turns empty ids into null.
+  if (eventId == null || eventId == "Unknown") {
     return null
   }
   return eventId
