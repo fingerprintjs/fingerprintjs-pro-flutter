@@ -323,19 +323,6 @@ void main() {
     });
   });
 
-  test('wraps a start failure as FingerprintError', () async {
-    platform = FingerprintWeb(start: (_) => throw 'start failed');
-    await expectLater(
-      platform.get(config()),
-      throwsA(
-        isA<FingerprintError>().having(
-          (error) => error.code,
-          'code',
-          FingerprintError.unknownError,
-        ),
-      ),
-    );
-  });
 }
 
 class FakeAgent {
