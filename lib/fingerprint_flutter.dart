@@ -13,6 +13,7 @@ export 'package:fingerprint_flutter/src/fingerprint_error.dart';
 export 'package:fingerprint_flutter/src/fingerprint_result.dart';
 export 'package:fingerprint_flutter/src/options.dart';
 export 'package:fingerprint_flutter/src/region.dart';
+export 'package:fingerprint_flutter/src/version.dart';
 
 /// Identification client. Create one per public API key and configuration.
 ///

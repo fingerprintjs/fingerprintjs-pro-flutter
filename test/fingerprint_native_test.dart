@@ -5,7 +5,6 @@ import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_native.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/pigeon/fingerprint_api.g.dart';
-import 'package:fingerprint_flutter/src/plugin_version.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +55,7 @@ void main() {
       expect(fakeHostApi.createdConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
-      expect(fakeHostApi.createdConfig?.pluginVersion, pluginVersion);
+      expect(fakeHostApi.createdConfig?.pluginVersion, fingerprintFlutterVersion);
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, 3000);
     });
@@ -87,7 +86,7 @@ void main() {
       expect(fakeHostApi.lastConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
-      expect(fakeHostApi.lastConfig?.pluginVersion, pluginVersion);
+      expect(fakeHostApi.lastConfig?.pluginVersion, fingerprintFlutterVersion);
       expect(fakeHostApi.lastConfig?.allowUseOfLocationData, isTrue);
       expect(fakeHostApi.lastConfig?.locationTimeoutMillis, 3000);
       expect(fakeHostApi.lastTags, {'sessionId': 1});
