@@ -8,8 +8,6 @@ import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
 import com.fingerprint.android.NetworkUnavailableError
 import com.fingerprint.android.RequestTimeout
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -31,7 +29,7 @@ class FingerprintHostApiImplTest {
       // throws IllegalAccessError on the desktop JVM (works on ART).
     )
     for ((nativeError, expectedCode) in cases) {
-      val api = FingerprintHostApiImpl(context) { _, _ ->
+      val api = hostApi { _, _ ->
         FakeFingerprint(nativeError)
       }
       var captured: Result<FingerprintNativeResult>? = null
@@ -49,7 +47,7 @@ class FingerprintHostApiImplTest {
   @Test
   fun getForwardsExplicitNullTagValues() {
     val client = CapturingFingerprint()
-    val api = FingerprintHostApiImpl(context) { _, _ -> client }
+    val api = hostApi { _, _ -> client }
     api.get(
       nativeConfig(),
       mapOf("campaign" to null, "sessionId" to 1),
@@ -65,7 +63,7 @@ class FingerprintHostApiImplTest {
   @Test
   fun getForwardsTimeoutThatFitsInt() {
     val client = CapturingFingerprint()
-    val api = FingerprintHostApiImpl(context) { _, _ -> client }
+    val api = hostApi { _, _ -> client }
     api.get(
       nativeConfig(),
       null,
@@ -78,7 +76,7 @@ class FingerprintHostApiImplTest {
   @Test
   fun getClampsTimeoutOutsideInt() {
     val client = CapturingFingerprint()
-    val api = FingerprintHostApiImpl(context) { _, _ -> client }
+    val api = hostApi { _, _ -> client }
     api.get(
       nativeConfig(),
       null,
@@ -91,7 +89,7 @@ class FingerprintHostApiImplTest {
   @Test
   fun getUsesDefaultTimeoutOverloadWhenOmitted() {
     val client = CapturingFingerprint()
-    val api = FingerprintHostApiImpl(context) { _, _ -> client }
+    val api = hostApi { _, _ -> client }
     api.get(
       nativeConfig(),
       null,
@@ -137,7 +135,7 @@ class FingerprintHostApiImplTest {
   @Test
   fun getForwardsLinkedId() {
     val client = CapturingFingerprint()
-    val api = FingerprintHostApiImpl(context) { _, _ -> client }
+    val api = hostApi { _, _ -> client }
     api.get(
       nativeConfig(),
       null,
@@ -173,7 +171,7 @@ class FingerprintHostApiImplTest {
     `when`(response.visitorId).thenReturn("vid-1")
     `when`(response.suspectScore).thenReturn(42)
     `when`(response.sealedResult).thenReturn("sealed")
-    val api = FingerprintHostApiImpl(context) { _, _ ->
+    val api = hostApi { _, _ ->
       SuccessFingerprint(response)
     }
     var captured: Result<FingerprintNativeResult>? = null
@@ -190,92 +188,37 @@ class FingerprintHostApiImplTest {
     assertEquals("sealed", result.sealedResult)
   }
 
-  @Test
-  fun reusesClientForEqualConfig() {
-    val created = AtomicInteger()
-    val api = FingerprintHostApiImpl(context) { _, _ ->
-      created.incrementAndGet()
-      mock(Fingerprint::class.java)
-    }
-    // Separate instances, like two Pigeon calls decode.
-    api.create(nativeConfig(fallbacks = listOf("https://fallback.example")))
-    api.create(nativeConfig(fallbacks = listOf("https://fallback.example")))
-    assertEquals(1, created.get())
-  }
-
-  @Test
-  fun distinctConfigsDoNotShareAClient() {
-    val created = AtomicInteger()
-    val api = FingerprintHostApiImpl(context) { _, _ ->
-      created.incrementAndGet()
-      mock(Fingerprint::class.java)
-    }
-    val configs = listOf(
-      nativeConfig(),
-      nativeConfig(apiKey = "key-b"),
-      nativeConfig(region = NativeRegion.EU),
-      nativeConfig(endpoint = "https://custom.example"),
-      nativeConfig(fallbacks = listOf("https://fallback.example")),
-      nativeConfig(pluginVersion = "2.0.0"),
-      nativeConfig(allowUseOfLocationData = true),
-      nativeConfig(locationTimeoutMillis = 1000L),
-    )
-    configs.forEach { api.create(it) }
-    assertEquals(configs.size, created.get())
-  }
-
-  @Test
-  fun concurrentFirstCreateBuildsOneClient() {
-    val created = AtomicInteger()
-    val api = FingerprintHostApiImpl(context) { _, _ ->
-      created.incrementAndGet()
-      Thread.sleep(20)
-      mock(Fingerprint::class.java)
-    }
-    val ready = CountDownLatch(16)
-    val go = CountDownLatch(1)
-    val threads = List(16) {
-      Thread {
-        ready.countDown()
-        go.await()
-        api.create(nativeConfig())
-      }
-    }
-    threads.forEach { it.start() }
-    ready.await()
-    go.countDown()
-    threads.forEach { it.join() }
-    assertEquals(1, created.get())
-  }
+  private fun hostApi(createFingerprint: FingerprintFactoryFn) =
+    FingerprintHostApiImpl(context, FingerprintClientCache(context, createFingerprint))
 
   private fun captureConfiguration(config: FingerprintNativeConfig): Configuration {
     var captured: Configuration? = null
-    val api = FingerprintHostApiImpl(context) { _, configuration ->
+    val api = hostApi { _, configuration ->
       captured = configuration
       mock(Fingerprint::class.java)
     }
     api.create(config)
     return checkNotNull(captured)
   }
-
-  private fun nativeConfig(
-    apiKey: String = "key-a",
-    region: NativeRegion = NativeRegion.US,
-    endpoint: String? = null,
-    fallbacks: List<String>? = null,
-    pluginVersion: String = "1.0.0",
-    allowUseOfLocationData: Boolean = false,
-    locationTimeoutMillis: Long? = 5000L,
-  ) = FingerprintNativeConfig(
-    apiKey,
-    region,
-    endpoint,
-    fallbacks,
-    pluginVersion,
-    allowUseOfLocationData,
-    locationTimeoutMillis,
-  )
 }
+
+internal fun nativeConfig(
+  apiKey: String = "key-a",
+  region: NativeRegion = NativeRegion.US,
+  endpoint: String? = null,
+  fallbacks: List<String>? = null,
+  pluginVersion: String = "1.0.0",
+  allowUseOfLocationData: Boolean = false,
+  locationTimeoutMillis: Long? = 5000L,
+) = FingerprintNativeConfig(
+  apiKey,
+  region,
+  endpoint,
+  fallbacks,
+  pluginVersion,
+  allowUseOfLocationData,
+  locationTimeoutMillis,
+)
 
 private class FakeFingerprint(
   private val error: com.fingerprint.android.Error,

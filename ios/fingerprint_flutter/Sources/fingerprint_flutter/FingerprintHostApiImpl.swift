@@ -14,14 +14,10 @@ private final class CompletionBox: @unchecked Sendable {
 
 /// Pigeon HostApi backed by the iOS Fingerprint SDK 4.x.
 final class FingerprintHostApiImpl: FingerprintHostApi {
-  // One client per config. Pigeon generates Hashable for the config.
-  // Configs that differ only in a field iOS ignores (locationTimeoutMillis)
-  // get separate clients, which is harmless.
-  private var clients: [FingerprintNativeConfig: FingerprintClientProviding] = [:]
-  private let lock = NSLock()
+  private let clientCache = FingerprintClientCache()
 
   func create(config: FingerprintNativeConfig) throws {
-    _ = nativeClient(for: config)
+    _ = clientCache.getOrCreate(config)
   }
 
   func get(
@@ -31,7 +27,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     timeoutMs: Int64?,
     completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void
   ) {
-    let client = nativeClient(for: config)
+    let client = clientCache.getOrCreate(config)
     let metadata = prepareMetadata(linkedId: linkedId, tags: tags)
     let timeoutSeconds: TimeInterval? = timeoutMs.map { TimeInterval($0) / 1000.0 }
     let box = CompletionBox(completion)
@@ -63,37 +59,6 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     } else {
       client.getVisitorIdResponse(metadata, completion: handler)
     }
-  }
-
-  private func nativeClient(for config: FingerprintNativeConfig) -> FingerprintClientProviding {
-    lock.lock()
-    defer { lock.unlock() }
-    if let existing = clients[config] {
-      return existing
-    }
-    let client = FingerprintFactory.getInstance(buildConfiguration(config: config))
-    clients[config] = client
-    return client
-  }
-
-  private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
-    // Dart drops empty endpoint strings before they get here.
-    let region: Region
-    if let endpoint = config.endpoint {
-      region = .custom(domain: endpoint, fallback: config.endpointFallbacks ?? [])
-    } else {
-      switch config.region {
-      case .us: region = .global
-      case .eu: region = .eu
-      case .ap: region = .ap
-      }
-    }
-    return Configuration(
-      apiKey: config.apiKey,
-      region: region,
-      integrationInfo: [("fingerprint-pro-flutter", config.pluginVersion)],
-      allowUseOfLocationData: config.allowUseOfLocationData
-    )
   }
 
   private func prepareMetadata(linkedId: String?, tags: [String?: Any?]?) -> Metadata {
