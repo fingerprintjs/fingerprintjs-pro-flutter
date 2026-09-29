@@ -33,28 +33,28 @@ final class FingerprintError implements Exception {
   static const proxyIntegrationSecretEnvironmentMismatch =
       'proxy_integration_secret_environment_mismatch';
 
-  // Client errors. Same code for the same failure on every platform, named
-  // after the JS agent code.
-  // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
+  // Client errors on every platform.
   static const networkError = 'network_error';
   static const clientTimeout = 'client_timeout';
-  static const badResponseFormat = 'bad_response_format';
-
-  /// iOS and web only. Android reports a malformed endpoint as
-  /// [networkError].
-  static const invalidEndpoint = 'invalid_endpoint';
   static const unknownError = 'unknown_error';
 
-  // JavaScript agent errors. Left out: codes the plugin's typed options rule
-  // out (worker, handleAgentData, non-string apiKey) and loader-internal ones.
+  // Client errors on iOS (invalid URL, JSON) and Android (response). Same
+  // codes as the React Native SDK.
+  static const invalidUrl = 'invalid_url';
+  static const jsonParsingError = 'json_parsing_error';
+  static const responseCannotBeParsed = 'response_cannot_be_parsed';
+
+  // JavaScript agent errors from its public docs, minus codes for options the
+  // plugin does not expose (worker, non-string apiKey).
+  // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   static const sandboxedIframe = 'sandboxed_iframe';
   static const cspBlock = 'csp_block';
+  static const invalidEndpoint = 'invalid_endpoint';
   static const scriptLoadFail = 'script_load_fail';
-  static const serverError = 'server_error';
+  static const badResponseFormat = 'bad_response_format';
   static const apiKeyMissing = 'api_key_missing';
   static const cacheMisconfigured = 'cache_misconfigured';
   static const endpointsMisconfigured = 'endpoints_misconfigured';
-  static const workerInitializationFailed = 'worker_initialization_failed';
 
   /// The machine-readable error code. Not limited to the constants above.
   final String code;

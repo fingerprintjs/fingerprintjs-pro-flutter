@@ -50,20 +50,14 @@ internal fun errorCode(error: Error): String? = when (error) {
   is InvalidProxyIntegrationHeaders -> "invalid_proxy_integration_headers"
   is ProxyIntegrationSecretEnvironmentMismatch ->
     "proxy_integration_secret_environment_mismatch"
-  // Client-side codes match the JS agent codes for the same failure.
-  // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
-  is ResponseCannotBeParsed -> "bad_response_format"
+  is ResponseCannotBeParsed -> "response_cannot_be_parsed"
   // Android splits offline vs request failure. iOS and web use one code.
   is NetworkError -> "network_error"
   is NetworkUnavailableError -> "network_error"
   is ClientTimeout -> "client_timeout"
-  // The SDK also uses UnknownError for server codes it does not know. It
-  // keeps the eventId but drops the server code and message, so the plugin
-  // cannot forward them.
+  // Also what the SDK returns for a server code it does not know.
   is UnknownError -> "unknown_error"
-  // Other types are Server API errors that identification does not return.
-  // Android Error has no raw code string, so toFlutterError sends
-  // unknown_error and keeps the description.
+  // Server API only types. Android has no raw code string to forward.
   else -> null
 }
 
