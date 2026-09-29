@@ -6,9 +6,6 @@
 /// Server codes that become [unknownError]:
 /// - Android: codes without a constant here. Message is kept.
 /// - Android and iOS: codes the native SDK does not know. Message is lost.
-///
-/// Platform code builds this after replacing SDK placeholders (e.g. Android
-/// "Unknown" event ids) with null.
 final class FingerprintError implements Exception {
   // Server errors returned by Identification API.
   static const failed = 'failed';
@@ -68,9 +65,8 @@ final class FingerprintError implements Exception {
   /// The identification event ID for this failure, if the client reported one.
   final String? eventId;
 
-  /// Creates an error from values a platform adapter already normalized.
-  ///
-  /// An empty code becomes [unknownError]. Empty optional strings become null.
+  /// Creates an error. An empty [code] becomes [unknownError]. Empty
+  /// [message] and [eventId] become null.
   FingerprintError({required String code, String? message, String? eventId})
     : code = code.isEmpty ? unknownError : code,
       message = (message == null || message.isEmpty) ? null : message,

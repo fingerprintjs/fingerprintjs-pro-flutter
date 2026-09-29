@@ -1,7 +1,8 @@
-/// Dart identification result after platform values are normalized.
-///
-/// Android/iOS send this through Pigeon `FingerprintNativeResult` (empty strings).
-/// Web sends omitted fields as null. The constructor maps both to the same shape.
+// Identification result, the same shape on every platform. Android and iOS
+// send '' for missing values, the JS agent omits them. The constructor turns
+// both into null.
+
+/// A successful identification.
 final class FingerprintResult {
   /// Identifier of this identification event. Different for every request.
   ///
@@ -31,10 +32,7 @@ final class FingerprintResult {
   /// Null outside the web. Only the web agent caches.
   final bool? cacheHit;
 
-  /// Creates a result.
-  ///
-  /// Empty [visitorId] and [sealedResult] become null. Native sends `''`
-  /// where the JS agent omits the field.
+  /// Creates a result. Empty [visitorId] and [sealedResult] become null.
   FingerprintResult({
     required this.eventId,
     required String? visitorId,
