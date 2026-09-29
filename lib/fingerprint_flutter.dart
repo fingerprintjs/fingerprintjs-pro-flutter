@@ -36,47 +36,46 @@ export 'package:fingerprint_flutter/src/version.dart';
 /// https://docs.fingerprint.com/reference/js-agent-start-function
 class Fingerprint {
   /// Public API key for this client.
-  final String apiKey;
+  String get apiKey => _config.apiKey;
 
   /// Workspace region. Android and iOS default to US when omitted. Web
   /// infers it from the API key.
   /// https://docs.fingerprint.com/reference/js-agent-start-function
-  final Region? region;
+  Region? get region => _config.region;
 
   /// Identification endpoints, first to last. Null, empty, or only empty
   /// strings uses the regional default. Empty strings in the list are dropped.
   ///
   /// It's recommended to include the default API URL for your [region](https://docs.fingerprint.com/docs/regions) last, as a fallback.
   /// https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers
-  final List<String>? endpoints;
+  List<String>? get endpoints => _config.endpoints;
 
   /// Android-only settings. Ignored on iOS and web.
-  final AndroidOptions? android;
+  AndroidOptions? get android => _config.android;
 
   /// iOS-only settings. Ignored on Android and web.
-  final IosOptions? ios;
+  IosOptions? get ios => _config.ios;
 
   /// Web-only settings. Ignored on Android and iOS.
-  final WebOptions? web;
+  WebOptions? get web => _config.web;
 
-  late final FingerprintConfig _config;
+  final FingerprintConfig _config;
 
   Fingerprint({
-    required this.apiKey,
-    this.region,
+    required String apiKey,
+    Region? region,
     List<String>? endpoints,
-    this.android,
-    this.ios,
-    this.web,
-  }) : endpoints = _normalizeEndpoints(endpoints) {
-    _config = FingerprintConfig(
-      apiKey: apiKey,
-      region: region,
-      endpoints: this.endpoints,
-      android: android,
-      ios: ios,
-      web: web,
-    );
+    AndroidOptions? android,
+    IosOptions? ios,
+    WebOptions? web,
+  }) : _config = FingerprintConfig(
+         apiKey: apiKey,
+         region: region,
+         endpoints: _normalizeEndpoints(endpoints),
+         android: android,
+         ios: ios,
+         web: web,
+       ) {
     // Warm-up only: iOS location, Android SDK loading, the web bundle.
     // - get does not wait for it. Platform get creates the client itself.
     // - A failed warm-up does not break the client. Real create errors
