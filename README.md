@@ -150,8 +150,7 @@ try {
 * `sealedResult` is set when [Sealed Results](https://dev.fingerprint.com/docs/sealed-client-results) are enabled. 
 * Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
 
-* Known error codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`. Other codes are passed through as is, with their `message`.
-* On Android and iOS, a server error code the native SDK does not know arrives as `unknown_error` without the server message. On Android, `eventId` is still set.
+* Known error codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`.
 
 ### Linking and tagging information
 
