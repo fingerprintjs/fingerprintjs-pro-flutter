@@ -167,100 +167,9 @@ internal fun nativeConfig(
   locationTimeoutMillis,
 )
 
-// Fake base for [Fingerprint], which has many getVisitorId overloads. Each
-// subclass below overrides only the overloads FingerprintHostApiImpl calls;
-// the rest throw if a test accidentally exercises them.
-private abstract class UnusedFingerprint : Fingerprint {
-  private fun unused(): Nothing = throw UnsupportedOperationException("not used by this test")
-
-  override fun getVisitorId(listener: (FingerprintResponse) -> Unit) {
-    unused()
-  }
-
-  override fun getVisitorId(timeoutMillis: Int, listener: (FingerprintResponse) -> Unit) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    timeoutMillis: Int,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    tags: Map<String, Any>,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    timeoutMillis: Int,
-    tags: Map<String, Any>,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    linkedId: String,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    timeoutMillis: Int,
-    linkedId: String,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    tags: Map<String, Any>,
-    linkedId: String,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override fun getVisitorId(
-    timeoutMillis: Int,
-    tags: Map<String, Any>,
-    linkedId: String,
-    listener: (FingerprintResponse) -> Unit,
-    errorListener: (com.fingerprint.android.Error) -> Unit,
-  ) {
-    unused()
-  }
-
-  override suspend fun getVisitorId(): FingerprintResponse = unused()
-
-  override suspend fun getVisitorId(
-    timeoutMillis: Int,
-    tags: Map<String, Any>,
-    linkedId: String,
-  ): FingerprintResponse = unused()
-}
-
 private class FakeFingerprint(
   private val error: com.fingerprint.android.Error,
-) : UnusedFingerprint() {
+) : Fingerprint by mock(Fingerprint::class.java) {
   override fun getVisitorId(
     tags: Map<String, Any>,
     linkedId: String,
@@ -271,7 +180,7 @@ private class FakeFingerprint(
   }
 }
 
-private class CapturingFingerprint : UnusedFingerprint() {
+private class CapturingFingerprint : Fingerprint by mock(Fingerprint::class.java) {
   var tags: Map<String, Any>? = null
   var linkedId: String? = null
   var timeoutMs: Int? = null
@@ -301,7 +210,7 @@ private class CapturingFingerprint : UnusedFingerprint() {
 
 private class SuccessFingerprint(
   private val response: FingerprintResponse,
-) : UnusedFingerprint() {
+) : Fingerprint by mock(Fingerprint::class.java) {
   override fun getVisitorId(
     tags: Map<String, Any>,
     linkedId: String,
