@@ -15,7 +15,7 @@
   - Write like a terse note to a self or teammate, no m-dashed essays
   - Prefer bullet points over long `;` chains
   - Avoid ambiguous jargon (seam, boundary, gate, envelope, wire shapes, ...), be plain, precise, specific
-  - No provenance needed: docs must stand alone, make sense later without PR/conversation context
+  - No provenance needed, do not overfit comments to current change: docs must stand alone, make sense later without PR/conversation context. Think of what the general long-term purpose of the doc/comment is.
   - Module files begin with short overview comment explaining purpose and links to relevant docs
   - Any non-obvious design decision, requirement, or claim gets a short explanatory note + exact docs link
     - close to affected code + commit message body (always)

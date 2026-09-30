@@ -16,7 +16,8 @@ extension FPError {
     case .invalidURLParams:
       return ("invalid_url_params", description, nil)
     case .apiError(let apiError):
-      let code = apiError.pigeonCode()
+      // rawValue is the code string the server sent.
+      let code = apiError.errorDetails?.code?.rawValue ?? "unknown_error"
       let message = apiError.errorDetails?.message ?? description
       let eventId = normalizeEventId(apiError.eventId)
       return (code, message, eventId)
@@ -30,47 +31,11 @@ extension FPError {
       return ("invalid_response_type", description, nil)
     case .clientTimeout:
       return ("client_timeout", description, nil)
+    // Also used for server codes missing from APIError.Code.
     case .unknownError:
       fallthrough
     @unknown default:
       return ("unknown_error", description, nil)
-    }
-  }
-}
-
-extension APIError {
-  func pigeonCode() -> String {
-    guard let code = errorDetails?.code else {
-      return "unknown_error"
-    }
-    return Self.snakeCaseCode(code)
-  }
-
-  static func snakeCaseCode(_ code: APIError.Code) -> String {
-    switch code {
-    case .requestCannotBeParsed: return "request_cannot_be_parsed"
-    case .failed: return "failed"
-    case .requestReadTimeout: return "request_read_timeout"
-    case .tooManyRequests: return "too_many_requests"
-    case .publicApiKeyRequired: return "public_api_key_required"
-    case .publicApiKeyNotFound: return "public_api_key_not_found"
-    case .subscriptionNotActive: return "subscription_not_active"
-    case .subscriptionRestricted: return "subscription_restricted"
-    case .wrongRegion: return "wrong_region"
-    case .featureNotEnabled: return "feature_not_enabled"
-    case .missingModule: return "missing_module"
-    case .payloadTooLarge: return "payload_too_large"
-    case .serviceUnavailable: return "service_unavailable"
-    case .environmentRestricted: return "environment_restricted"
-    case .installationMethodRestricted: return "installation_method_restricted"
-    case .invalidProxyIntegrationSecret: return "invalid_proxy_integration_secret"
-    case .invalidProxyIntegrationHeaders: return "invalid_proxy_integration_headers"
-    case .proxyIntegrationSecretEnvironmentMismatch:
-      return "proxy_integration_secret_environment_mismatch"
-    // Identification-only constants live in Dart. Unlisted codes still go
-    // through so a newer iOS SDK is debuggable.
-    default:
-      return camelCaseToSnakeCase(code.rawValue)
     }
   }
 }
@@ -82,19 +47,4 @@ func normalizeEventId(_ eventId: String?) -> String? {
     return nil
   }
   return eventId
-}
-
-private func camelCaseToSnakeCase(_ value: String) -> String {
-  var result = ""
-  for character in value {
-    if character.isUppercase {
-      if !result.isEmpty {
-        result.append("_")
-      }
-      result.append(character.lowercased())
-    } else {
-      result.append(character)
-    }
-  }
-  return result
 }
