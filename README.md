@@ -20,6 +20,8 @@
 identification and device intelligence with industry-leading accuracy. Fingerprint Flutter SDK is an easy way to integrate Fingerprint into your Flutter
 application. The plugin allows you to call the underlying native Fingerprint agents (Android, iOS, and Web) and identify devices.
 
+This package replaces `fpjs_pro_plugin`. If you are upgrading from 4.x, see the [5.0.0 changelog](https://github.com/fingerprintjs/flutter/blob/main/CHANGELOG.md#500).
+
 ## Table of contents
 - [Fingerprint Flutter](#fingerprint-flutter)
   - [Table of contents](#table-of-contents)
@@ -43,6 +45,7 @@ application. The plugin allows you to call the underlying native Fingerprint age
 - Flutter 3.44.0 or higher
 - Dart 3.12.0 or higher
 - Android 7.0 (API level 24+) or higher
+- Android apps on AGP 8: Kotlin Gradle plugin 2.2.20 or higher. The Android SDK is built with Kotlin 2.3, and your app's Kotlin version compiles the plugin.
 - iOS 15+/tvOS 15+, Xcode 16+, Swift 6 or higher (stable releases)
 
 We aim to keep the [Flutter compatibility policy](https://docs.flutter.dev/release/compatibility-policy).
@@ -85,20 +88,29 @@ To use this plugin on the web, add the bundled v4 loader `<script>` tag to the `
 
 ### 1. Create a client
 
-Create one `Fingerprint` client per API key and configuration at app startup. 
+Create one `Fingerprint` client per API key and configuration. On Android and iOS, `region` defaults to `Region.us` when omitted. On web, the agent infers it from the API key. See [regions](https://docs.fingerprint.com/docs/regions).
 
 ```dart
+import 'package:flutter/widgets.dart';
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 
-final client = Fingerprint(
-  apiKey: '<PUBLIC_API_KEY>',
-  region: Region.eu, // or Region.us, Region.ap
-);
+late final Fingerprint client;
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  client = Fingerprint(
+    apiKey: '<PUBLIC_API_KEY>',
+    region: Region.eu, // or Region.us, Region.ap
+  );
+  runApp(const MyApp());
+}
 ```
 
-* On Android and iOS, `region` defaults to `Region.us` when omitted. On web, the agent infers it from the API key. See [regions](https://docs.fingerprint.com/docs/regions).
-
-* The constructor is synchronous: it starts the client and returns immediately, you do not need to await it. It builds the native client on Android and iOS, and starts downloading the JavaScript agent on web. Initialization failures only surface when you call `get` to identify a visitor.
+The constructor is synchronous:
+* It returns immediately, you do not need to await it.
+* Initialization failures surface when you call `get` to identify a visitor.
+* On the web, the constructor starts downloading the JavaScript agent in the background.
+* On Android and iOS the constructor starts the native client. If the Flutter binding does not exist yet, it throws `FlutterError`. Call `WidgetsFlutterBinding.ensureInitialized()` first if you need to run the constructor before `runApp()`.
 
 ### Custom endpoints
 

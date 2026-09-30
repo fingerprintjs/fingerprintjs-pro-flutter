@@ -21,6 +21,10 @@ const pluginVersion = '4.13.1';
 /// The constructor starts the native or web client early. [get] does not
 /// depend on that start and is where create or load failures surface. Every
 /// get carries the full config, so two clients stay independent.
+///
+/// On Android and iOS, the constructor throws `FlutterError` if the Flutter
+/// binding does not exist yet. In `main()` before `runApp()`, call
+/// `WidgetsFlutterBinding.ensureInitialized()` first.
 /// https://docs.fingerprint.com/docs/ios-sdk
 /// https://docs.fingerprint.com/docs/android-sdk
 /// https://docs.fingerprint.com/reference/js-agent-start-function
@@ -70,8 +74,10 @@ class Fingerprint {
     );
     // Warm-up only, so native location and the web bundle start early.
     // - get does not wait for it. Platform get creates the client itself.
-    // - A failed warm-up (e.g. before the Flutter binding is ready) does not
-    //   break the client. Real create errors surface from get.
+    // - A failed warm-up does not break the client. Real create errors
+    //   surface from get.
+    // - A missing Flutter binding throws FlutterError here, see
+    //   FingerprintNative.create.
     // - ignore() so a failure is not an unhandled async error.
     FingerprintPlatform.instance.create(_config).ignore();
   }

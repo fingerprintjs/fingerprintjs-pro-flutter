@@ -16,12 +16,23 @@ class FingerprintNative extends FingerprintPlatform {
   final FingerprintHostApi _hostApi;
 
   @override
-  Future<void> create(FingerprintConfig config) async {
+  Future<void> create(FingerprintConfig config) {
+    // Before anything async, so a missing binding throws from the Fingerprint
+    // constructor. Inside the future, ignore() would drop it and skip the
+    // native create that starts location collection.
+    // The framework error names ServicesBinding. Release builds throw a
+    // null-check instead. Replace both.
+    // https://api.flutter.dev/flutter/widgets/WidgetsFlutterBinding/ensureInitialized.html
     try {
-      await _hostApi.create(_toNativeConfig(config));
-    } catch (error) {
-      throw _toFingerprintError(error);
+      ServicesBinding.instance;
+    } catch (_) {
+      throw FlutterError(
+        'Call WidgetsFlutterBinding.ensureInitialized() before creating Fingerprint.',
+      );
     }
+    return _hostApi
+        .create(_toNativeConfig(config))
+        .catchError((Object error) => throw _toFingerprintError(error));
   }
 
   @override
@@ -77,9 +88,9 @@ const _pigeonCodes = {'channel-error', 'null-error'};
 
 /// - Native code already sends snake_case codes. [PlatformException.details]
 ///   is the event id when the client reported one.
-/// - Pigeon codes and other errors (e.g. a missing Flutter binding) become
-///   [FingerprintError.unknownError] with the original text as message, so
-///   `get` only throws [FingerprintError] with a documented code.
+/// - Pigeon codes and other errors become [FingerprintError.unknownError]
+///   with the original text as message, so `get` only throws
+///   [FingerprintError] with a documented code.
 FingerprintError _toFingerprintError(Object error) {
   if (error is! PlatformException) {
     return FingerprintError(
