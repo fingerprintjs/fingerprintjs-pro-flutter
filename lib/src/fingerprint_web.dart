@@ -2,12 +2,12 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:fingerprint_flutter/options.dart';
-import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/options.dart';
 import 'package:fingerprint_flutter/src/fingerprint_error.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:fingerprint_flutter/src/js_agent_interop.dart';
+import 'package:fingerprint_flutter/src/version.dart';
 
 /// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
@@ -71,8 +71,8 @@ class FingerprintWeb extends FingerprintPlatform {
 JSObject _toStartOptions(FingerprintConfig config) {
   final options = <String, Object>{
     'apiKey': config.apiKey,
-    'integrationInfo': ['fingerprint-pro-flutter/${config.pluginVersion}/web'],
-    if (config.region != null) 'region': config.region!.stringValue,
+    'integrationInfo': ['fingerprint-pro-flutter/$fingerprintFlutterVersion/web'],
+    if (config.region != null) 'region': config.region!.name,
     if (config.endpoints != null) 'endpoints': config.endpoints!,
   };
   final web = config.web;

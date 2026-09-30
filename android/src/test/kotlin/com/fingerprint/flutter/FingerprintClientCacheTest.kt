@@ -3,10 +3,9 @@ package com.fingerprint.flutter
 import android.content.Context
 import com.fingerprint.android.Configuration
 import com.fingerprint.android.Fingerprint
-import java.util.Collections
 import java.util.concurrent.CountDownLatch
-import org.junit.Assert.assertNotSame
-import org.junit.Assert.assertSame
+import java.util.concurrent.atomic.AtomicInteger
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mockito.mock
 
@@ -14,78 +13,112 @@ class FingerprintClientCacheTest {
   private val context = mock(Context::class.java)
 
   @Test
-  fun reusesClientForSameConfiguration() {
-    val cache = cache()
-    val configuration = configuration()
-    val first = cache.getOrCreate(configuration, "1.0.0")
-    val second = cache.getOrCreate(configuration, "1.0.0")
-    assertSame(first, second)
-  }
-
-  @Test
-  fun distinctConfigurationsDoNotShareAClient() {
-    val cache = cache()
-    val base = cache.getOrCreate(configuration(), "1.0.0")
-    val variants = listOf(
-      cache.getOrCreate(configuration(apiKey = "key-b"), "1.0.0"),
-      cache.getOrCreate(configuration(region = Configuration.Region.EU), "1.0.0"),
-      cache.getOrCreate(configuration(endpointUrl = "https://custom.example"), "1.0.0"),
-      cache.getOrCreate(
-        configuration(fallbacks = listOf("https://fallback.example")),
-        "1.0.0",
-      ),
-      cache.getOrCreate(configuration(), "2.0.0"),
-      cache.getOrCreate(configuration(allowUseOfLocationData = true), "1.0.0"),
-      cache.getOrCreate(configuration(locationTimeoutMillis = 1000L), "1.0.0"),
-    )
-    for (variant in variants) {
-      assertNotSame(base, variant)
-    }
-  }
-
-  @Test
-  fun concurrentFirstAccessReturnsOneClient() {
-    val ready = CountDownLatch(16)
-    val go = CountDownLatch(1)
+  fun reusesClientForEqualConfig() {
+    val created = AtomicInteger()
     val cache = FingerprintClientCache(context) { _, _ ->
+      created.incrementAndGet()
+      mock(Fingerprint::class.java)
+    }
+    // Separate instances, like two Pigeon calls decode.
+    cache.getOrCreate(nativeConfig(fallbacks = listOf("https://fallback.example")))
+    cache.getOrCreate(nativeConfig(fallbacks = listOf("https://fallback.example")))
+    assertEquals(1, created.get())
+  }
+
+  @Test
+  fun distinctConfigsDoNotShareAClient() {
+    val created = AtomicInteger()
+    val cache = FingerprintClientCache(context) { _, _ ->
+      created.incrementAndGet()
+      mock(Fingerprint::class.java)
+    }
+    val configs = listOf(
+      nativeConfig(),
+      nativeConfig(apiKey = "key-b"),
+      nativeConfig(region = NativeRegion.EU),
+      nativeConfig(endpoint = "https://custom.example"),
+      nativeConfig(fallbacks = listOf("https://fallback.example")),
+      nativeConfig(pluginVersion = "2.0.0"),
+      nativeConfig(allowUseOfLocationData = true),
+      nativeConfig(locationTimeoutMillis = 1000L),
+    )
+    configs.forEach { cache.getOrCreate(it) }
+    assertEquals(configs.size, created.get())
+  }
+
+  @Test
+  fun concurrentFirstAccessCreatesOneClient() {
+    val created = AtomicInteger()
+    val cache = FingerprintClientCache(context) { _, _ ->
+      created.incrementAndGet()
       Thread.sleep(20)
       mock(Fingerprint::class.java)
     }
-    val configuration = configuration()
-    val clients = Collections.synchronizedList(mutableListOf<Fingerprint>())
+    val ready = CountDownLatch(16)
+    val go = CountDownLatch(1)
     val threads = List(16) {
       Thread {
         ready.countDown()
         go.await()
-        clients.add(cache.getOrCreate(configuration, "1.0.0"))
+        cache.getOrCreate(nativeConfig())
       }
     }
     threads.forEach { it.start() }
     ready.await()
     go.countDown()
     threads.forEach { it.join() }
-    assertSame(clients.first(), clients.toSet().single())
+    assertEquals(1, created.get())
   }
 
-  private fun cache() = FingerprintClientCache(context) { _, _ ->
-    mock(Fingerprint::class.java)
+  @Test
+  fun usesRegionUrlWhenEndpointIsOmitted() {
+    val built = buildConfiguration(nativeConfig(region = NativeRegion.EU, endpoint = null))
+    assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
   }
 
-  private fun configuration(
-    apiKey: String = "key-a",
-    region: Configuration.Region = Configuration.Region.US,
-    endpointUrl: String = region.endpointUrl,
-    fallbacks: List<String> = emptyList(),
-    pluginVersion: String = "1.0.0",
-    allowUseOfLocationData: Boolean = false,
-    locationTimeoutMillis: Long = 5000L,
-  ) = Configuration(
-    apiKey,
-    region,
-    endpointUrl,
-    fallbacks,
-    listOf(Pair("fingerprint-pro-flutter", pluginVersion)),
-    allowUseOfLocationData,
-    locationTimeoutMillis,
-  )
+  @Test
+  fun usesCustomEndpointAndFallbacks() {
+    val built = buildConfiguration(
+      nativeConfig(endpoint = "https://proxy.example", fallbacks = listOf("https://fallback.example")),
+    )
+    assertEquals("https://proxy.example", built.endpointUrl)
+    assertEquals(listOf("https://fallback.example"), built.fallbackEndpointUrls)
+  }
+
+  @Test
+  fun mapsRegions() {
+    val cases = listOf(
+      NativeRegion.EU to Configuration.Region.EU,
+      NativeRegion.AP to Configuration.Region.AP,
+      NativeRegion.US to Configuration.Region.US,
+    )
+    for ((region, expected) in cases) {
+      assertEquals(expected, buildConfiguration(nativeConfig(region = region)).region)
+    }
+  }
+
+  @Test
+  fun forwardsLocationSettings() {
+    val built = buildConfiguration(
+      nativeConfig(allowUseOfLocationData = true, locationTimeoutMillis = 1000L),
+    )
+    assertEquals(true, built.allowUseOfLocationData)
+    assertEquals(1000L, built.locationTimeoutMillis)
+  }
+
+  @Test
+  fun usesSdkDefaultLocationTimeoutWhenOmitted() {
+    val built = buildConfiguration(nativeConfig(locationTimeoutMillis = null))
+    assertEquals(Configuration.DEFAULT_LOCATION_TIMEOUT_MILLIS, built.locationTimeoutMillis)
+  }
+
+  // The Configuration the cache passes to the SDK factory.
+  private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
+    var captured: Configuration? = null
+    FingerprintClientCache(context) { _, configuration ->
+      captured = configuration
+      mock(Fingerprint::class.java)
+    }.getOrCreate(config)
+    return checkNotNull(captured)
+  }
 }

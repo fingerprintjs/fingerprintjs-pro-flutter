@@ -1,4 +1,4 @@
-// Memoizes Fingerprint clients by resolved native configuration.
+// One Android Fingerprint client per Pigeon config.
 package com.fingerprint.flutter
 
 import android.content.Context
@@ -15,34 +15,38 @@ internal class FingerprintClientCache(
     FingerprintFactory(context).createInstance(configuration)
   },
 ) {
-  // Fields, not a joined string. A delimiter key can collide or drop a field.
-  private data class ClientKey(
-    val apiKey: String,
-    val region: Configuration.Region,
-    val endpointUrl: String,
-    val fallbackEndpointUrls: List<String>,
-    val pluginVersion: String,
-    val allowUseOfLocationData: Boolean,
-    val locationTimeoutMillis: Long,
-  )
+  // Pigeon generates value equality for the config, so new fields are part
+  // of the key automatically. Configs that only resolve to the same
+  // Configuration (no endpoint vs the region's default URL) get separate
+  // clients, which is harmless.
+  private val clients = ConcurrentHashMap<FingerprintNativeConfig, Fingerprint>()
 
-  private val clients = ConcurrentHashMap<ClientKey, Fingerprint>()
-
-  fun getOrCreate(configuration: Configuration, pluginVersion: String): Fingerprint {
-    val key = ClientKey(
-      configuration.apiKey,
-      configuration.region,
-      configuration.endpointUrl,
-      configuration.fallbackEndpointUrls.toList(),
-      pluginVersion,
-      configuration.allowUseOfLocationData,
-      configuration.locationTimeoutMillis,
-    )
-    // Kotlin ConcurrentHashMap.getOrPut is not atomic: concurrent first hits can
-    // each create a Fingerprint client. computeIfAbsent runs the factory once.
-    // https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/get-or-put.html
-    return clients.computeIfAbsent(key) {
-      createFingerprint(applicationContext, configuration)
+  // Kotlin ConcurrentHashMap.getOrPut is not atomic: concurrent first hits can
+  // each create a Fingerprint client. computeIfAbsent runs the factory once.
+  // https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/get-or-put.html
+  fun getOrCreate(config: FingerprintNativeConfig): Fingerprint =
+    clients.computeIfAbsent(config) {
+      createFingerprint(applicationContext, buildConfiguration(config))
     }
+
+  private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
+    val region = when (config.region) {
+      NativeRegion.US -> Configuration.Region.US
+      NativeRegion.EU -> Configuration.Region.EU
+      NativeRegion.AP -> Configuration.Region.AP
+    }
+    // Dart drops empty endpoint strings before they get here.
+    val endpointUrl = config.endpoint ?: region.endpointUrl
+    val fallbacks = config.endpointFallbacks ?: emptyList()
+    val locationTimeout = config.locationTimeoutMillis ?: Configuration.DEFAULT_LOCATION_TIMEOUT_MILLIS
+    return Configuration(
+      config.apiKey,
+      region,
+      endpointUrl,
+      fallbacks,
+      listOf(Pair("fingerprint-pro-flutter", config.pluginVersion)),
+      config.allowUseOfLocationData,
+      locationTimeout,
+    )
   }
 }

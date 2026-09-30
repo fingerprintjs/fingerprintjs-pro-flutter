@@ -2,16 +2,15 @@
 package com.fingerprint.flutter
 
 import android.content.Context
-import com.fingerprint.android.Configuration
 import com.fingerprint.android.FingerprintResponse
 
 internal class FingerprintHostApiImpl(
-  private val applicationContext: Context,
+  applicationContext: Context,
   private val clientCache: FingerprintClientCache = FingerprintClientCache(applicationContext),
 ) : FingerprintHostApi {
 
   override fun create(config: FingerprintNativeConfig) {
-    nativeClient(config)
+    clientCache.getOrCreate(config)
   }
 
   override fun get(
@@ -21,10 +20,13 @@ internal class FingerprintHostApiImpl(
     timeoutMs: Long?,
     callback: (Result<FingerprintNativeResult>) -> Unit,
   ) {
+    // Pigeon catches throws only for sync methods like create. Here a throw
+    // would escape the handler instead of completing the Dart Future.
+    // Non-FlutterError throws would reach Dart with the class name as code.
     val client = try {
-      nativeClient(config)
-    } catch (error: FlutterError) {
-      callback(Result.failure(error))
+      clientCache.getOrCreate(config)
+    } catch (error: Exception) {
+      callback(Result.failure(FlutterError("unknown_error", error.toString())))
       return
     }
     val tagMap = pigeonTagsToNative(tags)
@@ -53,35 +55,6 @@ internal class FingerprintHostApiImpl(
     } else {
       client.getVisitorId(tagMap, linked, listener, errorListener)
     }
-  }
-
-  private fun nativeClient(config: FingerprintNativeConfig) =
-    clientCache.getOrCreate(buildConfiguration(config), config.pluginVersion)
-
-  private fun buildConfiguration(config: FingerprintNativeConfig): Configuration {
-    val region = parseRegion(config.region)
-    // Dart drops empty endpoint strings before they get here.
-    val endpointUrl = config.endpoint ?: region.endpointUrl
-    val fallbacks = config.endpointFallbacks ?: emptyList()
-    val locationTimeout = config.locationTimeoutMillis ?: 5000L
-    return Configuration(
-      config.apiKey,
-      region,
-      endpointUrl,
-      fallbacks,
-      listOf(Pair("fingerprint-pro-flutter", config.pluginVersion)),
-      config.allowUseOfLocationData,
-      locationTimeout,
-    )
-  }
-}
-
-internal fun parseRegion(region: String?): Configuration.Region {
-  return when (region?.lowercase()) {
-    "eu" -> Configuration.Region.EU
-    "ap" -> Configuration.Region.AP
-    "us", null -> Configuration.Region.US
-    else -> throw FlutterError("unknown_error", "Invalid region: $region", null)
   }
 }
 

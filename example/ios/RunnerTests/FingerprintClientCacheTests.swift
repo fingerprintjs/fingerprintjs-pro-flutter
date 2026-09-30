@@ -1,4 +1,4 @@
-// Verifies that native clients are cached by their complete configuration.
+// Verifies that native clients are cached per Pigeon config.
 
 @preconcurrency import Fingerprint
 import Foundation
@@ -10,53 +10,37 @@ struct FingerprintClientCacheTests {
   @Test func reusesClientForSameConfiguration() {
     let factory = ClientFactoryRecorder()
     let cache = FingerprintClientCache(createClient: factory.create)
-    let configuration = Configuration(apiKey: "api-key")
-
-    let first = cache.getOrCreate(configuration: configuration, pluginVersion: "1.0.0")
-    let second = cache.getOrCreate(configuration: configuration, pluginVersion: "1.0.0")
+    // Separate values, like two Pigeon calls decode.
+    let first = cache.getOrCreate(nativeConfig(endpointFallbacks: ["https://fallback.example.com"]))
+    let second = cache.getOrCreate(nativeConfig(endpointFallbacks: ["https://fallback.example.com"]))
 
     #expect(first === second)
     #expect(factory.callCount == 1)
   }
 
   @Test func usesSeparateClientsForDifferentConfigurations() {
-    // Every pair differs in at least one key field.
-    let cases: [(Configuration, String)] = [
-      (Configuration(apiKey: "api-key"), "1.0.0"),
-      (Configuration(apiKey: "other-api-key"), "1.0.0"),
-      (Configuration(apiKey: "api-key", region: .eu), "1.0.0"),
-      (Configuration(apiKey: "api-key", region: .custom(domain: "https://example.com")), "1.0.0"),
-      (
-        Configuration(apiKey: "api-key", region: .custom(domain: "https://other.example.com")),
-        "1.0.0"
-      ),
-      (
-        Configuration(
-          apiKey: "api-key",
-          region: .custom(
-            domain: "https://example.com",
-            fallback: ["https://fallback.example.com"]
-          )
-        ),
-        "1.0.0"
-      ),
-      (Configuration(apiKey: "api-key"), "2.0.0"),
-      (Configuration(apiKey: "api-key", allowUseOfLocationData: true), "1.0.0"),
+    // Every pair differs in at least one field.
+    let configs = [
+      nativeConfig(),
+      nativeConfig(apiKey: "other-api-key"),
+      nativeConfig(region: .eu),
+      nativeConfig(endpoint: "https://example.com"),
+      nativeConfig(endpointFallbacks: ["https://fallback.example.com"]),
+      nativeConfig(pluginVersion: "2.0.0"),
+      nativeConfig(allowUseOfLocationData: true),
     ]
     let cache = FingerprintClientCache(createClient: { _ in StubFingerprintClient() })
 
-    let clients = cases.map { configuration, pluginVersion in
-      cache.getOrCreate(configuration: configuration, pluginVersion: pluginVersion)
-    }
+    let clients = configs.map { cache.getOrCreate($0) }
 
-    #expect(Set(clients.map(ObjectIdentifier.init)).count == cases.count)
+    #expect(Set(clients.map(ObjectIdentifier.init)).count == configs.count)
   }
 
   @Test func createsOneClientDuringConcurrentFirstAccess() {
     let factory = ClientFactoryRecorder(creationDelay: 0.02)
     let cache = FingerprintClientCache(createClient: factory.create)
     let clients = ClientCollector()
-    let configuration = Configuration(apiKey: "api-key")
+    let config = nativeConfig()
     let ready = DispatchSemaphore(value: 0)
     let start = DispatchSemaphore(value: 0)
     let finished = DispatchSemaphore(value: 0)
@@ -65,9 +49,7 @@ struct FingerprintClientCacheTests {
       Thread {
         ready.signal()
         start.wait()
-        clients.append(
-          cache.getOrCreate(configuration: configuration, pluginVersion: "1.0.0")
-        )
+        clients.append(cache.getOrCreate(config))
         finished.signal()
       }
     }
@@ -88,6 +70,24 @@ struct FingerprintClientCacheTests {
     #expect(factory.callCount == 1)
     #expect(clients.uniqueCount == 1)
   }
+}
+
+private func nativeConfig(
+  apiKey: String = "api-key",
+  region: NativeRegion = .us,
+  endpoint: String? = nil,
+  endpointFallbacks: [String]? = nil,
+  pluginVersion: String = "1.0.0",
+  allowUseOfLocationData: Bool = false
+) -> FingerprintNativeConfig {
+  FingerprintNativeConfig(
+    apiKey: apiKey,
+    region: region,
+    endpoint: endpoint,
+    endpointFallbacks: endpointFallbacks,
+    pluginVersion: pluginVersion,
+    allowUseOfLocationData: allowUseOfLocationData
+  )
 }
 
 private final class ClientCollector: @unchecked Sendable {

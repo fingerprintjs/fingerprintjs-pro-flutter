@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fingerprint_flutter/error.dart';
-import 'package:fingerprint_flutter/options.dart';
-import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_native.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/pigeon/fingerprint_api.g.dart';
@@ -28,7 +26,6 @@ void main() {
   }) {
     return FingerprintConfig(
       apiKey: apiKey,
-      pluginVersion: '9.9.9',
       region: region,
       endpoints: endpoints,
       android: android,
@@ -53,12 +50,12 @@ void main() {
       );
 
       expect(fakeHostApi.createdConfig?.apiKey, 'key-1');
-      expect(fakeHostApi.createdConfig?.region, 'eu');
+      expect(fakeHostApi.createdConfig?.region, NativeRegion.eu);
       expect(fakeHostApi.createdConfig?.endpoint, 'https://primary.example');
       expect(fakeHostApi.createdConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
-      expect(fakeHostApi.createdConfig?.pluginVersion, '9.9.9');
+      expect(fakeHostApi.createdConfig?.pluginVersion, fingerprintFlutterVersion);
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, 3000);
     });
@@ -84,12 +81,12 @@ void main() {
       );
 
       expect(fakeHostApi.lastConfig?.apiKey, 'key-1');
-      expect(fakeHostApi.lastConfig?.region, 'eu');
+      expect(fakeHostApi.lastConfig?.region, NativeRegion.eu);
       expect(fakeHostApi.lastConfig?.endpoint, 'https://primary.example');
       expect(fakeHostApi.lastConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
-      expect(fakeHostApi.lastConfig?.pluginVersion, '9.9.9');
+      expect(fakeHostApi.lastConfig?.pluginVersion, fingerprintFlutterVersion);
       expect(fakeHostApi.lastConfig?.allowUseOfLocationData, isTrue);
       expect(fakeHostApi.lastConfig?.locationTimeoutMillis, 3000);
       expect(fakeHostApi.lastTags, {'sessionId': 1});
@@ -117,10 +114,10 @@ void main() {
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
     });
 
-    test('leaves region and endpoints unset when omitted', () async {
+    test('defaults region to US and leaves endpoints unset', () async {
       await platform.create(config());
 
-      expect(fakeHostApi.createdConfig?.region, isNull);
+      expect(fakeHostApi.createdConfig?.region, NativeRegion.us);
       expect(fakeHostApi.createdConfig?.endpoint, isNull);
       expect(fakeHostApi.createdConfig?.endpointFallbacks, isNull);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, isNull);
@@ -161,7 +158,7 @@ void main() {
     test('create failure does not block a later get', () async {
       fakeHostApi.nextCreateError = PlatformException(
         code: 'unknown_error',
-        message: 'Invalid region: xx',
+        message: 'create failed',
       );
       await expectLater(
         platform.create(config()),

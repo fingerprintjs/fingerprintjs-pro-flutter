@@ -1,20 +1,19 @@
-// Public entry point: the `Fingerprint` client and its options.
+// The only public library: the `Fingerprint` client, its options, result,
+// and error. Everything else stays under `src/`.
 // https://docs.fingerprint.com/docs/flutter
 import 'dart:async';
 
-import 'package:fingerprint_flutter/options.dart';
-import 'package:fingerprint_flutter/region.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter/src/options.dart';
+import 'package:fingerprint_flutter/src/region.dart';
 import 'package:fingerprint_flutter/src/validation.dart';
 
-export 'package:fingerprint_flutter/error.dart';
-export 'package:fingerprint_flutter/options.dart';
-export 'package:fingerprint_flutter/region.dart';
-export 'package:fingerprint_flutter/result.dart';
-
-// Update it on each release
-const pluginVersion = '4.13.1';
+export 'package:fingerprint_flutter/src/fingerprint_error.dart';
+export 'package:fingerprint_flutter/src/fingerprint_result.dart';
+export 'package:fingerprint_flutter/src/options.dart';
+export 'package:fingerprint_flutter/src/region.dart';
+export 'package:fingerprint_flutter/src/version.dart';
 
 /// Identification client. Create one per public API key and configuration.
 ///
@@ -72,7 +71,6 @@ class Fingerprint {
   }) : endpoints = _normalizeEndpoints(endpoints) {
     _config = FingerprintConfig(
       apiKey: apiKey,
-      pluginVersion: pluginVersion,
       region: region,
       endpoints: this.endpoints,
       android: android,

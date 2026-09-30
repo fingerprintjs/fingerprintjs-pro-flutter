@@ -23,7 +23,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
   }
 
   func create(config: FingerprintNativeConfig) throws {
-    _ = nativeClient(for: config)
+    _ = clientCache.getOrCreate(config)
   }
 
   func get(
@@ -33,7 +33,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     timeoutMs: Int64?,
     completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void
   ) {
-    let client = nativeClient(for: config)
+    let client = clientCache.getOrCreate(config)
     let metadata = prepareMetadata(linkedId: linkedId, tags: tags)
     let timeoutSeconds: TimeInterval? = timeoutMs.map { TimeInterval($0) / 1000.0 }
     let box = CompletionBox(completion)
@@ -67,29 +67,6 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     }
   }
 
-  private func nativeClient(for config: FingerprintNativeConfig) -> FingerprintClientProviding {
-    clientCache.getOrCreate(
-      configuration: buildConfiguration(config: config),
-      pluginVersion: config.pluginVersion
-    )
-  }
-
-  private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
-    // Dart drops empty endpoint strings before they get here.
-    let region: Region
-    if let endpoint = config.endpoint {
-      region = .custom(domain: endpoint, fallback: config.endpointFallbacks ?? [])
-    } else {
-      region = Self.namedRegion(config.region)
-    }
-    return Configuration(
-      apiKey: config.apiKey,
-      region: region,
-      integrationInfo: [("fingerprint-pro-flutter", config.pluginVersion)],
-      allowUseOfLocationData: config.allowUseOfLocationData
-    )
-  }
-
   private func prepareMetadata(linkedId: String?, tags: [String?: Any?]?) -> Metadata {
     var metadata = Metadata(linkedId: linkedId)
     guard let tags else {
@@ -104,16 +81,5 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
       }
     }
     return metadata
-  }
-
-  private static func namedRegion(_ region: String?) -> Region {
-    switch region?.lowercased() {
-    case "eu":
-      return .eu
-    case "ap":
-      return .ap
-    default:
-      return .global
-    }
   }
 }
