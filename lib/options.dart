@@ -8,7 +8,9 @@ library;
 ///
 /// https://docs.fingerprint.com/docs/android-quickstart
 class AndroidOptions {
-  /// When true, the SDK may collect location data.
+  /// When true, the SDK may collect location data. It is collected during
+  /// each `get`, see [locationTimeout].
+  /// https://docs.fingerprint.com/docs/android-sdk
   final bool? allowUseOfLocationData;
 
   /// How long identification may wait for a location fix.
@@ -32,7 +34,10 @@ class AndroidOptions {
 ///
 /// https://docs.fingerprint.com/docs/ios-sdk
 class IosOptions {
-  /// When true, the SDK may collect location data.
+  /// When true, the SDK may collect location data. Collection starts when
+  /// the client is created, so create it at app startup and keep it for
+  /// better precision.
+  /// https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection
   final bool? allowUseOfLocationData;
 
   const IosOptions({this.allowUseOfLocationData});

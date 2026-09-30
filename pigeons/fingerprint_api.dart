@@ -57,15 +57,21 @@ class FingerprintNativeResult {
   String? sealedResult;
 }
 
+// All methods share one serial background queue:
+// - creating the native client can be slow, keep it off the UI thread
+// - serial keeps calls in order, so create runs before a later get
+// https://pub.dev/packages/pigeon#task-queue
 @HostApi()
 abstract class FingerprintHostApi {
-  /// Builds the native Fingerprint client immediately so location can warm
-  /// before identification. get still carries config and reuses this client,
-  /// so two Dart clients stay independent if create was skipped.
-  /// https://docs.fingerprint.com/docs/ios-sdk
+  /// Builds the native client early, so SDK startup work (such as iOS
+  /// location collection) begins before the first get. get carries the
+  /// config too and builds the client if create did not run.
+  /// https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void create(FingerprintNativeConfig config);
 
   @asyncCallback
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   FingerprintNativeResult get(
     FingerprintNativeConfig config,
     Map<String?, Object?>? tags,
