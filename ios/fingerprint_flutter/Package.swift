@@ -21,7 +21,7 @@ let package = Package(
         // pulled from users once a floating range allows it. Take each minor
         // on purpose. Example: 2.8.0 caused App Store rejections.
         // https://github.com/fingerprintjs/flutter/issues/92
-        .package(url: "https://github.com/fingerprintjs/fingerprint-ios", .upToNextMinor(from: "4.0.0"))
+        .package(url: "https://github.com/fingerprintjs/fingerprint-ios", .upToNextMinor(from: "4.1.0"))
     ],
     targets: [
         .target(
