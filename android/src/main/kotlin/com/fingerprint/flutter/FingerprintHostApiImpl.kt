@@ -49,8 +49,8 @@ internal class FingerprintHostApiImpl(
     }
     if (timeoutMs != null) {
       // Android getVisitorId takes Int. Long.toInt() wraps. Clamp so a huge timeout becomes Int.MAX_VALUE, not negative.
-      val timeoutInt =
-        timeoutMs.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+      // Dart rejects negative timeouts, so only the upper bound matters.
+      val timeoutInt = timeoutMs.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
       client.getVisitorId(timeoutInt, tagMap, linked, listener, errorListener)
     } else {
       client.getVisitorId(tagMap, linked, listener, errorListener)

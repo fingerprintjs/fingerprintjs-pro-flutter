@@ -31,9 +31,7 @@ class FingerprintNative extends FingerprintPlatform {
         'Call WidgetsFlutterBinding.ensureInitialized() before creating Fingerprint.',
       );
     }
-    return _hostApi
-        .create(_toNativeConfig(config))
-        .catchError((Object error) => throw _toFingerprintError(error));
+    return _hostApi.create(_toNativeConfig(config));
   }
 
   @override
