@@ -16,6 +16,7 @@ struct FingerprintHostApiImplTests {
     try hostApi.create(
       config: FingerprintNativeConfig(
         apiKey: "api-key",
+        region: .us,
         endpoint: "https://custom.example.com",
         endpointFallbacks: ["https://fallback.example.com"],
         pluginVersion: "1.2.3",
@@ -46,7 +47,7 @@ struct FingerprintHostApiImplTests {
     try hostApi.create(
       config: FingerprintNativeConfig(
         apiKey: "api-key",
-        region: "eu",
+        region: .eu,
         pluginVersion: "1.2.3",
         allowUseOfLocationData: false
       )
@@ -71,6 +72,7 @@ struct FingerprintHostApiImplTests {
     hostApi.get(
       config: FingerprintNativeConfig(
         apiKey: "api-key",
+        region: .us,
         pluginVersion: "1.2.3",
         allowUseOfLocationData: false
       ),
@@ -108,6 +110,7 @@ struct FingerprintHostApiImplTests {
     hostApi.get(
       config: FingerprintNativeConfig(
         apiKey: "api-key",
+        region: .us,
         pluginVersion: "1.2.3",
         allowUseOfLocationData: false
       ),
@@ -134,6 +137,7 @@ struct FingerprintHostApiImplTests {
     hostApi.get(
       config: FingerprintNativeConfig(
         apiKey: "api-key",
+        region: .us,
         pluginVersion: "1.2.3",
         allowUseOfLocationData: false
       ),

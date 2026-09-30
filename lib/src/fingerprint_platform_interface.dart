@@ -1,8 +1,8 @@
 // Platform interface that the native and web implementations share.
 // https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins
 import 'package:flutter/foundation.dart';
-import 'package:fingerprint_flutter/options.dart';
-import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/options.dart';
+import 'package:fingerprint_flutter/src/region.dart';
 import 'package:fingerprint_flutter/src/fingerprint_native.dart';
 import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -10,7 +10,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 /// Configuration passed to every platform [create] and [get].
 class FingerprintConfig {
   final String apiKey;
-  final String pluginVersion;
   final Region? region;
 
   /// Null or non-empty, without empty strings. [Fingerprint] filters them so
@@ -22,7 +21,6 @@ class FingerprintConfig {
 
   const FingerprintConfig({
     required this.apiKey,
-    required this.pluginVersion,
     this.region,
     this.endpoints,
     this.android,
@@ -36,7 +34,6 @@ class FingerprintConfig {
   bool operator ==(Object other) =>
       other is FingerprintConfig &&
       other.apiKey == apiKey &&
-      other.pluginVersion == pluginVersion &&
       other.region == region &&
       listEquals(other.endpoints, endpoints) &&
       other.android == android &&
@@ -46,7 +43,6 @@ class FingerprintConfig {
   @override
   int get hashCode => Object.hash(
     apiKey,
-    pluginVersion,
     region,
     Object.hashAll(endpoints ?? const []),
     android,

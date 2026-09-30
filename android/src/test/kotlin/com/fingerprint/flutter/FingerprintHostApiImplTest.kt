@@ -2,7 +2,6 @@ package com.fingerprint.flutter
 
 import android.content.Context
 import com.fingerprint.android.ApiKeyRequired
-import com.fingerprint.android.Configuration
 import com.fingerprint.android.Failed
 import com.fingerprint.android.Fingerprint
 import com.fingerprint.android.FingerprintResponse
@@ -29,12 +28,12 @@ class FingerprintHostApiImplTest {
       // throws IllegalAccessError on the desktop JVM (works on ART).
     )
     for ((nativeError, expectedCode) in cases) {
-      val cache = FingerprintClientCache(context) { _, _ ->
+      val api = hostApi { _, _ ->
         FakeFingerprint(nativeError)
       }
       var captured: Result<FingerprintNativeResult>? = null
-      FingerprintHostApiImpl(context, cache).get(
-        FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+      api.get(
+        nativeConfig(),
         null,
         null,
         null,
@@ -47,9 +46,9 @@ class FingerprintHostApiImplTest {
   @Test
   fun getForwardsExplicitNullTagValues() {
     val client = CapturingFingerprint()
-    val cache = FingerprintClientCache(context) { _, _ -> client }
-    FingerprintHostApiImpl(context, cache).get(
-      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+    val api = hostApi { _, _ -> client }
+    api.get(
+      nativeConfig(),
       mapOf("campaign" to null, "sessionId" to 1),
       null,
       null,
@@ -63,9 +62,9 @@ class FingerprintHostApiImplTest {
   @Test
   fun getForwardsTimeoutThatFitsInt() {
     val client = CapturingFingerprint()
-    val cache = FingerprintClientCache(context) { _, _ -> client }
-    FingerprintHostApiImpl(context, cache).get(
-      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+    val api = hostApi { _, _ -> client }
+    api.get(
+      nativeConfig(),
       null,
       null,
       500L,
@@ -76,9 +75,9 @@ class FingerprintHostApiImplTest {
   @Test
   fun getClampsTimeoutOutsideInt() {
     val client = CapturingFingerprint()
-    val cache = FingerprintClientCache(context) { _, _ -> client }
-    FingerprintHostApiImpl(context, cache).get(
-      FingerprintNativeConfig("key-a", "us", null, null, "1.0.0", false, 5000L),
+    val api = hostApi { _, _ -> client }
+    api.get(
+      nativeConfig(),
       null,
       null,
       Int.MAX_VALUE.toLong() + 1,
@@ -89,8 +88,8 @@ class FingerprintHostApiImplTest {
   @Test
   fun getUsesDefaultTimeoutOverloadWhenOmitted() {
     val client = CapturingFingerprint()
-    val cache = FingerprintClientCache(context) { _, _ -> client }
-    FingerprintHostApiImpl(context, cache).get(
+    val api = hostApi { _, _ -> client }
+    api.get(
       nativeConfig(),
       null,
       null,
@@ -101,42 +100,10 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createUsesRegionUrlWhenEndpointIsOmitted() {
-    val built = captureConfiguration(
-      nativeConfig(region = "eu", endpoint = null),
-    )
-    assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
-  }
-
-  @Test
-  fun createUsesCustomEndpoint() {
-    val built = captureConfiguration(
-      nativeConfig(endpoint = "https://proxy.example"),
-    )
-    assertEquals("https://proxy.example", built.endpointUrl)
-  }
-
-  @Test
-  fun createForwardsLocationFlag() {
-    val built = captureConfiguration(
-      nativeConfig(allowUseOfLocationData = true),
-    )
-    assertEquals(true, built.allowUseOfLocationData)
-  }
-
-  @Test
-  fun createUsesProvidedLocationTimeout() {
-    val built = captureConfiguration(
-      nativeConfig(locationTimeoutMillis = 1000L),
-    )
-    assertEquals(1000L, built.locationTimeoutMillis)
-  }
-
-  @Test
   fun getForwardsLinkedId() {
     val client = CapturingFingerprint()
-    val cache = FingerprintClientCache(context) { _, _ -> client }
-    FingerprintHostApiImpl(context, cache).get(
+    val api = hostApi { _, _ -> client }
+    api.get(
       nativeConfig(),
       null,
       "order-1",
@@ -146,23 +113,14 @@ class FingerprintHostApiImplTest {
   }
 
   @Test
-  fun createMapsRegionsAndDefaultsToUs() {
-    val cases = listOf(
-      "eu" to Configuration.Region.EU,
-      "ap" to Configuration.Region.AP,
-      "us" to Configuration.Region.US,
-      null to Configuration.Region.US,
-    )
-    for ((region, expected) in cases) {
-      val built = captureConfiguration(nativeConfig(region = region))
-      assertEquals(expected, built.region)
-    }
-  }
-
-  @Test
-  fun createDefaultsLocationTimeoutWhenOmitted() {
-    val built = captureConfiguration(nativeConfig(locationTimeoutMillis = null))
-    assertEquals(5000L, built.locationTimeoutMillis)
+  fun getReportsClientCreationFailureAsUnknownError() {
+    val api = hostApi { _, _ -> throw IllegalStateException("bad config") }
+    var captured: Result<FingerprintNativeResult>? = null
+    api.get(nativeConfig(), null, null, null) { captured = it }
+    val error = captured!!.exceptionOrNull() as FlutterError
+    assertEquals("unknown_error", error.code)
+    assertTrue(error.message!!.contains("bad config"))
+    assertNull(error.details)
   }
 
   @Test
@@ -172,11 +130,11 @@ class FingerprintHostApiImplTest {
     `when`(response.visitorId).thenReturn("vid-1")
     `when`(response.suspectScore).thenReturn(42)
     `when`(response.sealedResult).thenReturn("sealed")
-    val cache = FingerprintClientCache(context) { _, _ ->
+    val api = hostApi { _, _ ->
       SuccessFingerprint(response)
     }
     var captured: Result<FingerprintNativeResult>? = null
-    FingerprintHostApiImpl(context, cache).get(
+    api.get(
       nativeConfig(),
       null,
       null,
@@ -189,31 +147,27 @@ class FingerprintHostApiImplTest {
     assertEquals("sealed", result.sealedResult)
   }
 
-  private fun captureConfiguration(config: FingerprintNativeConfig): Configuration {
-    var captured: Configuration? = null
-    val cache = FingerprintClientCache(context) { _, configuration ->
-      captured = configuration
-      mock(Fingerprint::class.java)
-    }
-    FingerprintHostApiImpl(context, cache).create(config)
-    return checkNotNull(captured)
-  }
-
-  private fun nativeConfig(
-    region: String? = "us",
-    endpoint: String? = null,
-    allowUseOfLocationData: Boolean = false,
-    locationTimeoutMillis: Long? = 5000L,
-  ) = FingerprintNativeConfig(
-    "key-a",
-    region,
-    endpoint,
-    null,
-    "1.0.0",
-    allowUseOfLocationData,
-    locationTimeoutMillis,
-  )
+  private fun hostApi(createFingerprint: FingerprintFactoryFn) =
+    FingerprintHostApiImpl(context, FingerprintClientCache(context, createFingerprint))
 }
+
+internal fun nativeConfig(
+  apiKey: String = "key-a",
+  region: NativeRegion = NativeRegion.US,
+  endpoint: String? = null,
+  fallbacks: List<String>? = null,
+  pluginVersion: String = "1.0.0",
+  allowUseOfLocationData: Boolean = false,
+  locationTimeoutMillis: Long? = 5000L,
+) = FingerprintNativeConfig(
+  apiKey,
+  region,
+  endpoint,
+  fallbacks,
+  pluginVersion,
+  allowUseOfLocationData,
+  locationTimeoutMillis,
+)
 
 private class FakeFingerprint(
   private val error: com.fingerprint.android.Error,

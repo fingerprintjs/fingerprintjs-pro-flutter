@@ -192,10 +192,22 @@ class FlutterError (
   val details: Any? = null
 ) : RuntimeException()
 
+enum class NativeRegion(val raw: Int) {
+  US(0),
+  EU(1),
+  AP(2);
+
+  companion object {
+    fun ofRaw(raw: Int): NativeRegion? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class FingerprintNativeConfig (
   val apiKey: String,
-  val region: String? = null,
+  val region: NativeRegion,
   val endpoint: String? = null,
   val endpointFallbacks: List<String>? = null,
   val pluginVersion: String,
@@ -206,7 +218,7 @@ data class FingerprintNativeConfig (
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): FingerprintNativeConfig {
       val apiKey = pigeonVar_list[0] as String
-      val region = pigeonVar_list[1] as String?
+      val region = pigeonVar_list[1] as NativeRegion
       val endpoint = pigeonVar_list[2] as String?
       val endpointFallbacks = pigeonVar_list[3] as List<String>?
       val pluginVersion = pigeonVar_list[4] as String
@@ -312,11 +324,16 @@ private open class FingerprintApiPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
       129.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          NativeRegion.ofRaw(it.toInt())
+        }
+      }
+      130.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           FingerprintNativeConfig.fromList(it)
         }
       }
-      130.toByte() -> {
+      131.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           FingerprintNativeResult.fromList(it)
         }
@@ -326,12 +343,16 @@ private open class FingerprintApiPigeonCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is FingerprintNativeConfig -> {
+      is NativeRegion -> {
         stream.write(129)
+        writeValue(stream, value.raw.toLong())
+      }
+      is FingerprintNativeConfig -> {
+        stream.write(130)
         writeValue(stream, value.toList())
       }
       is FingerprintNativeResult -> {
-        stream.write(130)
+        stream.write(131)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

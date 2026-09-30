@@ -18,10 +18,12 @@ import 'package:pigeon/pigeon.dart';
         'ios/fingerprint_flutter/Sources/fingerprint_flutter/FingerprintApi.g.swift',
   ),
 )
+enum NativeRegion { us, eu, ap }
+
 class FingerprintNativeConfig {
   FingerprintNativeConfig({
     required this.apiKey,
-    this.region,
+    required this.region,
     this.endpoint,
     this.endpointFallbacks,
     required this.pluginVersion,
@@ -30,7 +32,7 @@ class FingerprintNativeConfig {
   });
 
   String apiKey;
-  String? region;
+  NativeRegion region;
   // Public API is one `endpoints` list. Native still splits first + rest.
   String? endpoint;
   List<String>? endpointFallbacks;

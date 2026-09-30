@@ -1,45 +1,12 @@
-// Memoizes Fingerprint clients by resolved native configuration.
-
+// One iOS Fingerprint client per Pigeon config.
 @preconcurrency import Fingerprint
 import Foundation
 
-/// One [FingerprintClientProviding] per resolved configuration.
 final class FingerprintClientCache: @unchecked Sendable {
-  // Fields, not a joined string. A delimiter key can collide or drop a field.
-  private struct ClientKey: Hashable {
-    var apiKey: String
-    var regionCode: String
-    var customDomain: String?
-    var customFallbacks: [String]
-    var pluginVersion: String
-    var allowUseOfLocationData: Bool
-
-    init(configuration: Configuration, pluginVersion: String) {
-      apiKey = configuration.apiKey
-      self.pluginVersion = pluginVersion
-      allowUseOfLocationData = configuration.allowUseOfLocationData
-      switch configuration.region {
-      case .eu:
-        regionCode = "eu"
-        customDomain = nil
-        customFallbacks = []
-      case .ap:
-        regionCode = "ap"
-        customDomain = nil
-        customFallbacks = []
-      case .custom(let domain, let fallback):
-        regionCode = "custom"
-        customDomain = domain
-        customFallbacks = fallback
-      default:
-        regionCode = "global"
-        customDomain = nil
-        customFallbacks = []
-      }
-    }
-  }
-
-  private var clients: [ClientKey: FingerprintClientProviding] = [:]
+  // Pigeon generates Hashable for the config, so new fields are part of the
+  // key automatically. Configs that differ only in a field iOS ignores
+  // (locationTimeoutMillis) get separate clients, which is harmless.
+  private var clients: [FingerprintNativeConfig: FingerprintClientProviding] = [:]
   private let createClient: (Configuration) -> FingerprintClientProviding
   private let lock = NSLock()
 
@@ -51,18 +18,34 @@ final class FingerprintClientCache: @unchecked Sendable {
     self.createClient = createClient
   }
 
-  func getOrCreate(
-    configuration: Configuration,
-    pluginVersion: String
-  ) -> FingerprintClientProviding {
+  func getOrCreate(_ config: FingerprintNativeConfig) -> FingerprintClientProviding {
     lock.lock()
     defer { lock.unlock() }
-    let key = ClientKey(configuration: configuration, pluginVersion: pluginVersion)
-    if let existing = clients[key] {
+    if let existing = clients[config] {
       return existing
     }
-    let client = createClient(configuration)
-    clients[key] = client
+    let client = createClient(buildConfiguration(config: config))
+    clients[config] = client
     return client
+  }
+
+  private func buildConfiguration(config: FingerprintNativeConfig) -> Configuration {
+    // Dart drops empty endpoint strings before they get here.
+    let region: Region
+    if let endpoint = config.endpoint {
+      region = .custom(domain: endpoint, fallback: config.endpointFallbacks ?? [])
+    } else {
+      switch config.region {
+      case .us: region = .global
+      case .eu: region = .eu
+      case .ap: region = .ap
+      }
+    }
+    return Configuration(
+      apiKey: config.apiKey,
+      region: region,
+      integrationInfo: [("fingerprint-pro-flutter", config.pluginVersion)],
+      allowUseOfLocationData: config.allowUseOfLocationData
+    )
   }
 }

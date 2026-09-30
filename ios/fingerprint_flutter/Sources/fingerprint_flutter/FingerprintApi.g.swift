@@ -184,10 +184,16 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 }
 
 
+enum NativeRegion: Int, CaseIterable {
+  case us = 0
+  case eu = 1
+  case ap = 2
+}
+
 /// Generated class from Pigeon that represents data sent in messages.
 struct FingerprintNativeConfig: Hashable, CustomStringConvertible {
   var apiKey: String
-  var region: String? = nil
+  var region: NativeRegion
   var endpoint: String? = nil
   var endpointFallbacks: [String]? = nil
   var pluginVersion: String
@@ -198,7 +204,7 @@ struct FingerprintNativeConfig: Hashable, CustomStringConvertible {
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> FingerprintNativeConfig? {
     let apiKey = pigeonVar_list[0] as! String
-    let region: String? = nilOrValue(pigeonVar_list[1])
+    let region = pigeonVar_list[1] as! NativeRegion
     let endpoint: String? = nilOrValue(pigeonVar_list[2])
     let endpointFallbacks: [String]? = nilOrValue(pigeonVar_list[3])
     let pluginVersion = pigeonVar_list[4] as! String
@@ -308,8 +314,14 @@ private class FingerprintApiPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
     case 129:
-      return FingerprintNativeConfig.fromList(self.readValue() as! [Any?])
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return NativeRegion(rawValue: enumResultAsInt)
+      }
+      return nil
     case 130:
+      return FingerprintNativeConfig.fromList(self.readValue() as! [Any?])
+    case 131:
       return FingerprintNativeResult.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -319,11 +331,14 @@ private class FingerprintApiPigeonCodecReader: FlutterStandardReader {
 
 private class FingerprintApiPigeonCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? FingerprintNativeConfig {
+    if let value = value as? NativeRegion {
       super.writeByte(129)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? FingerprintNativeConfig {
+      super.writeByte(130)
       super.writeValue(value.toList())
     } else if let value = value as? FingerprintNativeResult {
-      super.writeByte(130)
+      super.writeByte(131)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
