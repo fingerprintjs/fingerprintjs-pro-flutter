@@ -16,8 +16,7 @@ Pod::Spec.new do |s|
   s.source_files     = 'fingerprint_flutter/Sources/fingerprint_flutter/**/*.swift'
   s.dependency 'Flutter'
   s.dependency 'Fingerprint-iOS', ">= #{fingerprint_lower}", "< #{fingerprint_upper}"
-  s.ios.deployment_target  = '15.0'
-  s.tvos.deployment_target = '15.0'
+  s.platform         = :ios, '15.0'
   s.xcconfig = {
     'LIBRARY_SEARCH_PATHS' => '"${PROJECT_DIR}/.."/*'
   }
