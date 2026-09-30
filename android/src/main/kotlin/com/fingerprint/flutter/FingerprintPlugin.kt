@@ -1,3 +1,5 @@
+// Plugin entry point: registers the Pigeon host API on each Flutter engine.
+// https://pub.dev/packages/pigeon
 package com.fingerprint.flutter
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin

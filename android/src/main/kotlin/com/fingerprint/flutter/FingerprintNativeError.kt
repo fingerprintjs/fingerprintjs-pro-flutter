@@ -59,26 +59,13 @@ internal fun errorCode(error: Error): String? = when (error) {
   else -> null
 }
 
-internal fun normalizeEventId(eventId: String?): String? {
-  // Android Error defaults eventId to "Unknown" when the SDK has no id.
-  // That is not a server event. Dart turns empty ids into null.
-  if (eventId == null || eventId == "Unknown") {
-    return null
-  }
-  return eventId
-}
-
-internal fun normalizeMessage(description: String?): String? {
-  // Same Android default as eventId. Do not forward "Unknown" as a message.
-  if (description == null || description == "Unknown") {
-    return null
-  }
-  return description
-}
+// Android Error defaults eventId and description to "Unknown" when the SDK
+// has none. That is not a real value, so Dart should see null instead.
+internal fun unknownToNull(value: String?): String? = if (value == "Unknown") null else value
 
 internal fun toFlutterError(error: Error): FlutterError {
-  val eventId = normalizeEventId(error.eventId)
-  val description = normalizeMessage(error.description)
+  val eventId = unknownToNull(error.eventId)
+  val description = unknownToNull(error.description)
   val code = errorCode(error)
     ?: return FlutterError(
       "unknown_error",
