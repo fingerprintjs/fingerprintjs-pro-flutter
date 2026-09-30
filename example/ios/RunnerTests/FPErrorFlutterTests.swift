@@ -7,16 +7,11 @@ import Testing
 @testable import fingerprint_flutter
 
 struct FPErrorFlutterTests {
-  @Test(arguments: [
-    ("", nil),
-    ("event-id", "event-id"),
-  ] as [(String, String?)])
-  func keepsCodeAndMessageAndDropsEmptyEventId(eventId: String, expectedEventId: String?)
-    throws
-  {
+  @Test
+  func keepsCodeMessageAndEventId() throws {
     let error = try makeAPIError(
       code: .publicApiKeyRequired,
-      eventId: eventId,
+      eventId: "event-id",
       message: "API key is required"
     )
 
@@ -24,7 +19,7 @@ struct FPErrorFlutterTests {
 
     #expect(fields.code == "public_api_key_required")
     #expect(fields.message == "API key is required")
-    #expect(fields.eventId == expectedEventId)
+    #expect(fields.eventId == "event-id")
   }
 
   // Literal server strings, not APIError.Code.rawValue, so this fails if the

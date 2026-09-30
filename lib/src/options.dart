@@ -13,7 +13,8 @@ class AndroidOptions {
   /// https://docs.fingerprint.com/docs/android-sdk
   final bool? allowUseOfLocationData;
 
-  /// How long identification may wait for a location fix.
+  /// How long identification may wait for a location fix. Must not be
+  /// negative.
   ///
   /// The Android SDK default is 5 seconds when this is omitted.
   final Duration? locationTimeout;

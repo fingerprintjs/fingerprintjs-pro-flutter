@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 void main() {
   late RecordingPlatform platform;
@@ -92,6 +91,23 @@ void main() {
       throwsArgumentError,
     );
     expect(platform.gets, isEmpty);
+  });
+
+  test('rejects a negative Android location timeout without starting', () {
+    expect(
+      () => Fingerprint(
+        apiKey: 'key-1',
+        android: const AndroidOptions(locationTimeout: Duration(seconds: -1)),
+      ),
+      throwsA(
+        isA<ArgumentError>().having(
+          (error) => error.name,
+          'name',
+          'android.locationTimeout',
+        ),
+      ),
+    );
+    expect(platform.created, isEmpty);
   });
 
   // E.g. the client was built before the Flutter binding was ready.
@@ -249,8 +265,7 @@ void main() {
   });
 }
 
-class RecordingPlatform extends FingerprintPlatform
-    with MockPlatformInterfaceMixin {
+class RecordingPlatform extends FingerprintPlatform {
   final created = <FingerprintConfig>[];
   final gets = <_GetCall>[];
   FingerprintError? createError;

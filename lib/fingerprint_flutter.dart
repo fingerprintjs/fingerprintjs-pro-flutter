@@ -76,6 +76,7 @@ class Fingerprint {
          ios: ios,
          web: web,
        ) {
+    validateTimeout(android?.locationTimeout, 'android.locationTimeout');
     // Warm-up only: iOS location, Android SDK loading, the web bundle.
     // - get does not wait for it. Platform get creates the client itself.
     // - A failed warm-up does not break the client. Real create errors
@@ -100,7 +101,7 @@ class Fingerprint {
   }) {
     // Not `async`, so ArgumentError throws now, not as a Future error.
     validateTags(tags);
-    validateTimeout(timeout);
+    validateTimeout(timeout, 'timeout');
     return FingerprintPlatform.instance.get(
       _config,
       tags: tags,
