@@ -17,7 +17,7 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A1000001294A63A400263BE5 /* FingerprintHostApiImplTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011294A63A400263BE5 /* FingerprintHostApiImplTests.swift */; };
 		A1000002294A63A400263BE5 /* TestFingerprintClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000012294A63A400263BE5 /* TestFingerprintClient.swift */; };
-		A1000003294A63A400263BE5 /* FPJSErrorFlutterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013294A63A400263BE5 /* FPJSErrorFlutterTests.swift */; };
+		A1000003294A63A400263BE5 /* FPErrorFlutterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013294A63A400263BE5 /* FPErrorFlutterTests.swift */; };
 		A1000004294A63A400263BE5 /* JSONTypeConvertorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000014294A63A400263BE5 /* JSONTypeConvertorTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -66,7 +66,7 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000011294A63A400263BE5 /* FingerprintHostApiImplTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerprintHostApiImplTests.swift; sourceTree = "<group>"; };
 		A1000012294A63A400263BE5 /* TestFingerprintClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFingerprintClient.swift; sourceTree = "<group>"; };
-		A1000013294A63A400263BE5 /* FPJSErrorFlutterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FPJSErrorFlutterTests.swift; sourceTree = "<group>"; };
+		A1000013294A63A400263BE5 /* FPErrorFlutterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FPErrorFlutterTests.swift; sourceTree = "<group>"; };
 		A1000014294A63A400263BE5 /* JSONTypeConvertorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONTypeConvertorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,7 +94,7 @@
 			children = (
 				331C807B294A63A400263BE5 /* FingerprintClientCacheTests.swift */,
 				A1000011294A63A400263BE5 /* FingerprintHostApiImplTests.swift */,
-				A1000013294A63A400263BE5 /* FPJSErrorFlutterTests.swift */,
+				A1000013294A63A400263BE5 /* FPErrorFlutterTests.swift */,
 				A1000014294A63A400263BE5 /* JSONTypeConvertorTests.swift */,
 				A1000012294A63A400263BE5 /* TestFingerprintClient.swift */,
 			);
@@ -348,7 +348,7 @@
 			files = (
 				331C808B294A63A400263BE5 /* FingerprintClientCacheTests.swift in Sources */,
 				A1000001294A63A400263BE5 /* FingerprintHostApiImplTests.swift in Sources */,
-				A1000003294A63A400263BE5 /* FPJSErrorFlutterTests.swift in Sources */,
+				A1000003294A63A400263BE5 /* FPErrorFlutterTests.swift in Sources */,
 				A1000004294A63A400263BE5 /* JSONTypeConvertorTests.swift in Sources */,
 				A1000002294A63A400263BE5 /* TestFingerprintClient.swift in Sources */,
 			);
@@ -457,7 +457,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fingerprintjs.flutter.fpjs_pro.fpjsProPluginExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fingerprint.flutter.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 6.0;
@@ -640,7 +640,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fingerprintjs.flutter.fpjs_pro.fpjsProPluginExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fingerprint.flutter.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -664,7 +664,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fingerprintjs.flutter.fpjs_pro.fpjsProPluginExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fingerprint.flutter.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 6.0;

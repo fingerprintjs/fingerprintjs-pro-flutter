@@ -3,10 +3,16 @@
   "changelog": [
     "@fingerprintjs/changesets-native-dependency-format",
     {
-      "repo": "fingerprintjs/fingerprintjs-pro-flutter",
-      "androidPath": "android",
-      "iosPodspecPath": "ios/fpjs_pro_plugin.podspec",
-      "packageName": "fingerprintjs-pro-flutter"
+      "repo": "fingerprintjs/flutter",
+      "packageName": "fingerprint_flutter",
+      "ios": {
+        "podspecPath": "ios/fingerprint_flutter.podspec",
+        "dependencyName": "Fingerprint-iOS"
+      },
+      "android": {
+        "path": "android",
+        "gradleTaskName": "printFingerprintNativeSDKVersion"
+      }
     }
   ],
   "commit": false,

@@ -5,7 +5,7 @@
 import Foundation
 import Testing
 
-@testable import fpjs_pro_plugin
+@testable import fingerprint_flutter
 
 struct JSONTypeConvertorTests {
   @Test func convertsJSONNull() {

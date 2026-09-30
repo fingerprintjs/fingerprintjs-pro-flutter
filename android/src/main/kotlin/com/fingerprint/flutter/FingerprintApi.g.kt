@@ -2,7 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
+package com.fingerprint.flutter
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel
@@ -361,7 +361,7 @@ interface FingerprintHostApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: FingerprintHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.create$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -379,7 +379,7 @@ interface FingerprintHostApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fpjs_pro_plugin.FingerprintHostApi.get$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>

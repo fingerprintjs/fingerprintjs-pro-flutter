@@ -1,10 +1,10 @@
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
+package com.fingerprint.flutter
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 
 /** Registers the Pigeon [FingerprintHostApi] with the Flutter engine. */
-class FpjsProPlugin : FlutterPlugin {
+class FingerprintPlugin : FlutterPlugin {
   private var hostApiImpl: FingerprintHostApiImpl? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {

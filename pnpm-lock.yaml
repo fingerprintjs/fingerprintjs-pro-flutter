@@ -12,8 +12,8 @@ importers:
         specifier: ^2.30.0
         version: 2.31.0
       '@fingerprintjs/changesets-native-dependency-format':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
 
 packages:
 
@@ -79,8 +79,8 @@ packages:
   '@fingerprintjs/changesets-changelog-format@0.2.0':
     resolution: {integrity: sha512-1jI+J1r8OKUtjlFfQW4bmQ8u4E1097zPaKw5fUCgAcahLPgwW4Ae+Keoc253CSyyaKgTu2v/wniUGchmPaXAsg==}
 
-  '@fingerprintjs/changesets-native-dependency-format@0.1.0':
-    resolution: {integrity: sha512-fRrunw8LFXjKEFGWxSB/LG1/0GRkZARKNEs1Zuz9rOSDsJdjzhsYnv1Bo0IEkv7tTCTTJk69oAXGYFOXtWfHeg==}
+  '@fingerprintjs/changesets-native-dependency-format@0.2.0':
+    resolution: {integrity: sha512-wUh8Zg+veIPyLs8YWl1AOb1ARUy0F+Yw2ak1Cr0n2U3QCXlZPZ7lTt24DmKSoOgqbA4ZQqu2DOupgsNajkgOog==}
 
   '@inquirer/external-editor@1.0.3':
     resolution: {integrity: sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA==}
@@ -545,7 +545,7 @@ snapshots:
     dependencies:
       '@changesets/types': 6.1.0
 
-  '@fingerprintjs/changesets-native-dependency-format@0.1.0':
+  '@fingerprintjs/changesets-native-dependency-format@0.2.0':
     dependencies:
       '@changesets/get-release-plan': 4.0.16
       '@changesets/types': 6.1.0
