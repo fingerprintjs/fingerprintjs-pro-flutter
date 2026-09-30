@@ -41,7 +41,7 @@ jobs:
             flutter-version: ""
     defaults:
       run:
-        working-directory: fpjs_pro_plugin
+        working-directory: fingerprint_flutter
     env:
       API_KEY: ${{ secrets.API_KEY }}
       REGION: ${{ secrets.REGION }}
@@ -55,7 +55,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          path: fpjs_pro_plugin
+          path: fingerprint_flutter
       - name: Install Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
@@ -95,7 +95,7 @@ jobs:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          working-directory: fpjs_pro_plugin
+          working-directory: fingerprint_flutter
           script: ./.github/scripts/run_smoke_test.sh android
       - name: Run iOS smoke test
         if: matrix.platform == 'ios'
@@ -112,5 +112,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: smoke-${{ matrix.platform }}
-          path: fpjs_pro_plugin/.local/maestro/${{ matrix.platform }}
+          path: fingerprint_flutter/.local/maestro/${{ matrix.platform }}
           include-hidden-files: true

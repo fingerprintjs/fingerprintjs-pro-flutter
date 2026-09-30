@@ -5,12 +5,12 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpjs_pro_plugin/error.dart';
-import 'package:fpjs_pro_plugin/options.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_web.dart';
-import 'package:fpjs_pro_plugin/src/js_agent_interop.dart';
+import 'package:fingerprint_flutter/error.dart';
+import 'package:fingerprint_flutter/options.dart';
+import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/src/fingerprint_web.dart';
+import 'package:fingerprint_flutter/src/js_agent_interop.dart';
 
 void main() {
   late FakeAgent fake;
@@ -357,7 +357,7 @@ class FakeAgent {
   Object? nextThrow;
   JSObject? startError;
 
-  FingerprintJSAgent start(JSObject options) {
+  FingerprintAgent start(JSObject options) {
     final error = startError;
     if (error != null) {
       throw error;
@@ -387,7 +387,7 @@ class FakeAgent {
                   .toJS,
             )
             as JSFunction);
-    return FingerprintJSAgent(agent);
+    return FingerprintAgent(agent);
   }
 
   JSPromise<JSObject> _get([JSObject? options]) {

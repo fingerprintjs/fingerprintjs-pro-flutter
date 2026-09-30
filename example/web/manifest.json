@@ -1,11 +1,11 @@
 {
-    "name": "fpjs_pro_plugin_example",
-    "short_name": "fpjs_pro_plugin_example",
+    "name": "fingerprint_flutter_example",
+    "short_name": "fingerprint_flutter_example",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Demonstrates how to use the fpjs_pro_plugin plugin.",
+    "description": "Demonstrates how to use the fingerprint_flutter plugin.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

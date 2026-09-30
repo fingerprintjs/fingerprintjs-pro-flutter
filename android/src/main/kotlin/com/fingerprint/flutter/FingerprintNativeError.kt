@@ -2,7 +2,7 @@
 // Match on type, not javaClass.simpleName. R8 can rename classes in minified
 // builds, which would send the wrong Dart code.
 // https://developer.android.com/build/shrink-code
-package com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin
+package com.fingerprint.flutter
 
 import com.fingerprint.android.ApiKeyNotFound
 import com.fingerprint.android.ApiKeyRequired

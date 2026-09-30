@@ -2,11 +2,11 @@
 // https://pub.dev/packages/pigeon
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fpjs_pro_plugin/region.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_error.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_platform_interface.dart';
-import 'package:fpjs_pro_plugin/src/fingerprint_result.dart';
-import 'package:fpjs_pro_plugin/src/pigeon/fingerprint_api.g.dart';
+import 'package:fingerprint_flutter/region.dart';
+import 'package:fingerprint_flutter/src/fingerprint_error.dart';
+import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
+import 'package:fingerprint_flutter/src/fingerprint_result.dart';
+import 'package:fingerprint_flutter/src/pigeon/fingerprint_api.g.dart';
 
 /// Android and iOS [FingerprintPlatform] using generated [FingerprintHostApi].
 class FingerprintNative extends FingerprintPlatform {

@@ -1,4 +1,4 @@
-/// Region in which FingerprintJS Pro subscription is created
+/// Fingerprint workspace region.
 enum Region { eu, us, ap }
 
 /// Lowercase region name sent to the native SDKs and the JS agent.

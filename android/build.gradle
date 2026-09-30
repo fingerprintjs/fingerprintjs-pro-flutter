@@ -4,7 +4,7 @@ plugins {
 
 apply from: 'fingerprint.gradle'
 
-group 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
+group 'com.fingerprint.flutter'
 version '4.13.1'
 
 rootProject.allprojects {
@@ -29,7 +29,7 @@ android {
     }
 
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
+        namespace 'com.fingerprint.flutter'
     }
 }
 

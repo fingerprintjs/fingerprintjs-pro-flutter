@@ -31,7 +31,7 @@ case "$platform" in
     (cd example && flutter build apk --debug)
     adb -s "$device" install -r example/build/app/outputs/flutter-apk/app-debug.apk
     maestro_command+=(--device "$device")
-    test_args=(-e APP_ID=com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example)
+    test_args=(-e APP_ID=com.fingerprint.flutter.example)
     ;;
   ios)
     device=${2:?Pass the booted simulator UDID as the second argument}

@@ -1,4 +1,4 @@
-// Patch releases only, same as iOS in ios/fpjs_pro_plugin/Package.swift.
+// Patch releases only, same as iOS in ios/fingerprint_flutter/Package.swift.
 // Take each native minor on purpose.
 ext.fingerprint_native_sdk_version = "[4.1.0, 4.2.0)"
 

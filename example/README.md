@@ -1,6 +1,6 @@
-# Example project using `fpjs_pro_plugin`
+# Example project using `fingerprint_flutter`
 
-Demonstrates how to use the `fpjs_pro_plugin` plugin.
+Demonstrates how to use the `fingerprint_flutter` plugin.
 
 ## Getting Started
 

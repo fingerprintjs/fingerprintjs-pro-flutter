@@ -4,7 +4,7 @@
 import Foundation
 import Testing
 
-@testable import fpjs_pro_plugin
+@testable import fingerprint_flutter
 
 struct FingerprintHostApiImplTests {
   @Test func createBuildsCustomRegionFromEndpointAndFallbacks() throws {
