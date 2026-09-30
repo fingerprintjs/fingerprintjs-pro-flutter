@@ -83,31 +83,61 @@ void main() {
     expect(platform.gets, isEmpty);
   });
 
-  test('rejects a negative timeout without identifying', () {
+  test('rejects a timeout under 1 ms without identifying', () {
     final client = Fingerprint(apiKey: 'key-1');
 
-    expect(
-      () => client.get(timeout: const Duration(seconds: -1)),
-      throwsArgumentError,
-    );
+    for (final timeout in const [
+      Duration(seconds: -1),
+      Duration.zero,
+      Duration(microseconds: 500),
+    ]) {
+      expect(() => client.get(timeout: timeout), throwsArgumentError);
+    }
     expect(platform.gets, isEmpty);
   });
 
-  test('rejects a negative Android location timeout without starting', () {
-    expect(
-      () => Fingerprint(
-        apiKey: 'key-1',
-        android: const AndroidOptions(locationTimeout: Duration(seconds: -1)),
-      ),
-      throwsA(
-        isA<ArgumentError>().having(
-          (error) => error.name,
-          'name',
-          'android.locationTimeout',
+  test('accepts a 1 ms timeout', () async {
+    final client = Fingerprint(apiKey: 'key-1');
+
+    await client.get(timeout: const Duration(milliseconds: 1));
+
+    expect(platform.gets.single.timeout, const Duration(milliseconds: 1));
+  });
+
+  test('rejects an Android location timeout under 1 ms without starting', () {
+    for (final timeout in const [
+      Duration(seconds: -1),
+      Duration.zero,
+      Duration(microseconds: 500),
+    ]) {
+      expect(
+        () => Fingerprint(
+          apiKey: 'key-1',
+          android: AndroidOptions(locationTimeout: timeout),
         ),
-      ),
-    );
+        throwsA(
+          isA<ArgumentError>().having(
+            (error) => error.name,
+            'name',
+            'android.locationTimeout',
+          ),
+        ),
+      );
+    }
     expect(platform.created, isEmpty);
+  });
+
+  test('accepts a 1 ms Android location timeout', () async {
+    final client = Fingerprint(
+      apiKey: 'key-1',
+      android: const AndroidOptions(locationTimeout: Duration(milliseconds: 1)),
+    );
+    await client.get();
+
+    expect(
+      platform.created.single.android?.locationTimeout,
+      const Duration(milliseconds: 1),
+    );
   });
 
   // E.g. the client was built before the Flutter binding was ready.
