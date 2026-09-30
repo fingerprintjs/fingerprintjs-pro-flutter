@@ -154,16 +154,14 @@ class FingerprintHostApiImplTest {
 internal fun nativeConfig(
   apiKey: String = "key-a",
   region: NativeRegion = NativeRegion.US,
-  endpoint: String? = null,
-  fallbacks: List<String>? = null,
+  endpoints: List<String>? = null,
   pluginVersion: String = "1.0.0",
   allowUseOfLocationData: Boolean = false,
   locationTimeoutMillis: Long? = 5000L,
 ) = FingerprintNativeConfig(
   apiKey,
   region,
-  endpoint,
-  fallbacks,
+  endpoints,
   pluginVersion,
   allowUseOfLocationData,
   locationTimeoutMillis,

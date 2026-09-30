@@ -20,8 +20,8 @@ class FingerprintClientCacheTest {
       mock(Fingerprint::class.java)
     }
     // Separate instances, like two Pigeon calls decode.
-    cache.getOrCreate(nativeConfig(fallbacks = listOf("https://fallback.example")))
-    cache.getOrCreate(nativeConfig(fallbacks = listOf("https://fallback.example")))
+    cache.getOrCreate(nativeConfig(endpoints = listOf("https://custom.example", "https://fallback.example")))
+    cache.getOrCreate(nativeConfig(endpoints = listOf("https://custom.example", "https://fallback.example")))
     assertEquals(1, created.get())
   }
 
@@ -36,8 +36,8 @@ class FingerprintClientCacheTest {
       nativeConfig(),
       nativeConfig(apiKey = "key-b"),
       nativeConfig(region = NativeRegion.EU),
-      nativeConfig(endpoint = "https://custom.example"),
-      nativeConfig(fallbacks = listOf("https://fallback.example")),
+      nativeConfig(endpoints = listOf("https://custom.example")),
+      nativeConfig(endpoints = listOf("https://custom.example", "https://fallback.example")),
       nativeConfig(pluginVersion = "2.0.0"),
       nativeConfig(allowUseOfLocationData = true),
       nativeConfig(locationTimeoutMillis = 1000L),
@@ -72,14 +72,14 @@ class FingerprintClientCacheTest {
 
   @Test
   fun usesRegionUrlWhenEndpointIsOmitted() {
-    val built = buildConfiguration(nativeConfig(region = NativeRegion.EU, endpoint = null))
+    val built = buildConfiguration(nativeConfig(region = NativeRegion.EU, endpoints = null))
     assertEquals(Configuration.Region.EU.endpointUrl, built.endpointUrl)
   }
 
   @Test
   fun usesCustomEndpointAndFallbacks() {
     val built = buildConfiguration(
-      nativeConfig(endpoint = "https://proxy.example", fallbacks = listOf("https://fallback.example")),
+      nativeConfig(endpoints = listOf("https://proxy.example", "https://fallback.example")),
     )
     assertEquals("https://proxy.example", built.endpointUrl)
     assertEquals(listOf("https://fallback.example"), built.fallbackEndpointUrls)

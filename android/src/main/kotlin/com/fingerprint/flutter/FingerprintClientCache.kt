@@ -35,9 +35,10 @@ internal class FingerprintClientCache(
       NativeRegion.EU -> Configuration.Region.EU
       NativeRegion.AP -> Configuration.Region.AP
     }
-    // Dart drops empty endpoint strings before they get here.
-    val endpointUrl = config.endpoint ?: region.endpointUrl
-    val fallbacks = config.endpointFallbacks ?: emptyList()
+    // Dart drops empty endpoint strings and sends null, not an empty list.
+    val endpoints = config.endpoints.orEmpty()
+    val endpointUrl = endpoints.firstOrNull() ?: region.endpointUrl
+    val fallbacks = endpoints.drop(1)
     val locationTimeout = config.locationTimeoutMillis ?: Configuration.DEFAULT_LOCATION_TIMEOUT_MILLIS
     return Configuration(
       config.apiKey,

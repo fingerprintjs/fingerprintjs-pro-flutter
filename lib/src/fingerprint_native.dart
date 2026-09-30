@@ -60,7 +60,6 @@ class FingerprintNative extends FingerprintPlatform {
   }
 
   FingerprintNativeConfig _toNativeConfig(FingerprintConfig config) {
-    final endpoints = config.endpoints;
     return FingerprintNativeConfig(
       apiKey: config.apiKey,
       region: switch (config.region) {
@@ -69,10 +68,7 @@ class FingerprintNative extends FingerprintPlatform {
         // Android and iOS default to US, see Fingerprint.region.
         Region.us || null => NativeRegion.us,
       },
-      endpoint: endpoints?.first,
-      endpointFallbacks: endpoints != null && endpoints.length > 1
-          ? endpoints.sublist(1)
-          : null,
+      endpoints: config.endpoints,
       pluginVersion: fingerprintFlutterVersion,
       allowUseOfLocationData: _allowLocation(config),
       locationTimeoutMillis: config.android?.locationTimeout?.inMilliseconds,

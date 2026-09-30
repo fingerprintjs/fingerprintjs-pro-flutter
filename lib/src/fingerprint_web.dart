@@ -50,7 +50,10 @@ class FingerprintWeb extends FingerprintPlatform {
     }
   }
 
-  // A failed start is not cached, so the next call retries it.
+  // - A start() that throws is not cached, so the next call retries it.
+  // - start() returns before the agent script loads. If the load fails, this
+  //   agent rejects every get with script_load_fail until the page reloads.
+  // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   FingerprintAgent _agentFor(FingerprintConfig config) =>
       _agents[config] ??= _start(_toStartOptions(config));
 }
@@ -80,7 +83,11 @@ JSObject _toStartOptions(FingerprintConfig config) {
   if (cache != null) {
     options['cache'] = {
       'storage': cache.storage.name,
-      'duration': _cacheDuration(cache.duration),
+      'duration': switch (cache.duration) {
+        WebCachePreset.optimizeCost => 'optimize-cost',
+        WebCachePreset.aggressive => 'aggressive',
+        WebCacheCustomDuration(:final seconds) => seconds,
+      },
       if (cache.cachePrefix != null) 'cachePrefix': cache.cachePrefix!,
     };
   }
@@ -101,16 +108,6 @@ JSObject? _toGetOptions({
         'timeout': ?timeout?.inMilliseconds,
       }.jsify()
       as JSObject;
-}
-
-Object _cacheDuration(WebCacheDuration duration) {
-  if (duration == WebCacheDuration.optimizeCost) {
-    return 'optimize-cost';
-  }
-  if (duration == WebCacheDuration.aggressive) {
-    return 'aggressive';
-  }
-  return duration.seconds!;
 }
 
 FingerprintResult _toResult(JSObject js) {

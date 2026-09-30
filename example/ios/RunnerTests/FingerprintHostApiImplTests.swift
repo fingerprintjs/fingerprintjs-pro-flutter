@@ -17,8 +17,7 @@ struct FingerprintHostApiImplTests {
       config: FingerprintNativeConfig(
         apiKey: "api-key",
         region: .us,
-        endpoint: "https://custom.example.com",
-        endpointFallbacks: ["https://fallback.example.com"],
+        endpoints: ["https://custom.example.com", "https://fallback.example.com"],
         pluginVersion: "1.2.3",
         allowUseOfLocationData: true
       )
@@ -63,7 +62,7 @@ struct FingerprintHostApiImplTests {
     let hostApi = FingerprintHostApiImpl(
       clientCache: FingerprintClientCache(createClient: factory.create)
     )
-    let tags: [String?: Any?] = [
+    let tags: [String: Any?] = [
       "campaign": nil,
       "sessionId": 1,
       "nested": ["missing": NSNull(), "active": true],

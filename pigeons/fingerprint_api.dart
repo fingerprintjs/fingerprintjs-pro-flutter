@@ -24,8 +24,7 @@ class FingerprintNativeConfig {
   FingerprintNativeConfig({
     required this.apiKey,
     required this.region,
-    this.endpoint,
-    this.endpointFallbacks,
+    this.endpoints,
     required this.pluginVersion,
     required this.allowUseOfLocationData,
     this.locationTimeoutMillis,
@@ -33,9 +32,9 @@ class FingerprintNativeConfig {
 
   String apiKey;
   NativeRegion region;
-  // Public API is one `endpoints` list. Native still splits first + rest.
-  String? endpoint;
-  List<String>? endpointFallbacks;
+  // Null or non-empty. The native SDKs take the first as the primary
+  // endpoint and the rest as fallbacks.
+  List<String>? endpoints;
   String pluginVersion;
   bool allowUseOfLocationData;
   int? locationTimeoutMillis;
@@ -76,7 +75,7 @@ abstract class FingerprintHostApi {
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   FingerprintNativeResult get(
     FingerprintNativeConfig config,
-    Map<String?, Object?>? tags,
+    Map<String, Object?>? tags,
     String? linkedId,
     int? timeoutMs,
   );

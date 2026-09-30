@@ -28,7 +28,7 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
 
   func get(
     config: FingerprintNativeConfig,
-    tags: [String?: Any?]?,
+    tags: [String: Any?]?,
     linkedId: String?,
     timeoutMs: Int64?,
     completion: @escaping (Result<FingerprintNativeResult, Error>) -> Void
@@ -67,10 +67,9 @@ final class FingerprintHostApiImpl: FingerprintHostApi {
     }
   }
 
-  private func prepareMetadata(linkedId: String?, tags: [String?: Any?]?) -> Metadata {
+  private func prepareMetadata(linkedId: String?, tags: [String: Any?]?) -> Metadata {
     var nativeTags: [String: JSONType] = [:]
     for (key, value) in tags ?? [:] {
-      guard let key else { continue }
       // Dart validateTags rejects values jsonType cannot convert, so nil is
       // not expected here.
       nativeTags[key] = jsonType(from: value)

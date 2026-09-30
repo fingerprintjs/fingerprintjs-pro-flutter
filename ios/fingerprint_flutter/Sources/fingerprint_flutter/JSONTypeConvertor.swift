@@ -17,6 +17,8 @@ func jsonType(from object: Any?) -> JSONType? {
   }
   // Flutter bools are CFBoolean NSNumbers. `as? Int` turns them into 0/1,
   // and `as? Bool` also matches integer NSNumbers. Check CFBoolean first.
+  // Swift Bool, Int, and Double values bridge to NSNumber too, so this
+  // covers every number.
   // https://developer.apple.com/documentation/corefoundation/cfboolean
   if let number = object as? NSNumber {
     if CFGetTypeID(number) == CFBooleanGetTypeID() {
@@ -29,15 +31,6 @@ func jsonType(from object: Any?) -> JSONType? {
   }
   if let value = object as? String {
     return .string(value)
-  }
-  if let value = object as? Bool {
-    return .bool(value)
-  }
-  if let value = object as? Int {
-    return .int(value)
-  }
-  if let value = object as? Double {
-    return .double(value)
   }
   if let array = object as? [Any?] {
     return .array(array.compactMap { jsonType(from: $0) })

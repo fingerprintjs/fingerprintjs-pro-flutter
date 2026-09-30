@@ -11,8 +11,8 @@ struct FingerprintClientCacheTests {
     let factory = ClientFactoryRecorder()
     let cache = FingerprintClientCache(createClient: factory.create)
     // Separate values, like two Pigeon calls decode.
-    let first = cache.getOrCreate(nativeConfig(endpointFallbacks: ["https://fallback.example.com"]))
-    let second = cache.getOrCreate(nativeConfig(endpointFallbacks: ["https://fallback.example.com"]))
+    let first = cache.getOrCreate(nativeConfig(endpoints: ["https://example.com", "https://fallback.example.com"]))
+    let second = cache.getOrCreate(nativeConfig(endpoints: ["https://example.com", "https://fallback.example.com"]))
 
     #expect(first === second)
     #expect(factory.callCount == 1)
@@ -24,8 +24,8 @@ struct FingerprintClientCacheTests {
       nativeConfig(),
       nativeConfig(apiKey: "other-api-key"),
       nativeConfig(region: .eu),
-      nativeConfig(endpoint: "https://example.com"),
-      nativeConfig(endpointFallbacks: ["https://fallback.example.com"]),
+      nativeConfig(endpoints: ["https://example.com"]),
+      nativeConfig(endpoints: ["https://example.com", "https://fallback.example.com"]),
       nativeConfig(pluginVersion: "2.0.0"),
       nativeConfig(allowUseOfLocationData: true),
     ]
@@ -75,16 +75,14 @@ struct FingerprintClientCacheTests {
 private func nativeConfig(
   apiKey: String = "api-key",
   region: NativeRegion = .us,
-  endpoint: String? = nil,
-  endpointFallbacks: [String]? = nil,
+  endpoints: [String]? = nil,
   pluginVersion: String = "1.0.0",
   allowUseOfLocationData: Bool = false
 ) -> FingerprintNativeConfig {
   FingerprintNativeConfig(
     apiKey: apiKey,
     region: region,
-    endpoint: endpoint,
-    endpointFallbacks: endpointFallbacks,
+    endpoints: endpoints,
     pluginVersion: pluginVersion,
     allowUseOfLocationData: allowUseOfLocationData
   )
