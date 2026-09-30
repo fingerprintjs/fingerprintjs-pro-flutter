@@ -343,10 +343,10 @@ private open class FingerprintApiPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface FingerprintHostApi {
   /**
-   * Builds the native Fingerprint client immediately so location can warm
-   * before identification. get still carries config and reuses this client,
-   * so two Dart clients stay independent if create was skipped.
-   * https://docs.fingerprint.com/docs/ios-sdk
+   * Builds the native client early, so SDK startup work (such as iOS
+   * location collection) begins before the first get. get carries the
+   * config too and builds the client if create did not run.
+   * https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection
    */
   fun create(config: FingerprintNativeConfig)
   fun get(config: FingerprintNativeConfig, tags: Map<String?, Any?>?, linkedId: String?, timeoutMs: Long?, callback: (Result<FingerprintNativeResult>) -> Unit)
@@ -360,8 +360,9 @@ interface FingerprintHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: FingerprintHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      val taskQueue = binaryMessenger.makeBackgroundTaskQueue()
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.create$separatedMessageChannelSuffix", codec, taskQueue)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -379,7 +380,7 @@ interface FingerprintHostApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.fingerprint_flutter.FingerprintHostApi.get$separatedMessageChannelSuffix", codec, taskQueue)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
