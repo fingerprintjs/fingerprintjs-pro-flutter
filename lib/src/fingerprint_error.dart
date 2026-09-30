@@ -3,6 +3,10 @@
 /// [code] is the client's snake_case value. Compare it with the constants on
 /// this class. Other strings are kept.
 ///
+/// Server codes that become [unknownError]:
+/// - Android: codes without a constant here. Message is kept.
+/// - Android and iOS: codes the native SDK does not know. Message is lost.
+///
 /// Platform code builds this after replacing SDK placeholders (e.g. Android
 /// "Unknown" event ids) with null.
 final class FingerprintError implements Exception {
@@ -29,30 +33,30 @@ final class FingerprintError implements Exception {
   static const proxyIntegrationSecretEnvironmentMismatch =
       'proxy_integration_secret_environment_mismatch';
 
-  // Client errors shared by one or more platforms.
-  static const responseCannotBeParsed = 'response_cannot_be_parsed';
-  static const invalidUrl = 'invalid_url';
-  static const invalidUrlParams = 'invalid_url_params';
+  // Client errors on every platform.
   static const networkError = 'network_error';
-  static const jsonParsingError = 'json_parsing_error';
-  static const invalidResponseType = 'invalid_response_type';
   static const clientTimeout = 'client_timeout';
   static const unknownError = 'unknown_error';
 
-  // JavaScript agent errors.
+  // iOS and Android client errors, same as the React Native SDK.
+  static const invalidUrl = 'invalid_url';
+  static const invalidUrlParams = 'invalid_url_params';
+  static const jsonParsingError = 'json_parsing_error';
+  static const invalidResponseType = 'invalid_response_type';
+  static const responseCannotBeParsed = 'response_cannot_be_parsed';
+
+  // JS agent ErrorCode values, minus ones the plugin cannot trigger (worker,
+  // handleAgentData, non-string apiKey, loader-internal).
+  // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   static const sandboxedIframe = 'sandboxed_iframe';
   static const cspBlock = 'csp_block';
   static const invalidEndpoint = 'invalid_endpoint';
-  static const handleAgentData = 'handle_agent_data';
   static const scriptLoadFail = 'script_load_fail';
-  static const bundleNotDefined = 'bundle_not_defined';
   static const badResponseFormat = 'bad_response_format';
   static const serverError = 'server_error';
   static const apiKeyMissing = 'api_key_missing';
-  static const apiKeyInvalid = 'api_key_invalid';
   static const cacheMisconfigured = 'cache_misconfigured';
   static const endpointsMisconfigured = 'endpoints_misconfigured';
-  static const wrongWorkerOption = 'wrong_worker_option';
   static const workerInitializationFailed = 'worker_initialization_failed';
 
   /// The machine-readable error code. Not limited to the constants above.
