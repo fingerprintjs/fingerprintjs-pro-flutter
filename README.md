@@ -38,6 +38,7 @@ This package replaces `fpjs_pro_plugin`. If you are upgrading from 4.x, see the 
     - [Location data](#location-data)
     - [Web options](#web-options)
   - [Additional Resources](#additional-resources)
+  - [Version support](#version-support)
   - [Support and feedback](#support-and-feedback)
   - [License](#license)
 
@@ -225,6 +226,12 @@ A custom cache duration must be a whole number of seconds, greater than zero and
 ## Additional Resources
 - [Fingerprint documentation](https://docs.fingerprint.com)
 - [Server API](https://docs.fingerprint.com/reference/server-api)
+
+## Version support
+
+| SDK major version | Android SDK | iOS SDK | JS Agent version | Status | End of support |
+|---|---|---|---|---|---|
+| v4.x (current) | v2.x | v2.x | [v3](https://docs.fingerprint.com/reference/v3/javascript-agent) | Supported | - |
 
 ## Support and feedback
 
