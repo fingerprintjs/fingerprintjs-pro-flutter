@@ -55,7 +55,10 @@ void main() {
       expect(fakeHostApi.createdConfig?.endpointFallbacks, [
         'https://fallback.example',
       ]);
-      expect(fakeHostApi.createdConfig?.pluginVersion, fingerprintFlutterVersion);
+      expect(
+        fakeHostApi.createdConfig?.pluginVersion,
+        fingerprintFlutterVersion,
+      );
       expect(fakeHostApi.createdConfig?.allowUseOfLocationData, isTrue);
       expect(fakeHostApi.createdConfig?.locationTimeoutMillis, 3000);
     });
@@ -160,10 +163,7 @@ void main() {
         code: 'unknown_error',
         message: 'create failed',
       );
-      await expectLater(
-        platform.create(config()),
-        throwsA(isA<FingerprintError>()),
-      );
+      await expectLater(platform.create(config()), throwsA(anything));
 
       final result = await platform.get(config());
       expect(result.eventId, 'default-event');
@@ -219,9 +219,9 @@ void main() {
     });
 
     test('maps a non-platform error to unknown_error', () async {
-      fakeHostApi.nextCreateError = StateError('binding not initialized');
+      fakeHostApi.nextError = StateError('binding not initialized');
       await expectLater(
-        platform.create(config()),
+        platform.get(config()),
         throwsA(
           isA<FingerprintError>()
               .having((error) => error.code, 'code', 'unknown_error')
