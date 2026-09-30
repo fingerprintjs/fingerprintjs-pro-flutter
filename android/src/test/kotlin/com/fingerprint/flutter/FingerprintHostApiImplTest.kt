@@ -114,13 +114,28 @@ class FingerprintHostApiImplTest {
 
   @Test
   fun getReportsClientCreationFailureAsUnknownError() {
-    val api = hostApi { _, _ -> throw IllegalStateException("bad config") }
-    var captured: Result<FingerprintNativeResult>? = null
-    api.get(nativeConfig(), null, null, null) { captured = it }
-    val error = captured!!.exceptionOrNull() as FlutterError
-    assertEquals("unknown_error", error.code)
-    assertTrue(error.message!!.contains("bad config"))
-    assertNull(error.details)
+    // JVM Errors are not Exceptions, cover both.
+    for (thrown in listOf(IllegalStateException("bad config"), UnsatisfiedLinkError("bad config"))) {
+      val api = hostApi { _, _ -> throw thrown }
+      var captured: Result<FingerprintNativeResult>? = null
+      api.get(nativeConfig(), null, null, null) { captured = it }
+      val error = captured!!.exceptionOrNull() as FlutterError
+      assertEquals("unknown_error", error.code)
+      assertTrue(error.message!!.contains("bad config"))
+      assertNull(error.details)
+    }
+  }
+
+  @Test
+  fun getReportsSdkThrowAsUnknownError() {
+    for (timeoutMs in listOf(null, 500L)) {
+      val api = hostApi { _, _ -> ThrowingFingerprint() }
+      var captured: Result<FingerprintNativeResult>? = null
+      api.get(nativeConfig(), null, null, timeoutMs) { captured = it }
+      val error = captured!!.exceptionOrNull() as FlutterError
+      assertEquals("unknown_error", error.code)
+      assertTrue(error.message!!.contains("sdk broke"))
+    }
   }
 
   @Test
@@ -205,6 +220,27 @@ private class CapturingFingerprint : Fingerprint by mock(Fingerprint::class.java
     this.timeoutMs = timeoutMillis
     this.tags = tags
     this.linkedId = linkedId
+  }
+}
+
+private class ThrowingFingerprint : Fingerprint by mock(Fingerprint::class.java) {
+  override fun getVisitorId(
+    tags: Map<String, Any>,
+    linkedId: String,
+    listener: (FingerprintResponse) -> Unit,
+    errorListener: (com.fingerprint.android.Error) -> Unit,
+  ) {
+    throw IllegalStateException("sdk broke")
+  }
+
+  override fun getVisitorId(
+    timeoutMillis: Int,
+    tags: Map<String, Any>,
+    linkedId: String,
+    listener: (FingerprintResponse) -> Unit,
+    errorListener: (com.fingerprint.android.Error) -> Unit,
+  ) {
+    throw IllegalStateException("sdk broke")
   }
 }
 
