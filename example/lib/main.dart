@@ -8,14 +8,19 @@ import 'package:flutter/semantics.dart';
 import 'package:fingerprint_flutter/fingerprint_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
+// Covers every JSON value type, so E2E runs the null and double handling in
+// the native tag conversion.
 const tags = {
   'a': 'a',
   'b': 0,
   'c': {
     'foo': true,
-    'bar': [1, 2, 3],
+    'bar': [1, 2.5, null],
+    'baz': null,
   },
   'd': false,
+  'e': null,
+  'f': 0.5,
 };
 
 const runChecksButtonKey = ValueKey('run-checks-button');
