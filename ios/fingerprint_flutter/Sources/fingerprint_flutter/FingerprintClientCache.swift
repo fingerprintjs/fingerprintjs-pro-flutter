@@ -10,8 +10,8 @@ final class FingerprintClientCache: @unchecked Sendable {
   private let createClient: (Configuration) -> FingerprintClientProviding
   private let lock = NSLock()
 
-  // Called on the Pigeon background queue. No hop to main is needed: the SDK
-  // starts location updates on the main thread itself.
+  // Client creation runs on the Pigeon background queue. No hop to main is
+  // needed: the SDK starts location updates on the main thread itself.
   init(
     createClient: @escaping (Configuration) -> FingerprintClientProviding = {
       FingerprintFactory.getInstance($0)
