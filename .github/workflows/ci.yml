@@ -117,6 +117,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # Faster builds. A cache under 24h old also reuses the resolved native SDK version range,
+          # so fewer requests to its Maven registry.
+          # https://docs.gradle.org/current/userguide/dynamic_versions.html#sec:controlling-dynamic-version-caching
+          cache: gradle
 
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
