@@ -35,15 +35,20 @@ final class FingerprintError implements Exception {
   static const clientTimeout = 'client_timeout';
   static const unknownError = 'unknown_error';
 
-  // iOS and Android client errors, same as the React Native SDK.
+  // iOS-only client errors.
   static const invalidUrl = 'invalid_url';
   static const invalidUrlParams = 'invalid_url_params';
   static const jsonParsingError = 'json_parsing_error';
   static const invalidResponseType = 'invalid_response_type';
+
+  // Android-only client error.
   static const responseCannotBeParsed = 'response_cannot_be_parsed';
 
-  // JS agent ErrorCode values, minus ones the plugin cannot trigger (worker,
-  // handleAgentData, non-string apiKey, loader-internal).
+  // JS agent ErrorCode values, minus ones the plugin cannot trigger:
+  // handleAgentData, non-string apiKey, loader-internal codes, and
+  // wrong_worker_option (start() has no worker option).
+  // worker_initialization_failed stays: it is in the agent's public ErrorCode
+  // type, so a later agent 4.x could emit it.
   // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   static const sandboxedIframe = 'sandboxed_iframe';
   static const cspBlock = 'csp_block';
