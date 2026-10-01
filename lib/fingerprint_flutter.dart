@@ -76,6 +76,7 @@ class Fingerprint {
          ios: ios,
          web: web,
        ) {
+    // Checked on every platform, not only Android, so a bad value fails early.
     validateTimeout(android?.locationTimeout, 'android.locationTimeout');
     // Warm-up only: iOS location, Android SDK loading, the web bundle.
     // - get does not wait for it. Platform get creates the client itself.
@@ -93,7 +94,8 @@ class Fingerprint {
   /// is forwarded on every platform, including JSON null.
   /// https://docs.fingerprint.com/docs/tagging-information
   ///
-  /// [timeout] must not be negative. Null uses the platform default.
+  /// [timeout] must be at least 1 millisecond. Null uses the platform
+  /// default.
   Future<FingerprintResult> get({
     Map<String, Object?>? tags,
     String? linkedId,
