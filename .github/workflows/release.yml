@@ -5,14 +5,19 @@ on:
       - main
       - test
 jobs:
+  # Only before publishing (release PR merged). Opening the release PR needs no check,
+  # the merged feature PR already passed CI.
   test:
     name: 'Build and check code before release'
-    if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
+    if: ${{ contains(github.event.head_commit.message, 'chore(release)') }}
     uses: ./.github/workflows/ci.yml
 
   release:
     name: 'Release using changesets'
     needs: test
+    # Run even when `test` is skipped. Without `if`, a skipped `needs` job skips this one too.
+    # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idneeds
+    if: ${{ !failure() && !cancelled() }}
     uses: fingerprintjs/dx-team-toolkit/.github/workflows/release-sdk-changesets.yml@v1
     with:
       appId: ${{ vars.APP_ID }}
