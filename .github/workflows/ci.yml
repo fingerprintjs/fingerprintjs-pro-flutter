@@ -32,6 +32,23 @@ jobs:
           dart run pigeon --input pigeons/fingerprint_api.dart
           git diff --exit-code -- lib/src/pigeon android/src/main/kotlin ios/fingerprint_flutter/Sources
 
+      # pnpm version comes from packageManager in the root package.json.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      # The banner year comes from the build date, so ignore a change to that line only.
+      - name: Verify web/index.js is built from web/index.ts
+        working-directory: web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+          git diff --exit-code -I 'Copyright \(c\) FingerprintJS, Inc, [0-9]{4}' -- index.js
+
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
         shell: bash
