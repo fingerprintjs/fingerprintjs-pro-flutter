@@ -135,6 +135,8 @@ String? _sealedResult(JSAny? value) {
 
 FingerprintError _wrapJsError(Object error) {
   // JS errors have no Dart class. `isA` cannot narrow them.
+  // Caught values are JS values or Dart exceptions, so this check gives the
+  // same result on JS and WASM. CI runs the web tests on both.
   // ignore: invalid_runtime_check_with_js_interop_types
   if (error is JSObject) {
     final code = error.getProperty('code'.toJS);

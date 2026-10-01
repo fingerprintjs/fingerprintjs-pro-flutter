@@ -46,6 +46,10 @@ jobs:
       - name: Run web tests
         run: flutter test --platform chrome
 
+      # JS interop type checks can differ between dart2js and dart2wasm.
+      - name: Run web tests (WASM)
+        run: flutter test --platform chrome --wasm
+
       - name: Run example tests
         working-directory: example
         run: flutter test
