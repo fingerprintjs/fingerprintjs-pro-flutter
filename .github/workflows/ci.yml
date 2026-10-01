@@ -32,6 +32,12 @@ jobs:
           dart run pigeon --input pigeons/fingerprint_api.dart
           git diff --exit-code -- lib/src/pigeon android/src/main/kotlin ios/fingerprint_flutter/Sources
 
+      # Same SDK as publish.yaml (latest stable). Fails on warnings, so publish
+      # problems show up on the PR instead of after tagging.
+      - name: Validate package for pub.dev
+        if: matrix['flutter-version'] == ''
+        run: flutter pub publish --dry-run
+
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
         shell: bash
