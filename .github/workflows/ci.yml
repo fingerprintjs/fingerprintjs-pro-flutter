@@ -12,26 +12,23 @@ jobs:
     name: "Detect native changes"
     runs-on: ubuntu-latest
     outputs:
-      native: ${{ steps.diff.outputs.native }}
+      native: ${{ github.event_name != 'pull_request' || steps.filter.outputs.native == 'true' }}
     steps:
-      # A PR checkout is a merge commit, so its first parent is the base branch.
-      - name: Checkout
+      # On PRs reads changed files through the API, no checkout needed.
+      - name: Filter changed paths
+        id: filter
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v7
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
-          fetch-depth: 2
-
-      # Defaults to `true`, so a failed diff can't skip required checks.
-      - name: Diff
-        id: diff
-        run: |
-          native=true
-          if [ "${{ github.event_name }}" = pull_request ] \
-            && files=$(git diff --name-only HEAD^1 HEAD) \
-            && ! grep -qE '^(android|ios|lib|example|pigeons)/|^pubspec\.yaml$|^\.github/workflows/ci\.yml$' <<< "$files"; then
-            native=false
-          fi
-          echo "native=$native" >> "$GITHUB_OUTPUT"
+          filters: |
+            native:
+              - 'android/**'
+              - 'ios/**'
+              - 'lib/**'
+              - 'example/**'
+              - 'pigeons/**'
+              - 'pubspec.yaml'
+              - '.github/workflows/ci.yml'
 
   analyze-and-test:
     name: "Analyze and test (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
