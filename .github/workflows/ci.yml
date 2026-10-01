@@ -1,8 +1,6 @@
 name: ci
 on:
   pull_request:
-    paths-ignore:
-      - "**.md"
   workflow_call:
 
 jobs:
@@ -118,11 +116,8 @@ jobs:
   build-examples-android:
     name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }}, built-in Kotlin ${{ matrix['built-in-kotlin'] }})"
     needs: [analyze-and-test, changes]
+    if: needs.changes.outputs.native == 'true'
     runs-on: ubuntu-latest
-    # Skipped per step, not per job. A job-level `if` skips before the matrix expands, so the
-    # required checks (named by matrix values) would never report.
-    env:
-      NATIVE: ${{ needs.changes.outputs.native }}
     strategy:
       fail-fast: false
       matrix:
@@ -138,18 +133,15 @@ jobs:
             built-in-kotlin: "true"
     steps:
       - name: Checkout
-        if: env.NATIVE == 'true'
         uses: actions/checkout@v7
 
       - name: Set up JDK 17
-        if: env.NATIVE == 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Install and set Flutter version
-        if: env.NATIVE == 'true'
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: "stable"
@@ -157,36 +149,29 @@ jobs:
           cache: true
 
       - name: Restore packages
-        if: env.NATIVE == 'true'
         run: flutter pub get
 
       - name: Create .env.local
-        if: env.NATIVE == 'true'
         run: cp ./example/.env ./example/.env.local
         shell: bash
 
       - name: Analyze
-        if: env.NATIVE == 'true'
         run: flutter analyze
 
       - name: Configure built-in Kotlin
-        if: env.NATIVE == 'true'
         run: |
           sed -i "s/^android\.builtInKotlin=.*/android.builtInKotlin=${{ matrix['built-in-kotlin'] }}/" example/android/gradle.properties
           grep -Fx "android.builtInKotlin=${{ matrix['built-in-kotlin'] }}" example/android/gradle.properties
 
       - name: Build example (android)
-        if: env.NATIVE == 'true'
         working-directory: example
         run: flutter build apk
 
       - name: Run Android plugin unit tests
-        if: env.NATIVE == 'true'
         working-directory: example/android
         run: ./gradlew :fingerprint_flutter:testDebugUnitTest
 
       - name: Verify Kotlin bytecode target
-        if: env.NATIVE == 'true'
         working-directory: example
         run: |
           plugin_class=$(find build -type f -name FingerprintPlugin.class -print -quit)
@@ -313,3 +298,16 @@ jobs:
             cat "$manifest"
             exit 1
           fi
+
+  # The one check required on main. Lets jobs skip or change matrix without editing the ruleset.
+  ci-passed:
+    name: "CI passed"
+    # Without `always()` this is skipped when a job it needs fails, and skipped counts as passing.
+    # https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+    if: always()
+    needs: [changes, analyze-and-test, build-examples-web, build-examples-android, build-examples-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
