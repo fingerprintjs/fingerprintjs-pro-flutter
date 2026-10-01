@@ -12,7 +12,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 
 class FingerprintHostApiImplTest {
   private val context = mock(Context::class.java)
@@ -125,11 +124,12 @@ class FingerprintHostApiImplTest {
 
   @Test
   fun mapsSuccessfulResponse() {
-    val response = mock(FingerprintResponse::class.java)
-    `when`(response.eventId).thenReturn("evt-1")
-    `when`(response.visitorId).thenReturn("vid-1")
-    `when`(response.suspectScore).thenReturn(42)
-    `when`(response.sealedResult).thenReturn("sealed")
+    val response = FingerprintResponse(
+      eventId = "evt-1",
+      visitorId = "vid-1",
+      suspectScore = 42,
+      sealedResult = "sealed",
+    )
     val api = hostApi { _, _ ->
       SuccessFingerprint(response)
     }
