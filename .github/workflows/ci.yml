@@ -6,6 +6,33 @@ on:
   workflow_call:
 
 jobs:
+  # Skips the slow native example builds on PRs that cannot affect them (e.g. tests, scripts, other workflows).
+  # Any other event (e.g. the pre-release run from release.yml) builds everything.
+  changes:
+    name: "Detect native changes"
+    runs-on: ubuntu-latest
+    outputs:
+      native: ${{ steps.diff.outputs.native }}
+    steps:
+      # A PR checkout is a merge commit, so its first parent is the base branch.
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      # Defaults to `true`, so a failed diff can't skip required checks.
+      - name: Diff
+        id: diff
+        run: |
+          native=true
+          if [ "${{ github.event_name }}" = pull_request ] \
+            && files=$(git diff --name-only HEAD^1 HEAD) \
+            && ! grep -qE '^(android|ios|lib|example|pigeons)/|^pubspec\.yaml$|^\.github/workflows/ci\.yml$' <<< "$files"; then
+            native=false
+          fi
+          echo "native=$native" >> "$GITHUB_OUTPUT"
+
   analyze-and-test:
     name: "Analyze and test (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
@@ -93,8 +120,12 @@ jobs:
 
   build-examples-android:
     name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }}, built-in Kotlin ${{ matrix['built-in-kotlin'] }})"
-    needs: analyze-and-test
+    needs: [analyze-and-test, changes]
     runs-on: ubuntu-latest
+    # Skipped per step, not per job. A job-level `if` skips before the matrix expands, so the
+    # required checks (named by matrix values) would never report.
+    env:
+      NATIVE: ${{ needs.changes.outputs.native }}
     strategy:
       fail-fast: false
       matrix:
@@ -110,15 +141,18 @@ jobs:
             built-in-kotlin: "true"
     steps:
       - name: Checkout
+        if: env.NATIVE == 'true'
         uses: actions/checkout@v7
 
       - name: Set up JDK 17
+        if: env.NATIVE == 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Install and set Flutter version
+        if: env.NATIVE == 'true'
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: "stable"
@@ -126,29 +160,36 @@ jobs:
           cache: true
 
       - name: Restore packages
+        if: env.NATIVE == 'true'
         run: flutter pub get
 
       - name: Create .env.local
+        if: env.NATIVE == 'true'
         run: cp ./example/.env ./example/.env.local
         shell: bash
 
       - name: Analyze
+        if: env.NATIVE == 'true'
         run: flutter analyze
 
       - name: Configure built-in Kotlin
+        if: env.NATIVE == 'true'
         run: |
           sed -i "s/^android\.builtInKotlin=.*/android.builtInKotlin=${{ matrix['built-in-kotlin'] }}/" example/android/gradle.properties
           grep -Fx "android.builtInKotlin=${{ matrix['built-in-kotlin'] }}" example/android/gradle.properties
 
       - name: Build example (android)
+        if: env.NATIVE == 'true'
         working-directory: example
         run: flutter build apk
 
       - name: Run Android plugin unit tests
+        if: env.NATIVE == 'true'
         working-directory: example/android
         run: ./gradlew :fingerprint_flutter:testDebugUnitTest
 
       - name: Verify Kotlin bytecode target
+        if: env.NATIVE == 'true'
         working-directory: example
         run: |
           plugin_class=$(find build -type f -name FingerprintPlugin.class -print -quit)
@@ -173,7 +214,8 @@ jobs:
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
   build-examples-ios:
     name: "Build examples for iOS (Flutter latest stable)"
-    needs: analyze-and-test
+    needs: [analyze-and-test, changes]
+    if: needs.changes.outputs.native == 'true'
     runs-on: macos-latest
     # Checkout as `fingerprint_flutter`: Flutter SwiftPM identifies path-overridden plugins by folder name
     # (https://github.com/flutter/flutter/issues/186881).
