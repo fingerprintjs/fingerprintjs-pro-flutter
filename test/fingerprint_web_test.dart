@@ -323,6 +323,25 @@ void main() {
     });
   });
 
+  test('names the missing loader script tag', () async {
+    final platform = FingerprintWeb();
+    await expectLater(
+      platform.get(config()),
+      throwsA(
+        isA<FingerprintError>()
+            .having(
+              (error) => error.code,
+              'code',
+              FingerprintError.scriptLoadFail,
+            )
+            .having(
+              (error) => error.message,
+              'message',
+              contains('assets/packages/fingerprint_flutter/web/index.js'),
+            ),
+      ),
+    );
+  });
 }
 
 class FakeAgent {

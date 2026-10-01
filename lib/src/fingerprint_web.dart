@@ -14,7 +14,7 @@ import 'package:fingerprint_flutter/src/version.dart';
 /// Web [FingerprintPlatform] using `@fingerprint/agent` v4.
 class FingerprintWeb extends FingerprintPlatform {
   FingerprintWeb({FingerprintAgent Function(JSObject options)? start})
-    : _start = start ?? ((options) => FingerprintLoader.start(options));
+    : _start = start ?? _startLoader;
 
   final FingerprintAgent Function(JSObject options) _start;
   final _agents = <FingerprintConfig, FingerprintAgent>{};
@@ -58,6 +58,21 @@ class FingerprintWeb extends FingerprintPlatform {
   // https://docs.fingerprint.com/reference/js-agent-v4-error-handling
   FingerprintAgent _agentFor(FingerprintConfig config) =>
       _agents[config] ??= _start(_toStartOptions(config));
+}
+
+FingerprintAgent _startLoader(JSObject options) {
+  // The loader global comes from a <script> tag the app adds itself. Without
+  // it, the call below fails with a bare JS TypeError.
+  if (globalContext['FingerprintFlutter'].isUndefinedOrNull) {
+    throw FingerprintError(
+      code: FingerprintError.scriptLoadFail,
+      message:
+          'FingerprintFlutter loader not found. Add <script '
+          'src="assets/packages/fingerprint_flutter/web/index.js" defer>'
+          '</script> to the <head> of web/index.html.',
+    );
+  }
+  return FingerprintLoader.start(options);
 }
 
 JSObject _toStartOptions(FingerprintConfig config) {
@@ -134,6 +149,9 @@ String? _sealedResult(JSAny? value) {
 }
 
 FingerprintError _wrapJsError(Object error) {
+  if (error is FingerprintError) {
+    return error;
+  }
   // JS errors have no Dart class. `isA` cannot narrow them.
   // ignore: invalid_runtime_check_with_js_interop_types
   if (error is JSObject) {
