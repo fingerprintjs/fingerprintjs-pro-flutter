@@ -3,9 +3,13 @@
 /// Tags: same string-keyed JSON map on every platform. No size cap here.
 /// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
 /// as `payload_too_large`.
+/// No depth or cycle check. A cyclic map is a caller bug, and a visited set
+/// is not worth it. It overflows the stack here instead of in Pigeon or
+/// `jsify()`.
 ///
-/// Timeouts: Dart [Duration] can be negative. Reject it here so native and
-/// web never see a negative millisecond value.
+/// Timeouts: must be at least 1 ms. Native and web get whole milliseconds,
+/// so zero and sub-millisecond values become 0, which all three SDKs fail
+/// right away with `client_timeout`.
 library;
 
 import 'dart:typed_data';
@@ -21,10 +25,14 @@ void validateTags(Map<String, Object?>? tags) {
   }
 }
 
-/// Throws an [ArgumentError] named [name] if [timeout] is negative.
+/// Throws an [ArgumentError] named [name] if [timeout] is under 1 ms.
 void validateTimeout(Duration? timeout, String name) {
-  if (timeout != null && timeout.isNegative) {
-    throw ArgumentError.value(timeout, name, 'Timeout cannot be negative');
+  if (timeout != null && timeout.inMilliseconds < 1) {
+    throw ArgumentError.value(
+      timeout,
+      name,
+      'Timeout must be at least 1 millisecond',
+    );
   }
 }
 

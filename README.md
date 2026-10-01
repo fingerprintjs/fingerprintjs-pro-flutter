@@ -181,7 +181,7 @@ Default timeout:
 final result = await client.get(timeout: const Duration(seconds: 10));
 ```
 
-Must not be negative.
+Must be at least 1 millisecond, otherwise `get` throws `ArgumentError`. The same rule applies to `android.locationTimeout`.
 
 A timeout throws `FingerprintError` with `code` `client_timeout`.
 
