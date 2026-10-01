@@ -61,6 +61,8 @@ class FingerprintNativeResult {
 // All methods share one serial background queue:
 // - creating the native client can be slow, keep it off the UI thread
 // - serial keeps calls in order, so create runs before a later get
+// - both native SDKs accept calls from any thread. They run location work on
+//   the main thread themselves, so this queue needs no run loop or Looper.
 // https://pub.dev/packages/pigeon#task-queue
 @HostApi()
 abstract class FingerprintHostApi {

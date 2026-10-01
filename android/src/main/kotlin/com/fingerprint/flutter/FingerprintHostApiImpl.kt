@@ -23,6 +23,10 @@ internal class FingerprintHostApiImpl(
     // Pigeon catches throws only for sync methods like create. Here a throw
     // would escape the handler instead of completing the Dart Future.
     // Non-FlutterError throws would reach Dart with the class name as code.
+    // - getVisitorId needs no guard: it does not throw, and reports every
+    //   failure, including a failed client build, through errorListener.
+    // - Error is not caught: here it only comes from a broken build (class
+    //   loading), which should fail loudly.
     val client = try {
       clientCache.getOrCreate(config)
     } catch (error: Exception) {
