@@ -3,11 +3,12 @@
 /// Tags: same string-keyed JSON map on every platform. No size cap here.
 /// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
 /// as `payload_too_large`.
-/// No depth or cycle check. A cyclic map is a caller bug and would overflow
-/// the platform codec anyway.
+/// No depth or cycle check. A cyclic map is a caller bug, and a visited set
+/// is not worth it. It overflows the stack here instead of in Pigeon or
+/// `jsify()`.
 ///
 /// Timeouts: must be at least 1 ms. Native and web get whole milliseconds,
-/// so zero and sub-millisecond values become 0. Both native SDKs fail 0
+/// so zero and sub-millisecond values become 0, which all three SDKs fail
 /// right away with `client_timeout`.
 library;
 
