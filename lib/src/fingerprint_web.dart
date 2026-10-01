@@ -1,3 +1,5 @@
+// Web platform code, backed by the bundled `@fingerprint/agent` v4 JS loader.
+// https://docs.fingerprint.com/reference/js-agent-start-function
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
