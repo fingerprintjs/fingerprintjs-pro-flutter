@@ -2,18 +2,22 @@
 // Custom endpoints go through `withoutDefault` so web behavior stays consistent
 // with native platforms, which have no default fallback.
 // https://docs.fingerprint.com/reference/js-agent-start-function
-import { start as agentStart, withoutDefault } from "@fingerprint/agent";
+import * as Agent from "@fingerprint/agent";
 
-type StartOptions = Parameters<typeof agentStart>[0];
+type StartOptions = Parameters<typeof Agent.start>[0];
 
-// Dart sends endpoints only as a list. Dart reads only `start`, so nothing
-// else is exported, which keeps unused agent code out of the bundle.
 function start(options: StartOptions) {
   const { endpoints } = options;
-  if (!Array.isArray(endpoints)) {
-    return agentStart(options);
+  if (typeof endpoints !== "string" && !Array.isArray(endpoints)) {
+    return Agent.start(options);
   }
-  return agentStart({ ...options, endpoints: withoutDefault(endpoints) });
+  return Agent.start({
+    ...options,
+    endpoints: Agent.withoutDefault(endpoints),
+  });
 }
 
-export const Fingerprint = { start };
+export const Fingerprint = {
+  ...Agent,
+  start,
+};
