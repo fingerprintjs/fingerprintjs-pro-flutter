@@ -3,4 +3,4 @@
 
 /// The `fingerprint_flutter` package version, e.g. for logs or support
 /// requests.
-const fingerprintFlutterVersion = '4.13.1';
+const fingerprintFlutterVersion = '5.0.0-test.0';
