@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
     id 'dev.flutter.flutter-gradle-plugin'
 }
 
@@ -27,21 +26,13 @@ android {
     compileSdkVersion flutter.compileSdkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     defaultConfig {
-        applicationId "com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example"
-        minSdkVersion 23
+        applicationId "com.fingerprint.flutter.example"
+        minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         compileSdkVersion 36
         versionCode flutterVersionCode.toInteger()
@@ -56,11 +47,16 @@ android {
         }
     }
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin_example'
+        namespace 'com.fingerprint.flutter.example'
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
 }
 
 flutter {
     source '../..'
 }
-

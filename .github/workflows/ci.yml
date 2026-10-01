@@ -1,6 +1,8 @@
 name: ci
 on:
   pull_request:
+    paths-ignore:
+      - "**.md"
   workflow_call:
 
 jobs:
@@ -10,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.19.0", ""]
+        flutter-version: ["3.44.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -20,9 +22,15 @@ jobs:
         with:
           channel: "stable"
           flutter-version: ${{ matrix['flutter-version'] }}
+          cache: true
 
       - name: Restore packages
         run: flutter pub get
+
+      - name: Verify Pigeon codegen is up to date
+        run: |
+          dart run pigeon --input pigeons/fingerprint_api.dart
+          git diff --exit-code -- lib/src/pigeon android/src/main/kotlin ios/fingerprint_flutter/Sources
 
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
@@ -34,6 +42,18 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      # Tests marked `@TestOn('browser')` are skipped by the run above.
+      - name: Run web tests
+        run: flutter test --platform chrome
+
+      # JS interop type checks can differ between dart2js and dart2wasm.
+      - name: Run web tests (WASM)
+        run: flutter test --platform chrome --wasm
+
+      - name: Run example tests
+        working-directory: example
+        run: flutter test
+
   build-examples-web:
     name: "Build examples for Web (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     needs: analyze-and-test
@@ -41,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.19.0", ""]
+        flutter-version: ["3.44.0", ""]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -51,6 +71,7 @@ jobs:
         with:
           channel: "stable"
           flutter-version: ${{ matrix['flutter-version'] }}
+          cache: true
 
       - name: Restore packages
         run: flutter pub get
@@ -66,30 +87,43 @@ jobs:
         working-directory: example
         run: flutter build web
 
-      # WASM compilation needs Flutter 3.22+. The 3.19.0 matrix entry is the
-      # plugin floor and does not support --wasm.
       - name: Build example (web WASM)
-        if: matrix['flutter-version'] != '3.19.0'
         working-directory: example
         run: flutter build web --wasm
 
   build-examples-android:
-    name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
+    name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }}, built-in Kotlin ${{ matrix['built-in-kotlin'] }})"
     needs: analyze-and-test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        flutter-version: ["3.19.0", ""]
+        # Flutter only understands `android.builtInKotlin` from 3.47, so 3.44 can only build with
+        # the legacy fallback. Latest stable is covered in both modes: `false` is the checked-in
+        # default, and Flutter implements the fallback itself, so it can change between versions.
+        include:
+          - flutter-version: "3.44.0"
+            built-in-kotlin: "false"
+          - flutter-version: ""
+            built-in-kotlin: "false"
+          - flutter-version: ""
+            built-in-kotlin: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
 
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: "stable"
           flutter-version: ${{ matrix['flutter-version'] }}
+          cache: true
 
       - name: Restore packages
         run: flutter pub get
@@ -101,9 +135,36 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
+      - name: Configure built-in Kotlin
+        run: |
+          sed -i "s/^android\.builtInKotlin=.*/android.builtInKotlin=${{ matrix['built-in-kotlin'] }}/" example/android/gradle.properties
+          grep -Fx "android.builtInKotlin=${{ matrix['built-in-kotlin'] }}" example/android/gradle.properties
+
       - name: Build example (android)
         working-directory: example
         run: flutter build apk
+
+      - name: Run Android plugin unit tests
+        working-directory: example/android
+        run: ./gradlew :fingerprint_flutter:testDebugUnitTest
+
+      - name: Verify Kotlin bytecode target
+        working-directory: example
+        run: |
+          plugin_class=$(find build -type f -name FingerprintPlugin.class -print -quit)
+          app_class=$(find build -type f -name MainActivity.class -print -quit)
+
+          for class_file in "$plugin_class" "$app_class"; do
+            if [ -z "$class_file" ]; then
+              echo "Expected Kotlin class was not compiled."
+              exit 1
+            fi
+            major_version=$(javap -verbose "$class_file" | sed -n 's/^  major version: //p')
+            if [ "$major_version" != "55" ]; then
+              echo "$class_file has bytecode major version $major_version, expected 55 (Java 11)."
+              exit 1
+            fi
+          done
 
   # iOS runs only on the latest stable Flutter, unlike the other jobs which also test an older floor.
   # The example's ios/ project is generated scaffolding that `flutter` keeps migrating to its newest
@@ -114,22 +175,23 @@ jobs:
     name: "Build examples for iOS (Flutter latest stable)"
     needs: analyze-and-test
     runs-on: macos-latest
-    # Checkout as `fpjs_pro_plugin`: Flutter SwiftPM identifies path-overridden plugins by folder name
+    # Checkout as `fingerprint_flutter`: Flutter SwiftPM identifies path-overridden plugins by folder name
     # (https://github.com/flutter/flutter/issues/186881).
     # TODO: drop `path:` and this `defaults:` block once flutter#188647 reaches stable.
     defaults:
       run:
-        working-directory: fpjs_pro_plugin
+        working-directory: fingerprint_flutter
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          path: fpjs_pro_plugin
+          path: fingerprint_flutter
 
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
         with:
           channel: "stable"
+          cache: true
 
       - name: Restore packages
         run: flutter pub get
@@ -148,13 +210,13 @@ jobs:
         run: flutter config --no-enable-swift-package-manager
 
       - name: Build example (iOS, CocoaPods)
-        working-directory: fpjs_pro_plugin/example
+        working-directory: fingerprint_flutter/example
         run: flutter build ios --no-codesign
 
       - name: Verify CocoaPods was used
         run: |
-          if [ ! -d example/ios/Pods/FingerprintPro ]; then
-            echo "example/ios/Pods/FingerprintPro is missing, CocoaPods did not install the native SDK."
+          if [ ! -d example/ios/Pods/Fingerprint-iOS ]; then
+            echo "example/ios/Pods/Fingerprint-iOS is missing, CocoaPods did not install the native SDK."
             ls example/ios/Pods 2>/dev/null || echo "example/ios/Pods does not exist."
             exit 1
           fi
@@ -163,17 +225,52 @@ jobs:
         run: flutter config --enable-swift-package-manager
 
       - name: Build example (iOS, Swift Package Manager)
-        working-directory: fpjs_pro_plugin/example
+        working-directory: fingerprint_flutter/example
         run: |
           flutter clean
           flutter build ios --no-codesign
+
+      - name: Find iOS simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          for runtime, items in devices.items():
+              if "iOS" not in runtime:
+                  continue
+              for device in items:
+                  if device.get("isAvailable") and "iPhone" in device.get("name", ""):
+                      print(device["udid"])
+                      raise SystemExit
+          raise SystemExit("no available iPhone simulator")
+          ')"
+          echo "Using simulator $udid"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      # Plugin sources are the same for CocoaPods and SwiftPM, so test once, under SwiftPM.
+      # Own DerivedData, so the tests can't link frameworks left over from the CocoaPods build.
+      - name: Run iOS unit tests (Swift Package Manager)
+        working-directory: fingerprint_flutter/example/ios
+        run: |
+          xcodebuild test \
+            -quiet \
+            -derivedDataPath "$RUNNER_TEMP/RunnerTests" \
+            -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -only-testing:RunnerTests \
+            -collect-test-diagnostics never \
+            CODE_SIGNING_ALLOWED=NO
 
       # `flutter build ios` succeeds even if SwiftPM never picked this plugin up. Assert that it did.
       - name: Verify Swift Package Manager was used
         run: |
           manifest=example/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift
-          if ! grep -q 'fpjs_pro_plugin' "$manifest"; then
-            echo "$manifest does not depend on fpjs_pro_plugin, SwiftPM did not pick the plugin up."
+          if ! grep -q 'fingerprint_flutter' "$manifest"; then
+            echo "$manifest does not depend on fingerprint_flutter, SwiftPM did not pick the plugin up."
             cat "$manifest"
             exit 1
           fi

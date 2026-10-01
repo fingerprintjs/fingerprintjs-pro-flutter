@@ -1,6 +1,6 @@
-# Example project using `fpjs_pro_plugin`
+# Example project using `fingerprint_flutter`
 
-Demonstrates how to use the `fpjs_pro_plugin` plugin.
+Demonstrates how to use the `fingerprint_flutter` plugin.
 
 ## Getting Started
 
@@ -26,19 +26,24 @@ flutter pub get
 
 ### 2. Define environment variables
 
-1. Create a `.env.local` file by copying the example `.env` file:
+1. Create a `.env.local` file by copying the checked-in `.env` template:
 
 ```bash
-cp .env.example .env.local
+cp .env .env.local
 ```
 
 The project will not compile if the `.env.local` file is not present.
 
-2. Add your environment variables to the `.env.local` file. You need to define at least the `API_KEY` and `REGION` variables.
+2. Add your environment variables to `.env.local`. `API_KEY` is required.
+`REGION` is optional. Android and iOS default to `us`. Web infers it from the
+API key. `ENDPOINTS` is optional. Use it for a
+[proxy integration](https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers).
+List every identification URL you want tried, comma-separated. We recommend including the default [regional](https://docs.fingerprint.com/docs/regions) endpoint last, as a fallback.
 
 ```bash
 API_KEY=your_api_key
-REGION=your_region
+REGION=eu
+# ENDPOINTS=https://metrics.yourwebsite.com,https://api.fpjs.io
 ```
 
 ### 3. Run the example project
@@ -55,4 +60,4 @@ For running the project in iOS or Android, you will need to have a physical devi
 * [Configure Android development (MacOS)](https://docs.flutter.dev/get-started/install/macos/mobile-android)
 * [Configure Android development (Windows)](https://docs.flutter.dev/get-started/install/windows/mobile)
 
-
+For the integration smoke test, see [contributing.md](../contributing.md#integration-smoke-test).

@@ -1,47 +1,43 @@
 plugins {
     id 'com.android.library'
-    id 'kotlin-android'
 }
 
 apply from: 'fingerprint.gradle'
 
-group 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
-version '4.13.1'
+group 'com.fingerprint.flutter'
 
 rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
         maven { url 'https://maven.fpregistry.io/releases' }
-        maven { url 'https://jitpack.io' }
     }
 }
 
 android {
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
     }
 
-    if (project.android.hasProperty("namespace")) {
-        namespace 'com.fingerprintjs.flutter.fpjs_pro.fpjs_pro_plugin'
+    namespace 'com.fingerprint.flutter'
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
 }
 
 dependencies {
-    implementation "com.fingerprint.android:pro:$fingerprint_native_sdk_version"
+    implementation "com.fingerprint.android:sdk:$fingerprint_native_sdk_version"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "org.mockito:mockito-core:5.14.2"
 }

@@ -1,0 +1,25 @@
+- Values
+  - Keep things simple, no accidental complexity
+  - After reaching a milestone, ask yourself: could I radically simplify this if I was starting from scratch?
+  - Deep modules, clear interfaces - do not leak implementation details across boundaries
+- Structure
+  - Avoid thin wrapper functions and helpers, minimize layers of indirection
+- Tests
+  - Test through APIs and contracts (like a real consumer uses them)
+  - Avoid mocks if possible
+  - DO NOT test trivial or internal implementation details
+  - DO NOT write tautological tests (test must be able to fail by messing up the implementation)
+- Comments & Docs
+  - Keep short, use simple english
+  - Focus on WHY (WHAT, HOW must be obvious from the code)
+  - Write like a terse note to a self or teammate, no m-dashed essays
+  - Prefer bullet points over long `;` chains
+  - Avoid ambiguous jargon (seam, boundary, gate, envelope, wire shapes, ...), be plain, precise, specific
+  - No provenance needed, do not overfit comments to current change: docs must stand alone, make sense later without PR/conversation context. Think of what the general long-term purpose of the doc/comment is.
+  - Module files begin with short overview comment explaining purpose and links to relevant docs
+  - Any non-obvious design decision, requirement, or claim gets a short explanatory note + exact docs link
+    - close to affected code + commit message body (always)
+    - only use public sources, never internal GitHub/Notion/Slack links
+    - in PR description (if significant)
+- Changesets
+  - Brief, only for changes affecting SDK consumers (public API, behavior)

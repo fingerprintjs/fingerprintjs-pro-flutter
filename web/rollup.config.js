@@ -1,37 +1,34 @@
-const { join }  = require('path')
 const typescript = require('@rollup/plugin-typescript')
-const licensePlugin = require('rollup-plugin-license')
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const { terser } = require ('rollup-plugin-terser')
 
 const commonTerser = terser({
   format: {
-    comments: false,
+    // Keep only the `/*!` banner below.
+    comments: /^!/,
   },
   safari10: true,
 })
 
-const inputFile = 'src/index.ts'
-const outputDirectory = 'dist'
-
-const commonBanner = licensePlugin({
-  banner: {
-    content: {
-      file: join(__dirname, 'resources', 'license_banner.txt'),
-    },
-  },
-})
+// Terser strips all comments, including the agent's own copyright header.
+// The agent is not MIT (see its LICENSE), so the bundle needs a notice.
+const agentVersion = require('@fingerprint/agent/package.json').version
+const banner = `/*!
+ * fingerprint_flutter web loader - Copyright (c) FingerprintJS, Inc, ${new Date().getFullYear()} (https://fingerprint.com)
+ * Licensed under the MIT license. Bundles @fingerprint/agent v${agentVersion},
+ * licensed under https://dev.fingerprint.com/docs/terms-of-service
+ */`
 
 module.exports = {
     input: 'index.ts',
-    // plugins: [typescript(), external(), commonBanner],
     plugins: [nodeResolve(), typescript()],
     output: [
       {
-        name: 'FingerprintJSFlutter',
+        name: 'FingerprintFlutter',
         exports: 'named',
         file: 'index.js',
         format: 'iife',
+        banner,
         plugins: [commonTerser],
       },
     ],

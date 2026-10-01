@@ -1,0 +1,25 @@
+# Keep CocoaPods and Swift Package Manager on the same patch range.
+fingerprint_lower = File.read(File.join(__dir__, 'fingerprint_flutter', 'Package.swift'))[/\.upToNextMinor\(from: "([\d.]+)"\)/, 1]
+raise 'Could not read the Fingerprint version range from Package.swift' if fingerprint_lower.nil?
+fingerprint_major, fingerprint_minor = fingerprint_lower.split('.').map(&:to_i)
+fingerprint_upper = "#{fingerprint_major}.#{fingerprint_minor + 1}.0"
+
+Pod::Spec.new do |s|
+  s.name             = 'fingerprint_flutter'
+  s.version          = '4.13.1'
+  s.summary          = 'Flutter plugin for Fingerprint.'
+  s.description      = 'Flutter plugin for Fingerprint.'
+  s.homepage         = 'https://github.com/fingerprintjs/flutter'
+  s.license          = { :file => '../LICENSE' }
+  s.author           = { 'FingerprintJS, Inc' => 'support@fingerprint.com' }
+  s.source           = { :path => '.' }
+  s.source_files     = 'fingerprint_flutter/Sources/fingerprint_flutter/**/*.swift'
+  s.dependency 'Flutter'
+  s.dependency 'Fingerprint-iOS', ">= #{fingerprint_lower}", "< #{fingerprint_upper}"
+  s.platform         = :ios, '15.0'
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'
+  }
+  s.swift_version = '6.0'
+end

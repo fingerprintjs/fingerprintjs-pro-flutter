@@ -1,27 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+// Example app startup states. Identification itself runs in the Maestro flows
+// in example/maestro.
+import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:fpjs_pro_plugin_example/main.dart';
+import 'package:fingerprint_flutter_example/main.dart';
 
 void main() {
-  testWidgets('Verify Platform version', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('shows the error and disables buttons without an API key', (
+    WidgetTester tester,
+  ) async {
+    dotenv.testLoad(envFilesAsStrings: const ['']);
     await tester.pumpWidget(const MyApp());
 
-    // Verify that platform version is retrieved.
+    // Maestro waits for this text to fail fast on a broken setup.
     expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text && widget.data!.startsWith('Running on:'),
-      ),
+      find.textContaining('Failed to create Fingerprint client:'),
       findsOneWidget,
     );
+    for (final label in _buttonLabels) {
+      expect(_button(tester, label).onPressed, isNull);
+    }
+  });
+
+  testWidgets('enables buttons when the client is created', (
+    WidgetTester tester,
+  ) async {
+    dotenv.testLoad(envFilesAsStrings: const ['API_KEY=test-api-key']);
+    await tester.pumpWidget(const MyApp());
+
+    expect(find.text('Fingerprint client created'), findsOneWidget);
+    for (final label in _buttonLabels) {
+      expect(_button(tester, label).onPressed, isNotNull);
+    }
   });
 }
+
+const _buttonLabels = ['Run tests!', 'Identify!', 'Get visitor data!'];
+
+ElevatedButton _button(WidgetTester tester, String label) =>
+    tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, label));
