@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:env_flutter/env_flutter.dart';
@@ -23,12 +22,6 @@ const tags = {
   'f': 0.5,
 };
 
-const runChecksButtonKey = ValueKey('run-checks-button');
-const identifyButtonKey = ValueKey('identify-button');
-const visitorDataButtonKey = ValueKey('visitor-data-button');
-
-enum InitializationState { initializing, created, error }
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
@@ -52,12 +45,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _visitorId = 'Unknown';
   String _checksResult = 'Not run';
-  InitializationState _initializationState = InitializationState.initializing;
-  String? _initializationError;
+  // Null when creation failed. Then _initializationError is set.
   Fingerprint? _client;
-  final String? _apiKey = dotenv.env['API_KEY'];
-  final String? _region = dotenv.env['REGION'];
-  final String? _endpoints = dotenv.env['ENDPOINTS'];
+  String? _initializationError;
   final bool _disableLocationCollection =
       dotenv.env['DISABLE_LOCATION_COLLECTION']?.toLowerCase() == 'true';
 
@@ -75,36 +65,23 @@ class _MyAppState extends State<MyApp> {
     return [for (final url in raw.split(',')) url.trim()];
   }
 
-  Region? _parseRegion(String? region) {
-    switch (region) {
-      case 'us':
-        return Region.us;
-      case 'eu':
-        return Region.eu;
-      case 'ap':
-        return Region.ap;
-    }
-    return null;
-  }
-
   void _createFingerprintClient() {
     try {
-      if (_apiKey == null || _apiKey.isEmpty) {
+      final apiKey = dotenv.env['API_KEY'];
+      if (apiKey == null || apiKey.isEmpty) {
         throw Exception('Set the API_KEY environment variable');
       }
       _client = Fingerprint(
-        apiKey: _apiKey,
-        region: _parseRegion(_region),
-        endpoints: _parseEndpoints(_endpoints),
+        apiKey: apiKey,
+        region: Region.values.asNameMap()[dotenv.env['REGION']],
+        endpoints: _parseEndpoints(dotenv.env['ENDPOINTS']),
         android: AndroidOptions(
           allowUseOfLocationData: !_disableLocationCollection,
           locationTimeout: const Duration(milliseconds: 6000),
         ),
         ios: IosOptions(allowUseOfLocationData: !_disableLocationCollection),
       );
-      _initializationState = InitializationState.created;
     } catch (error) {
-      _initializationState = InitializationState.error;
       _initializationError = 'Failed to create Fingerprint client: $error';
     }
   }
@@ -228,20 +205,9 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  String get _initializationStatus {
-    switch (_initializationState) {
-      case InitializationState.initializing:
-        return 'Creating Fingerprint client...';
-      case InitializationState.created:
-        return 'Fingerprint client created';
-      case InitializationState.error:
-        return _initializationError!;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isCreated = _initializationState == InitializationState.created;
+    final isCreated = _client != null;
 
     return MaterialApp(
       home: Scaffold(
@@ -250,16 +216,14 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_initializationStatus),
+              Text(_initializationError ?? 'Fingerprint client created'),
               ElevatedButton(
-                key: runChecksButtonKey,
                 onPressed: isCreated ? _runChecks : null,
                 child: const Text('Run tests!'),
               ),
               const Text('Checks result:'),
               Text(_checksResult),
               ElevatedButton(
-                key: identifyButtonKey,
                 onPressed: isCreated ? _showVisitorId : null,
                 child: const Text('Identify!'),
               ),
@@ -289,7 +253,6 @@ class _VisitorDataDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      key: visitorDataButtonKey,
       onPressed: enabled
           ? () async {
               final resultContext = context;
