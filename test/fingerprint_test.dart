@@ -110,7 +110,8 @@ void main() {
     expect(platform.created, isEmpty);
   });
 
-  // E.g. the client was built before the Flutter binding was ready.
+  // Constructor create is only a warm-up. Its failure must not become an
+  // uncaught async error or break get.
   test('a failed constructor start does not break get', () async {
     platform.createError = FingerprintError(
       code: FingerprintError.unknownError,

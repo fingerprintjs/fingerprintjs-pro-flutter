@@ -130,7 +130,7 @@ final client = Fingerprint(
 
 ### 2. Identify visitors
 
-`get` waits for the client to be ready, returns a `FingerprintResult` or throws `FingerprintError`.
+`get` returns a `FingerprintResult` or throws `FingerprintError`. The constructor starts the client early. `get` waits for it to be ready and uses it.
 
 ```dart
 try {
@@ -231,7 +231,8 @@ A custom cache duration must be a whole number of seconds, greater than zero and
 
 | SDK major version | Android SDK | iOS SDK | JS Agent version | Status | End of support |
 |---|---|---|---|---|---|
-| v4.x (current) | v2.x | v2.x | [v3](https://docs.fingerprint.com/reference/v3/javascript-agent) | Supported | - |
+| v5.x (current) | v4.x | v4.x | [v4](https://docs.fingerprint.com/reference/js-agent) | Supported | - |
+| v4.x | v2.x | v2.x | [v3](https://docs.fingerprint.com/reference/v3/javascript-agent) | Deprecated (security fixes only) | To be decided |
 
 ## Support and feedback
 
