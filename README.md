@@ -130,7 +130,7 @@ final client = Fingerprint(
 
 ### 2. Identify visitors
 
-`get` returns a `FingerprintResult` or throws `FingerprintError`. It does not wait for the client the constructor started in the background. If that client is not ready yet, `get` creates one itself.
+`get` returns a `FingerprintResult` or throws `FingerprintError`. The constructor starts the client early. `get` waits for it to be ready and uses it.
 
 ```dart
 try {
