@@ -1,6 +1,7 @@
 // Identification result, the same shape on every platform. Android and iOS
 // send '' for missing values, the JS agent omits them. The constructor turns
 // both into null.
+// https://docs.fingerprint.com/docs/identify-visitors
 
 /// A successful identification.
 final class FingerprintResult {
