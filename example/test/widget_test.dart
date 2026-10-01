@@ -1,92 +1,41 @@
+// Example app startup states. Identification itself runs in the Maestro flows
+// in example/maestro.
 import 'package:env_flutter/env_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fingerprint_flutter/src/fingerprint_platform_interface.dart';
-import 'package:fingerprint_flutter/src/fingerprint_result.dart';
 import 'package:fingerprint_flutter_example/main.dart';
 
 void main() {
-  late RecordingFingerprint platform;
-  late FingerprintPlatform previousPlatform;
-
-  setUp(() {
-    platform = RecordingFingerprint();
-    previousPlatform = FingerprintPlatform.instance;
-    FingerprintPlatform.instance = platform;
-  });
-
-  tearDown(() {
-    FingerprintPlatform.instance = previousPlatform;
-  });
-
-  testWidgets('disables controls when initialization fails', (
+  testWidgets('shows the error and disables buttons without an API key', (
     WidgetTester tester,
   ) async {
     dotenv.testLoad(envFilesAsStrings: const ['']);
     await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
 
+    // Maestro waits for this text to fail fast on a broken setup.
     expect(
       find.textContaining('Failed to create Fingerprint client:'),
       findsOneWidget,
     );
-    expect(_button(tester, runChecksButtonKey).onPressed, isNull);
-    expect(_button(tester, identifyButtonKey).onPressed, isNull);
-    expect(_button(tester, visitorDataButtonKey).onPressed, isNull);
+    for (final label in _buttonLabels) {
+      expect(_button(tester, label).onPressed, isNull);
+    }
   });
 
-  testWidgets('enables controls when initialization succeeds', (
+  testWidgets('enables buttons when the client is created', (
     WidgetTester tester,
   ) async {
     dotenv.testLoad(envFilesAsStrings: const ['API_KEY=test-api-key']);
-
     await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
 
     expect(find.text('Fingerprint client created'), findsOneWidget);
-    expect(platform.config?.android?.allowUseOfLocationData, isTrue);
-    expect(_button(tester, runChecksButtonKey).onPressed, isNotNull);
-    expect(_button(tester, identifyButtonKey).onPressed, isNotNull);
-    expect(_button(tester, visitorDataButtonKey).onPressed, isNotNull);
-  });
-
-  testWidgets('can disable location collection for native automation', (
-    WidgetTester tester,
-  ) async {
-    dotenv.testLoad(
-      envFilesAsStrings: const [
-        'API_KEY=test-api-key\nDISABLE_LOCATION_COLLECTION=true',
-      ],
-    );
-
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
-
-    expect(find.text('Fingerprint client created'), findsOneWidget);
-    expect(platform.config?.android?.allowUseOfLocationData, isFalse);
-    expect(platform.config?.ios?.allowUseOfLocationData, isFalse);
+    for (final label in _buttonLabels) {
+      expect(_button(tester, label).onPressed, isNotNull);
+    }
   });
 }
 
-ElevatedButton _button(WidgetTester tester, Key key) {
-  return tester.widget<ElevatedButton>(find.byKey(key));
-}
+const _buttonLabels = ['Run tests!', 'Identify!', 'Get visitor data!'];
 
-class RecordingFingerprint extends FingerprintPlatform {
-  FingerprintConfig? config;
-
-  @override
-  Future<void> create(FingerprintConfig config) async {
-    this.config = config;
-  }
-
-  @override
-  Future<FingerprintResult> get(
-    FingerprintConfig config, {
-    Map<String, Object?>? tags,
-    String? linkedId,
-    Duration? timeout,
-  }) async {
-    return FingerprintResult(eventId: 'test-event', visitorId: 'test-visitor');
-  }
-}
+ElevatedButton _button(WidgetTester tester, String label) =>
+    tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, label));
