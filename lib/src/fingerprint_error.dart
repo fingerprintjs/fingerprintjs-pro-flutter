@@ -35,13 +35,13 @@ final class FingerprintError implements Exception {
   static const clientTimeout = 'client_timeout';
   static const unknownError = 'unknown_error';
 
-  // iOS-only client errors, same codes as the React Native SDK.
+  // iOS-only client errors.
   static const invalidUrl = 'invalid_url';
   static const invalidUrlParams = 'invalid_url_params';
   static const jsonParsingError = 'json_parsing_error';
   static const invalidResponseType = 'invalid_response_type';
 
-  // Android-only client error, same code as the React Native SDK.
+  // Android-only client error.
   static const responseCannotBeParsed = 'response_cannot_be_parsed';
 
   // JS agent ErrorCode values, minus ones the plugin cannot trigger:
