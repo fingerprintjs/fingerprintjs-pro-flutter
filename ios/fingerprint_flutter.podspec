@@ -17,9 +17,6 @@ Pod::Spec.new do |s|
   s.dependency 'Flutter'
   s.dependency 'Fingerprint-iOS', ">= #{fingerprint_lower}", "< #{fingerprint_upper}"
   s.platform         = :ios, '15.0'
-  s.xcconfig = {
-    'LIBRARY_SEARCH_PATHS' => '"${PROJECT_DIR}/.."/*'
-  }
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'
