@@ -4,5 +4,9 @@
   "initialVersions": {
     "fingerprint_flutter": "4.13.1"
   },
-  "changesets": []
+  "changesets": [
+    "drop-jitpack-repo",
+    "native-background-queue",
+    "v5-api-migration"
+  ]
 }

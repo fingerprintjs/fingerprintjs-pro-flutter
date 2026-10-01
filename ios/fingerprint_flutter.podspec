@@ -6,7 +6,7 @@ fingerprint_upper = "#{fingerprint_major}.#{fingerprint_minor + 1}.0"
 
 Pod::Spec.new do |s|
   s.name             = 'fingerprint_flutter'
-  s.version          = '4.13.1'
+  s.version          = '5.0.0-test.0'
   s.summary          = 'Flutter plugin for Fingerprint.'
   s.description      = 'Flutter plugin for Fingerprint.'
   s.homepage         = 'https://github.com/fingerprintjs/flutter'
