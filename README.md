@@ -188,7 +188,11 @@ A timeout throws `FingerprintError` with `code` `client_timeout`.
 
 ### Location data
 
-Location is collected only when `allowUseOfLocationData` is true on the matching platform options.
+Location is collected only when `allowUseOfLocationData` is true on the matching platform options and the user has granted location permission. Without permission, identification succeeds without location. Your app must:
+
+- Android: declare `ACCESS_COARSE_LOCATION` in `AndroidManifest.xml`. Add `ACCESS_FINE_LOCATION` for better accuracy.
+- iOS: add `NSLocationWhenInUseUsageDescription` to `Info.plist`.
+- Request the permission at runtime, for example with [`permission_handler`](https://pub.dev/packages/permission_handler).
 
 ```dart
 final client = Fingerprint(
@@ -201,7 +205,7 @@ final client = Fingerprint(
 );
 ```
 
-On Android, identification waits up to `locationTimeout` for a fix (default 5 seconds), then continues without location. On iOS, collection starts when the client is created, so create it at app startup for the best precision. See [Android](https://docs.fingerprint.com/docs/native-android-integration#proximity-detection-for-android-devices) and [iOS](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection) proximity detection.
+On Android, identification waits up to `locationTimeout` for a fix (default 5 seconds), then continues without location. On iOS, collection starts when the client is created, so create it at app startup for the best precision. See [Android](https://docs.fingerprint.com/docs/android-sdk#using-location-data-for-proximity-detection) and [iOS](https://docs.fingerprint.com/docs/ios-sdk#using-location-data-for-proximity-detection) proximity detection.
 
 ### Web options
 
