@@ -111,3 +111,5 @@ Caching is off unless you pass `web: WebOptions(cache: ...)`.
 - <script src="assets/packages/fpjs_pro_plugin/web/index.js" defer></script>
 + <script src="assets/packages/fingerprint_flutter/web/index.js" defer></script>
 ```
+
+If this tag is missing, `get` throws `script_load_fail`.
