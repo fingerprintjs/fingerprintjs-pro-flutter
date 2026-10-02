@@ -58,11 +58,6 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "22"
-
       # The banner year comes from the build date, so ignore a change to that line only.
       - name: Verify web/index.js is built from web/index.ts
         working-directory: web
