@@ -2,7 +2,7 @@
 ///
 /// Tags: same string-keyed JSON map on every platform. No size cap here.
 /// The server enforces [16 KB](https://docs.fingerprint.com/docs/tagging-information)
-/// as `payload_too_large`.
+/// as `request_cannot_be_parsed`.
 /// No depth or cycle check. A cyclic map is a caller bug, and a visited set
 /// is not worth it. It overflows the stack here instead of in Pigeon or
 /// `jsify()`.
