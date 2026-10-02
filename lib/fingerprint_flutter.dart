@@ -45,8 +45,8 @@ class Fingerprint {
 
   /// Identification endpoints, first to last. Null, empty, or only empty
   /// strings uses the regional default. Empty strings in the list are dropped.
-  /// Other entries must be absolute http or https URLs, or the constructor
-  /// throws [ArgumentError].
+  /// Other entries must be http(s) URLs, or the constructor throws
+  /// [ArgumentError].
   ///
   /// It's recommended to include the default API URL for your [region](https://docs.fingerprint.com/docs/regions) last, as a fallback.
   /// https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers
@@ -119,11 +119,7 @@ class Fingerprint {
 /// URL as the first try. Drop them, then treat an empty list as null.
 ///
 /// Throws [ArgumentError] for a URL without an http(s) scheme and host.
-/// Checked here because the SDKs would fail only at get, each differently:
-/// - web: the JS agent loads its script from the first endpoint, so a
-///   relative URL fails with `script_load_fail` until the page reloads
-/// - Android and iOS: `network_error`
-/// https://docs.fingerprint.com/reference/js-agent-start-function
+/// Otherwise it fails only at get, and on web breaks the agent script load.
 List<String>? _normalizeEndpoints(List<String>? endpoints) {
   if (endpoints == null) {
     return null;
