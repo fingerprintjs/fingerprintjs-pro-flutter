@@ -53,9 +53,7 @@ final class FingerprintError implements Exception {
   static const sandboxedIframe = 'sandboxed_iframe';
   static const cspBlock = 'csp_block';
   static const invalidEndpoint = 'invalid_endpoint';
-  /// The agent script did not download, for example offline, with
-  /// unreachable `endpoints`, or blocked by an ad blocker. Web reports this
-  /// instead of [networkError].
+  /// The agent script failed to download. Not [networkError].
   static const scriptLoadFail = 'script_load_fail';
   static const badResponseFormat = 'bad_response_format';
   static const serverError = 'server_error';
