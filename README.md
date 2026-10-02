@@ -139,7 +139,7 @@ try {
   print(result.eventId);
   print(result.suspectScore);
   print(result.sealedResult);
-  print(result.cacheHit); // web only, otherwise null
+  print(result.cacheHit); // null unless WebOptions.cache is set (web only)
 } on FingerprintError catch (error) {
   print(error.code);
   print(error.message);
@@ -152,6 +152,7 @@ try {
 * Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
 
 * Known error codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`.
+* Network failures report `network_error`. On web, a failed agent script download reports `script_load_fail` until the page reloads.
 
 ### Linking and tagging information
 

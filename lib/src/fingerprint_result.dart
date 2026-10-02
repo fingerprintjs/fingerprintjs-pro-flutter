@@ -30,7 +30,7 @@ final class FingerprintResult {
 
   /// Whether the result came from the agent's cache.
   ///
-  /// Null outside the web. Only the web agent caches.
+  /// Null on Android and iOS, and on web when `WebOptions.cache` is not set.
   final bool? cacheHit;
 
   /// Creates a result. Empty [visitorId] and [sealedResult] become null.
