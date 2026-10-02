@@ -1,11 +1,33 @@
 name: ci
 on:
   pull_request:
-    paths-ignore:
-      - "**.md"
   workflow_call:
 
 jobs:
+  # Skips the slow native example builds on PRs that cannot affect them (e.g. tests, scripts, other workflows).
+  # Any other event (e.g. the pre-release run from release.yml) builds everything.
+  changes:
+    name: "Detect native changes"
+    runs-on: ubuntu-latest
+    outputs:
+      native: ${{ github.event_name != 'pull_request' || steps.filter.outputs.native == 'true' }}
+    steps:
+      # On PRs reads changed files through the API, no checkout needed.
+      - name: Filter changed paths
+        id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            native:
+              - 'android/**'
+              - 'ios/**'
+              - 'lib/**'
+              - 'example/**'
+              - 'pigeons/**'
+              - 'pubspec.yaml'
+              - '.github/workflows/ci.yml'
+
   analyze-and-test:
     name: "Analyze and test (Flutter ${{ matrix['flutter-version'] || 'latest stable' }})"
     runs-on: ubuntu-latest
@@ -48,6 +70,12 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm run build
           git diff --exit-code -I 'Copyright \(c\) FingerprintJS, Inc, [0-9]{4}' -- index.js
+
+      # Same SDK as publish.yaml (latest stable). Fails on warnings, so publish
+      # problems show up on the PR instead of after tagging.
+      - name: Validate package for pub.dev
+        if: matrix['flutter-version'] == ''
+        run: flutter pub publish --dry-run
 
       - name: Create .env.local
         run: cp ./example/.env ./example/.env.local
@@ -110,7 +138,8 @@ jobs:
 
   build-examples-android:
     name: "Build examples for Android (Flutter ${{ matrix['flutter-version'] || 'latest stable' }}, built-in Kotlin ${{ matrix['built-in-kotlin'] }})"
-    needs: analyze-and-test
+    needs: [analyze-and-test, changes]
+    if: needs.changes.outputs.native == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -134,6 +163,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Install and set Flutter version
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 #v2.23.0
@@ -190,7 +220,8 @@ jobs:
   # Plugin-level compatibility with older Flutter is still covered by `flutter analyze` in the other jobs.
   build-examples-ios:
     name: "Build examples for iOS (Flutter latest stable)"
-    needs: analyze-and-test
+    needs: [analyze-and-test, changes]
+    if: needs.changes.outputs.native == 'true'
     runs-on: macos-latest
     # Checkout as `fingerprint_flutter`: Flutter SwiftPM identifies path-overridden plugins by folder name
     # (https://github.com/flutter/flutter/issues/186881).
@@ -291,3 +322,16 @@ jobs:
             cat "$manifest"
             exit 1
           fi
+
+  # The one check required on main. Lets jobs skip or change matrix without editing the ruleset.
+  ci-passed:
+    name: "CI passed"
+    # Without `always()` this is skipped when a job it needs fails, and skipped counts as passing.
+    # https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+    if: always()
+    needs: [changes, analyze-and-test, build-examples-web, build-examples-android, build-examples-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

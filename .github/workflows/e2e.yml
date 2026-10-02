@@ -67,6 +67,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          # Maestro needs Java everywhere, only Android uses Gradle.
+          cache: ${{ matrix.platform == 'android' && 'gradle' || '' }}
       - name: Install Maestro 2.10.0
         run: |
           curl -fsSL https://github.com/mobile-dev-inc/maestro/releases/download/cli-2.10.0/maestro.zip -o "$RUNNER_TEMP/maestro.zip"
