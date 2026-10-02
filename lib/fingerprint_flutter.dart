@@ -45,6 +45,8 @@ class Fingerprint {
 
   /// Identification endpoints, first to last. Null, empty, or only empty
   /// strings uses the regional default. Empty strings in the list are dropped.
+  /// Other entries must be http(s) URLs, or the constructor throws
+  /// [ArgumentError].
   ///
   /// It's recommended to include the default API URL for your [region](https://docs.fingerprint.com/docs/regions) last, as a fallback.
   /// https://docs.fingerprint.com/docs/protecting-the-javascript-agent-from-adblockers
@@ -115,6 +117,9 @@ class Fingerprint {
 
 /// Empty strings would become a missing native primary and invent the region
 /// URL as the first try. Drop them, then treat an empty list as null.
+///
+/// Throws [ArgumentError] for a URL without an http(s) scheme and host.
+/// Otherwise it fails only at get, and on web breaks the agent script load.
 List<String>? _normalizeEndpoints(List<String>? endpoints) {
   if (endpoints == null) {
     return null;
@@ -123,6 +128,18 @@ List<String>? _normalizeEndpoints(List<String>? endpoints) {
     for (final url in endpoints)
       if (url.isNotEmpty) url,
   ];
+  for (final url in kept) {
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        (uri.scheme != 'https' && uri.scheme != 'http') ||
+        uri.host.isEmpty) {
+      throw ArgumentError.value(
+        url,
+        'endpoints',
+        'Endpoint must be an http or https URL with a host',
+      );
+    }
+  }
   if (kept.isEmpty) {
     return null;
   }
