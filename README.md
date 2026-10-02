@@ -152,6 +152,7 @@ try {
 * Look up the event with `eventId` in the [Server API](https://dev.fingerprint.com/reference/getevent).
 
 * Known error codes are constants on `FingerprintError`, such as `FingerprintError.clientTimeout`.
+* Network failures report `network_error` on all platforms. On web, the constructor also downloads the agent script from `endpoints` (or the default CDN). If that download fails, for example offline, with unreachable endpoints, or with an ad blocker, `get` throws `script_load_fail` instead, and the client keeps failing until the page reloads.
 
 ### Linking and tagging information
 
