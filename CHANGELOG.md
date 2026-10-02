@@ -1,5 +1,18 @@
 # Fingerprint Flutter
 
+## 5.0.0-test.1
+
+### Patch Changes
+
+- Android: fix R8 release builds failing with "Missing class com.google.android.gms..." and crashing on startup with `IllegalAccessError` on AGP 9.1. ([e656f7a](https://github.com/fingerprintjs/flutter/commit/e656f7a98bfcd8505cee24b5f1c88fa30399cdc8))
+
+### Supported Native SDK Version Range
+
+- Fingerprint iOS SDK Version Range: **`>= 4.1.0 and < 4.2.0`**
+- Fingerprint Android SDK Version Range: **`>= 4.1.0 and < 4.2.0`**
+
+* The `Fingerprint` constructor throws `ArgumentError` for an `endpoints` entry that is not an `http` or `https` URL. Before, it failed at `get`, differently on each platform. ([e51e064](https://github.com/fingerprintjs/flutter/commit/e51e064b6f4f030fcba95370deb0c09a947e3577))
+
 ## 5.0.0-test.0
 
 ### Major Changes

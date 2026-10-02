@@ -1,6 +1,6 @@
 {
   "name": "fingerprint_flutter",
-  "version": "5.0.0-test.0",
+  "version": "5.0.0-test.1",
   "private": true,
   "scripts": {
     "changeset:version": "changeset version && bash ./scripts/update_version.sh",
