@@ -3,6 +3,12 @@ allprojects {
         google()
         mavenCentral()
     }
+    // Resolve the native SDK version range on every build, so CI tests a new SDK release right away.
+    // By default Gradle reuses a resolved range for 24h, also from a restored CI cache.
+    // https://docs.gradle.org/current/userguide/dynamic_versions.html#sec:controlling-dynamic-version-caching
+    configurations.all {
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+    }
 }
 
 rootProject.buildDir = '../build'
