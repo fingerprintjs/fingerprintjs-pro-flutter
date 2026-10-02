@@ -189,6 +189,43 @@ void main() {
     },
   );
 
+  test('rejects an endpoint without http(s) scheme or host', () {
+    for (final url in const [
+      'example.com/path',
+      'ftp://example.com',
+      'https://',
+    ]) {
+      expect(
+        () => Fingerprint(
+          apiKey: 'key-1',
+          endpoints: ['https://proxy.example', url],
+        ),
+        throwsA(
+          isA<ArgumentError>()
+              .having((error) => error.name, 'name', 'endpoints')
+              .having((error) => error.invalidValue, 'invalidValue', url),
+        ),
+      );
+    }
+    expect(platform.created, isEmpty);
+  });
+
+  test('accepts http(s) endpoints with port, path, and query', () async {
+    final client = Fingerprint(
+      apiKey: 'key-1',
+      endpoints: const [
+        'https://example.com/path?region=eu',
+        'http://localhost:8080',
+      ],
+    );
+    await client.get();
+
+    expect(platform.created.single.endpoints, [
+      'https://example.com/path?region=eu',
+      'http://localhost:8080',
+    ]);
+  });
+
   group('get tags validation', () {
     Future<FingerprintResult> get(Map<String, Object?>? tags) =>
         Fingerprint(apiKey: 'key-1').get(tags: tags);
