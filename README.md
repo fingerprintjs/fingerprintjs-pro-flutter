@@ -139,7 +139,7 @@ try {
   print(result.eventId);
   print(result.suspectScore);
   print(result.sealedResult);
-  print(result.cacheHit); // web only, otherwise null
+  print(result.cacheHit); // null unless WebOptions.cache is set (web only)
 } on FingerprintError catch (error) {
   print(error.code);
   print(error.message);
